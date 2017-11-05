@@ -60,11 +60,11 @@
 % not capitalized unless they are the first or last word of the title.
 % Linebreaks \\ can be used within to get better formatting as desired.
 % Do not put math or special symbols in the title.
-\title{Your title here}
+\title{How Effective can an Adaptive AI Built With Predefined Expert Strategies be Against Other AI’s?}
 %
 %
 % author name
-\author{Your name here}
+\author{James Hellman}
 
 % The paper headers -- please do not change these, but uncomment one of them as appropriate
 % Uncomment this one for COMP320
@@ -97,31 +97,73 @@ The abstract goes here.
 % 
 % Here we have the typical use of a "T" for an initial drop letter
 % and "HIS" in caps to complete the first word.
-\IEEEPARstart{T}{his} demo file is intended to serve as a ``starter file''
-for your final year project dissertation.
-Use this template for your literature review and proposal in COMP320,
-which you will then expand into your dissertation in COMP360.
+\IEEEPARstart{A}{I} is considered  \cite{AIBook} \cite{Survey}
 
-Insert more sections here.
-Use BibTeX~ \cite{Agents}\cite{Bayesian}\cite{BuildOrder}
+\section{StarCraft}
+\IEEEPARstart{S}{tarCraft} is an Real-Time Strategy (RTS) game developed by Blizzard Entertainment \cite{Blizzard}, and released in 1998. Later that year StarCraft: Brood War was released and took hold as one of the greatest RTS games in gaming history, it was and is still large in the e-sports community. StarCraft 2: Wings of Liberty was released much later in 2010, with most of the game mechanics the same other than balance changes, the user interface (UI) was kept the same just with a visual overhaul. The premise of StarCraft is to gather resources, build a base, and build an army to then use to destroy an enemies base and army, during playtime there are also many upgrades available for these units to give them an edge over an enemy who did not spend the time acquiring them. There are many ways of doing this each player with a different order of building their armies/bases commonly referred to as their "Build Order" \cite{BuildOrder}. Build orders only refer to a players macro-management, whereas in StarCraft Micro-management is a huge part of the game, as those with greater control over individual units can better outmanoeuvre their opponent, and thus defeat them. This paper will be focusing on the macro-management portion of the game with a greater focus on the build order and the choosing of strategies rather than individual control of the units.
 
-\cite{DataMine}\cite{Dataset}\cite{Dataset17}
+\section{Related Work}
+In the StarCraft research community there are many different methods of AI creation. Some focus on micro-management like S. Liu et al \cite{EffectiveMicro} that uses a Genetic Algorithm (GA) and others that focus on macro-management looking at the build order like N. Justesen et al \cite{OnlineEvo}. Many of these research methods are cross depended and utilise more than one method for example, D. Churchill et al \cite{Agents} created the UAlbertaBot, which was intended to automate both build order planning and unit control. Though this paper is focusing on planning with the implementation of "either a Bayesian or other prediction algorithm" there are many other ways of creating an effective AI.
 
-\cite{ELGoal}\cite{EffectiveMicro}\cite{EvalHuman}
+\subsection{Datasets}
+A Dataset is a collection of any data,for game AI can consist of tens of thousands of replays, millions of game frames, and millions of player actions. This information can then put together to create a full game-state which allows for machine learning tasks \cite{Dataset17}. In AI research, datasets can be used in many approaches of development, one such use is to recreate game-states and evaluate them for prediction in realistic conditions \cite{SpecialTactics}.
+\cite{Dataset}
 
-\cite{GoalDriven}\cite{Hierarchical}\cite{MM}
+ 
+\subsection{Bayesian Approaches}
 
-\cite{NeuralGA}\cite{OnlineEvo}\cite{POSH}
+\cite{UnitsControl}
+\cite{Bayesian}
+\cite{SpecialTactics}
 
-\cite{ReplayPred}\cite{SOMA}\cite{Scouting}
+\subsection{Control}
+\cite{SOMA}
+\cite{EffectiveMicro}
+\cite{Swarm}
+\cite{MM}
 
-\cite{SpecialTactics}\cite{Survey}\cite{Swarm}
+\subsection{Planning}
+\cite{BuildOrder}
+\cite{OnlineEvo}
+\cite{GoalDriven}
+\cite{Swen}
+\cite{POSH}
+\cite{Hierarchical}
 
-\cite{Swen}\cite{UnitsControl}\cite{Fuzzy}\cite{Blizzard}
+\subsection{Prediction}
+\cite{DataMine}
+\cite{Bayesian}
+\cite{Scouting}
+\cite{ReplayPred}
 
-\cite{Liquid}\cite{AIBook}\cite{Deep}
-\section{Conclusion}
-The conclusion goes here.
+\subsection{Human-level AI}
+\cite{EvalHuman}
+\cite{MM}
+
+\subsection{Deep Learning}
+\cite{Deep}
+
+\subsection{Directly Related}
+\cite{Fuzzy}
+\cite{Agents}
+
+\section{Method}
+This paper will be focusing on the implementation of an AI with pre-built build orders and their counters taken from Liquipedia \cite{Liquid}, a website dedicated to StarCraft, on the there they have a collection of strategies that are free to use in any capacity. Building upon these build orders the experiment will also include a method for swapping between the orders at any point, to know when to do this, the AI will scout the map in search of the opponent and compare their current building to its stored build orders and find an appropriate counter. The issue with this method is that in late game the AI will struggle to decide which build order to continue. 
+
+\subsection{Tools}
+There are several tools that will be using in this experiment, these include The Brood War API (BWAPI), POSH tools, specifically POSH Sharp which is an interface that uses cSharp instead of C++, and the ABODE editing software which uses POSH plans to create Behaviour Oriented Design's for AI's. 
+
+BWAPI \cite{BWAPI} is a open source software that creates an interface for a custom AI to use to communicate with the game. BWAPI deliberately does not give access to all the games information \cite{POSH}, limiting the AI to only be able to have information on the enemy if there is no Fog-of-War currently covering them, as well as the size of the map and base locations. This prevents custom AI's from cheating and ensures a fair game, though this could be considered a plus as it means that the developers of these AI's do not need to worry about using information that could cause their AI to cheat. Though this does mean hat all the AI's must work in an imperfect environment which forces the AI to have to scout for information.
+
+Parallel-rooted Ordered Slip-stack Hierarchical (POSH) reactive plans, are 
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\textwidth]{POSH}
+	\caption{POSH plan for the Three Hatch Hydra build plan inside the ABODE editor.}
+	\label{fig:mesh1}
+\end{figure}
+\newpage
 
 % references section
 
@@ -130,9 +172,6 @@ The conclusion goes here.
 
 % Appendices
 
-\appendices
-\section{First appendix}
-Appendices are optional. Delete or comment out this part if you do not need them.
 
 % that's all folks
 \end{document}
