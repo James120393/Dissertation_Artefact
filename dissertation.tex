@@ -108,19 +108,20 @@ In the StarCraft research community there are many different methods of AI creat
 \subsection{Datasets}
 A Dataset is a collection of any data,for game AI can consist of tens of thousands of replays, millions of game frames, and millions of player actions. This information can then put together to create a full game-state which allows for machine learning tasks \cite{Dataset17}. In AI research, datasets can be used in many approaches of development, one such use is to recreate game-states and evaluate them for prediction in realistic conditions \cite{SpecialTactics}.
 \cite{Dataset}
-
  
 \subsection{Bayesian Approaches}
+Bayesian approaches are based on Bayes' Theorem, a calculation of probability or also known as a probabilistic model \cite{BayesianAI}. In papers by G. Synnaeve et al \cite{UnitsControl}\cite{SpecialTactics} they create an AI that controls units individually, they do this by using uncertainty which instead of asking where a unit might be, it makes rough estimations and acts upon that. Another use for the Bayesian approach is to predict strategies, by creating a probabilistic model that after learning from replays can predict an opponents strategy and adapt accordingly \cite{Bayesian}. One of the major downfalls of this approach is that it is computationally intense to calculate.
 
-\cite{UnitsControl}
-\cite{Bayesian}
-\cite{SpecialTactics}
+\subsection{Micro-Management}
+Micro management is a fundamental side of StarCraft game-play and many papers have their own approach to this aspect of RTS \cite{SOMA}\cite{EffectiveMicro}\cite{Swarm}\cite{MM}\cite{SpecialTactics}\cite{UnitsControl}. Many of these approaches us either Genetic Algorithms (GA) or Evolutionary Algorithms (EA) \cite{SOMA}\cite{EffectiveMicro}\cite{Swarm}, while others observe replays and apply a Monte-Carlo method to create data for practice use \cite{MM}. But most of these methods have one thing in common, they all use a version of machine learning \cite{Survey}.
 
-\subsection{Control}
-\cite{SOMA}
-\cite{EffectiveMicro}
-\cite{Swarm}
-\cite{MM}
+\subsection{Prediction}
+On a higher strategic level the prediction of the opponents strategy is an prominent approach used in research \cite{DataMine}\cite{Bayesian}\cite{Scouting}\cite{ReplayPred}. This type of research relies on the use of replays and machine learning to help the AI accurately predict a strategy, these do rely on the quantity and quality of replays used for the learning process\cite{DataMine}\cite{Bayesian}\cite{ReplayPred}. Another method for prediction is scouting alongside machine learning, this eliminates the need for replay observation and allows for a more real-time prediction \cite{Scouting}. Though this method does still require several games to be played before the AI can begin to have an accurate prediction.
+
+\subsection{Full Game Play}
+Many papers try to create an AI capable of handling all aspects of an RTS \cite{Agents}\cite{Hierarchical}\cite{HumanLevel}\cite{SCAIL}, but these have had limited success 
+\subsection{Neural Networks}
+\cite{Deep}
 
 \subsection{Planning}
 \cite{BuildOrder}
@@ -130,19 +131,6 @@ A Dataset is a collection of any data,for game AI can consist of tens of thousan
 \cite{POSH}
 \cite{Hierarchical}
 
-\subsection{Prediction}
-\cite{DataMine}
-\cite{Bayesian}
-\cite{Scouting}
-\cite{ReplayPred}
-
-\subsection{Human-level AI}
-\cite{EvalHuman}
-\cite{MM}
-
-\subsection{Deep Learning}
-\cite{Deep}
-
 \subsection{Directly Related}
 \cite{Fuzzy}
 \cite{Agents}
@@ -151,11 +139,11 @@ A Dataset is a collection of any data,for game AI can consist of tens of thousan
 This paper will be focusing on the implementation of an AI with pre-built build orders and their counters taken from Liquipedia \cite{Liquid}, a website dedicated to StarCraft, on the there they have a collection of strategies that are free to use in any capacity. Building upon these build orders the experiment will also include a method for swapping between the orders at any point, to know when to do this, the AI will scout the map in search of the opponent and compare their current building to its stored build orders and find an appropriate counter. The issue with this method is that in late game the AI will struggle to decide which build order to continue. 
 
 \subsection{Tools}
-There are several tools that will be using in this experiment, these include The Brood War API (BWAPI), POSH tools, specifically POSH Sharp which is an interface that uses cSharp instead of C++, and the ABODE editing software which uses POSH plans to create Behaviour Oriented Design's for AI's. 
+There are several tools that will be using in this experiment, these include The Brood War API (BWAPI), Parallel-rooted Ordered Slip-stack Hierarchical (POSH) reactive plans tools, specifically POSH Sharp which is an interface that uses cSharp instead of C++, and the ABODE editing software which uses POSH plans to create Behaviour Oriented Design's for AI's. 
 
 BWAPI \cite{BWAPI} is a open source software that creates an interface for a custom AI to use to communicate with the game. BWAPI deliberately does not give access to all the games information \cite{POSH}, limiting the AI to only be able to have information on the enemy if there is no Fog-of-War currently covering them, as well as the size of the map and base locations. This prevents custom AI's from cheating and ensures a fair game, though this could be considered a plus as it means that the developers of these AI's do not need to worry about using information that could cause their AI to cheat. Though this does mean hat all the AI's must work in an imperfect environment which forces the AI to have to scout for information.
 
-Parallel-rooted Ordered Slip-stack Hierarchical (POSH) reactive plans, are 
+POSH tools, are 
 
 \begin{figure}[h]
 	\centering
