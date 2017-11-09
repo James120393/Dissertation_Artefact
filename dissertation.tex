@@ -60,11 +60,15 @@
 % not capitalized unless they are the first or last word of the title.
 % Linebreaks \\ can be used within to get better formatting as desired.
 % Do not put math or special symbols in the title.
-\title{How Effective can an Adaptive AI Built With Predefined Expert Strategies be Against Competition Grade AI’s?}
+\title{How Effective can an Adaptive AI Built With Predefined Expert Strategies be Against Competition Grade AI?}
 %
 %
 % author name
-\author{James Hellman}
+\author{\IEEEauthorblockN{James Hellman\\}
+\IEEEauthorblockA{Falmouth Games Academy\\
+UK, Falmouth 1506530\\
+Email: jh182233@falmouth.ac.uk\\}
+}
 
 % The paper headers -- please do not change these, but uncomment one of them as appropriate
 % Uncomment this one for COMP320
@@ -78,11 +82,11 @@
 % As a general rule, do not put math, special symbols or citations
 % in the abstract or keywords.
 \begin{abstract}
-The abstract goes here.
+Effective macro-management (the ability to create armies and expand bases), is essential to obtaining victory in Real-Time Strategy (RTS), in the research community many AI's have been created to handle this. One method is to use a design approach to create what is known as build orders, many of these build orders take from expert strategies used by real people in high ranking tournaments. Build orders can be ridged during games leaving little room for adaptation to the opponents strategy. In this paper a collection of build orders will be used to create an AI capable of interchanging these build orders to effectively counter several strategies. An assumption is made here that the AI will only be effective in the early stages of the game and will be outmanoeuvred in late-game stages. The effectiveness of this AI will be its time survived, and winning state.
 \end{abstract}
 
 \section{Introduction}
-\IEEEPARstart{A}{I} is considered  \cite{AIBook} \cite{Survey} Real-Time Strategy
+\IEEEPARstart{A}{I}  \cite{AIBook} \cite{Survey} 
 
 \section{StarCraft}
 \IEEEPARstart{S}{tarCraft} is an RTS game developed by Blizzard Entertainment \cite{Blizzard}, and released in 1998. Later that year StarCraft: Brood War was released and took hold as one of the greatest RTS games in gaming history, it was and is still large in the e-sports community. StarCraft 2: Wings of Liberty was released much later in 2010, with most of the game mechanics the same other than balance changes, the user interface (UI) was kept the same just with a visual overhaul. The premise of StarCraft is to gather resources, build a base, and build an army to then use to destroy an enemies base and army, during playtime there are also many upgrades available for these units to give them the edge over an enemy who did not spend the time acquiring them. There are many ways of doing this each player with a different order of building their armies/bases commonly referred to as their "Build Order" \cite{BuildOrder}. Build orders only refer to a players macro-management, whereas in StarCraft Micro-management is a huge part of the game, as those with greater control over individual units can better outmanoeuvre their opponent, and thus defeat them. This paper will be focusing on the macro-management portion of the game with a greater focus on the build order and the choosing of strategies rather than individual control of the units.
@@ -110,26 +114,17 @@ Many papers try to create an AI capable of handling all aspects of an RTS \cite{
 Neural Networking are computational models loosely based on the functioning of biological brains \cite{Deep}. Given an input it computes an output by using a large number of neural units, in StarCraft it can be used to predict strategies or in the case of StarCraft 2 with its new architecture it can be used for full game-play. Using a neural network would be impractical for the purpose of this paper as ti would take many months to train.
 
 \subsection{Planning}
-Planning in StarCraft usually deals with the build order that the AI will use, 
-\cite{BuildOrder}
-\cite{OnlineEvo}
-\cite{GoalDriven}
-\cite{Hierarchical}
-\cite{Fuzzy}
-\cite{Swen}
-\cite{POSH}
-
-
+Planning in StarCraft usually deals with the build order that the AI will use usually only dealing with macro-management. There are several different ways to use a build order, some will use a static build order that will not change throughout the game \cite{Swen}, and the more popular route is to allow the AI to jump between build orders during play-time, another term is Reactive Planning \cite{Fuzzy}\cite{OnlineEvo}\cite{GoalDriven}. there has been some work on creating the build orders on the fly by finding out that most optimal method of gathering resource and building units \cite{BuildOrder}. Planning is perhaps the most optimal approach to creating an AI as there is little real-time calculations to make. Through the use of Parallel-rooted Ordered Slip-stack Hierarchical (POSH) reactive plans \cite{POSH}, you can iteratively design AI prototypes quickly \cite{Swen}.
 
 \section{Method}
 This paper will be focusing on the implementation of an AI with pre-built build orders and their counters taken from Liquipedia \cite{Liquid}, a website dedicated to StarCraft, on the there they have a collection of strategies that are free to use in any capacity. Building upon these build orders the experiment will also include a method for swapping between the orders at any point, to know when to do this, the AI will scout the map in search of the opponent and compare their current building to its stored build orders and find an appropriate counter. The issue with this method is that in late game the AI will struggle to decide which build order to continue. 
 
 \subsection{Tools}
-There are several tools that will be using in this experiment, these include The Brood War Application Programming Interface (BWAPI), Parallel-rooted Ordered Slip-stack Hierarchical (POSH) reactive plans tools, specifically POSH Sharp which is an interface that uses cSharp instead of C++, and the ABODE editing software which uses POSH plans to create Behaviour Oriented Design's for AI's. 
+There are several tools that will be using in this experiment, these include The Brood War Application Programming Interface (BWAPI), POSH tools, specifically POSH Sharp which is an interface that uses cSharp instead of C++, and the ABODE editing software which uses POSH plans to create Behaviour Oriented Design's for AI's. 
 
 BWAPI \cite{BWAPI} is a open source software that creates an interface for a custom AI to use to communicate with the game. BWAPI deliberately does not give access to all the games information \cite{POSH}, limiting the AI to only be able to have information on the enemy if there is no Fog-of-War currently covering them, as well as the size of the map and base locations. This prevents custom AI's from cheating and ensures a fair game, though this could be considered a plus as it means that the developers of these AI's do not need to worry about using information that could cause their AI to cheat. Though this does mean hat all the AI's must work in an imperfect environment which forces the AI to have to scout for information.
 
-The POSH tool, is 
+The POSH tool as seen in Figure 1, is a visual planning tool that allows for hierarchy of actions with associated triggers.
 
 \begin{figure}[h]
 	\centering
