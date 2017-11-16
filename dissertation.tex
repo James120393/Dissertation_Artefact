@@ -50,7 +50,69 @@
 \usepackage{graphicx}
 % to embed the file `myreferences.bib` in your `.tex` file
 % Insert additional usepackage commands here
+\usepackage{color}
+\usepackage{listings}
+%\usepackage{courier} %caused problems for me
 
+\lstloadlanguages{% Check Dokumentation for further languages ...
+	C,
+	C++,
+	csh,
+	Java
+}
+
+\definecolor{red}{rgb}{0.6,0,0} % for strings
+\definecolor{blue}{rgb}{0,0,0.6}
+\definecolor{green}{rgb}{0,0.8,0}
+\definecolor{cyan}{rgb}{0.0,0.6,0.6}
+
+\lstset{
+	language=csh,
+	basicstyle=\footnotesize\ttfamily, 
+	numbers=left, 
+	numberstyle=\tiny, 
+	numbersep=5pt, 
+	tabsize=2, 
+	extendedchars=true, 
+	breaklines=true, 
+	frame=b,
+	stringstyle=\color{blue}\ttfamily, 
+	showspaces=false, 
+	showtabs=true, 
+	xleftmargin=17pt,
+	framexleftmargin=17pt,
+	framexrightmargin=5pt,
+	framexbottommargin=4pt,
+	commentstyle=\color{green},
+	morecomment=[l]{//}, %use comment-line-style!
+	morecomment=[s]{/*}{*/}, %for multiline comments
+	showstringspaces=false, 
+	morekeywords={  abstract, event, new, struct,
+		as, explicit, null, switch,
+		base, extern, object, this,
+		bool, false, operator, throw,
+		break, finally, out, true,
+		byte, fixed, override, try,
+		case, float, params, typeof,
+		catch, for, private, uint,
+		char, foreach, protected, ulong,
+		checked, goto, public, unchecked,
+		class, if, readonly, unsafe,
+		const, implicit, ref, ushort,
+		continue, in, return, using,
+		decimal, int, sbyte, virtual,
+		default, interface, sealed, volatile,
+		delegate, internal, short, void,
+		do, is, sizeof, while,
+		double, lock, stackalloc,
+		else, long, static,
+		enum, namespace, string},
+	keywordstyle=\color{cyan},
+	identifierstyle=\color{red},
+}
+\usepackage{caption}
+\DeclareCaptionFont{black}{\color{black}}
+\DeclareCaptionFormat{listing}
 
 \begin{document}
 %
@@ -91,12 +153,16 @@ Effective macro-management (the ability to create armies and expand bases), is e
 \section{Introduction}
 \IEEEPARstart{A}{rtificial} Intelligence can be defined as anything that gives the illusion of intelligence to an appropriate level \cite{AIBook}. In games AI has been used in both single and multi-player environments to help create a more immersive, challenging and fun experience. One such area which AI is prominent is in the RTS genre and since the call for more research to be made for AI in Real-Time Strategy (RTS) games by Michael Buro in 2004 \cite{CallFor}, research in this area has exploded, with hundreds of papers being written \cite{Survey}. This has given rise to the creation of many AI's in RTS games from AI's that are built with pre-defined build orders \cite{Swen} to deep Neural Networks \cite{Deep} that can learn from game-play, which will be covered in more detail later on in the paper.
 
-In RTS, strategy selection is perhaps the most important choice any player or AI can make, as this will dictate the actions and reactions which they take during playtime. Though a human player can be proficient at choosing their strategy, by simply scouting the map, finding the enemy and seeing what they are building. The human player can then counter accordingly, and if they countered incorrectly the human player can simply change their strategy to accommodate. Creating an AI to do the same though can be a huge and complex task \cite{Fuzzy}\cite{OnlineEvo}\cite{GoalDriven}, one way to achieve this result without a huge effort is to create a library of expert strategies, and having the AI select the appropriate one throughout the game. This can be achieved using tools such as Advanced Behaviour Oriented Design Environment (ABODE) and Parallel-rooted Ordered Slip-stack Hierarchical (POSH) reactive plans \cite{POSH}, which will also be covered later in the paper. These tools allow for an iterative design approach for AI's in games and in this paper will be focusing on the macro-management with a particular focus on build orders and the selection of strategies rather than micro-management.  the way most papers create their AI is to use replays to train their ai to be able to counter strategies, this can be a slow process, so why not just program expert strategies into the bot and then the only thing the bot has to do is select one and follow it through, with some ability to jump between strategies at key points in-case a counter is detected. 
+RTS is a great test bed in AI research for its complex systems, involving many areas of interest from planning  Imperfect Information. \cite{StarCraftBot}
 
-Imperfect Information.
+In RTS, strategy selection is perhaps the most important choice any player or AI can make, as this will dictate the actions and reactions which they take during playtime. Though a human player can be proficient at choosing their strategy, by simply scouting the map, finding the enemy and seeing what they are building. The human player can then counter accordingly, and if they countered incorrectly the human player can simply change their strategy to accommodate. Creating an AI to do the same though can be a huge and complex task \cite{Fuzzy}\cite{OnlineEvo}\cite{GoalDriven}, one way to achieve this result without a huge effort is to create a library of expert strategies, and having the AI select the appropriate one throughout the game. This can be achieved using tools such as Advanced Behaviour Oriented Design Environment (ABODE) and Parallel-rooted Ordered Slip-stack Hierarchical (POSH) reactive plans \cite{POSH}, which will also be covered later in the paper. These tools allow for an iterative design approach for AI's in games and in this paper will be focusing on the macro-management with a particular focus on build orders and the selection of strategies rather than micro-management. 
+
+The method many papers use to create their AI is to use replays and train their AI to be able to counter strategies, this can be a slow process, so why not just program expert strategies into the AI and then the only thing the AI has to do is select one and follow it through, with some ability to jump between strategies at key points in-case a counter is detected. 
+
+
 
 \section{StarCraft}
-StarCraft is an RTS game developed by Blizzard Entertainment \cite{Blizzard}\cite{Release}, and released in 1998. Later that year StarCraft: Brood War was released and took hold as one of the greatest RTS games in gaming history, it was and is still large in the e-sports community. StarCraft 2: Wings of Liberty was released much later in 2010, with most of the game mechanics the same other than balance changes, and the user interface (UI) were kept the same just with a visual overhaul. The premise of StarCraft is to gather resources, build a base, and build an army to then use to destroy an enemies base and army, during playtime there are also many upgrades available for these units to give them the edge over an enemy who did not spend the time acquiring them. There are many ways of doing this each player with a different order of building their armies/bases commonly referred to as their "Build Order" \cite{BuildOrder}. Build orders refer to a players macro-management, whereas in StarCraft Micro-management is a huge part of the game, as those with greater control over individual units can better outmanoeuvre their opponent, and thus defeat them. 
+StarCraft the most popular RTS game of all time \cite{Current} is an RTS game developed by Blizzard Entertainment \cite{Blizzard}\cite{Release}, and released in 1998. Later that year StarCraft: Brood War was released and took hold in the e-sports community and is still popular today. StarCraft 2: Wings of Liberty was released much later in 2010, with most of the game mechanics the same other than balance changes, and the user interface (UI) were kept the same just with a visual overhaul. The premise of StarCraft is to gather resources, build a base, and build an army to then use to destroy an enemies base and army, during playtime there are also many upgrades available for these units to give them the edge over an enemy who did not spend the time acquiring them. There are many ways of doing this each player with a different order of building their armies/bases commonly referred to as their "Build Order" \cite{BuildOrder}. Build orders refer to a players macro-management, whereas in StarCraft Micro-management is a huge part of the game, as those with greater control over individual units can better outmanoeuvre their opponent, and thus defeat them. 
 
 \section{Related Work}
 In the StarCraft research community there are many different methods of AI creation. Some focus on micro-management like S. Liu et al \cite{EffectiveMicro} that uses a Genetic Algorithm (GA) and others that focus on macro-management looking at the build order like N. Justesen et al \cite{OnlineEvo}. Many of these research methods are cross depended and utilise more than one method for example, D. Churchill et al \cite{Agents} created the UAlbertaBot, which was intended to automate both build order planning and unit control. Though this paper is focusing on the planning aspect with an implementation of "either a Bayesian or other prediction algorithm" there are many other ways of creating an effective AI.
@@ -132,7 +198,7 @@ In the StarCraft AI community there are many AI's that have been created to comp
 	\item Skynet Winner of the 2012 AIIDE StarCraft AI Competition \cite{Skynet}
 \end{itemize}
 
-These AI's use several strategies along with different factions, and were chosen as they have all previously won the AIIDE StarCraft AI competition \cite{Results}. To ensure this AI is able to defeat them it must be able to counter early rush.
+These AI's use several strategies along with different factions, and were chosen as they have all previously won the AIIDE StarCraft AI competition \cite{Results}.
 
 \section{Method and Motivation}
 This paper will be focusing on the implementation of an AI with pre-built build orders and their counters taken from Liquipedia \cite{Liquid}, a website dedicated to StarCraft, on the there they have a collection of strategies that are free to use in any capacity. Building upon these build orders the experiment will also include a method for swapping between the orders at any point, to know when to do this, the AI will scout the map in search of the opponent and compare their current building to its stored build orders and find an appropriate counter. The issue with this method is that in late game the AI will struggle to decide which build order to continue. 
@@ -144,19 +210,58 @@ There are several tools that will be using in this experiment, these include The
 
 BWAPI \cite{BWAPI} is a open source software that creates an interface for a custom AI to use to communicate with the game. BWAPI deliberately does not give access to all the games information \cite{POSH}, limiting the AI to only be able to have information on the enemy if there is no Fog-of-War currently covering them, as well as the size of the map and base locations. This prevents custom AI's from cheating and ensures a fair game, though this could be considered a plus as it means that the developers of these AI's do not need to worry about using information that could cause their AI to cheat. Though this does mean hat all the AI's must work in an imperfect environment which forces the AI to have to scout for information.
 
-The POSH plan in the ABODE Environment as seen in Figure 1, is a visual planning tool that allows for hierarchy of actions with associated triggers.
-
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.5\textwidth]{POSH}
 	\caption{POSH plan for the Three Hatch Hydra build plan inside the ABODE editor.}
-	\label{fig:mesh1}
+	\label{Fig1}
 \end{figure}
-\newpage
+
+The POSH plan in the ABODE Environment as seen in Figure 1, is a visual planning tool that allows for hierarchy of actions with associated triggers. 
+
+\begin{lstlisting}
+[ExecutableAction("SelectExtractorLocation")]
+public bool SelectExtractorLocation()
+{
+    // enough resources available?
+    if (!CanMorphUnit(bwapi.UnitTypes_Zerg_Extractor) || !Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+    return false;
+    
+    TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
+    // are there any geysers available/visible?
+    IEnumerable<Unit> geysers = Interface()
+        .GetGeysers().Where(geyser => geyser.getResources() > 0);
+    if (geysers.Count() < 1)
+        return false;
+
+
+    // sort by closest path for ground units from selected build base
+    TilePosition closest = geysers
+        .OrderBy(geyser => geyser.getDistance(new Position(buildPosition)))
+        .First().getTilePosition();
+
+    // if there is a close geyers we are done
+    if (closest is TilePosition)
+    {
+        this.buildLocation = closest;
+        builder = Interface().GetBuilder(buildPosition);
+        //move(new Position(closest), builder);
+        // if (builder.getDistance(new Position(closest)) < DELTADISTANCE)
+        //     return true;
+        return true;
+    }
+    return false;
+}
+\end{lstlisting}
+\begin{figure}[h]
+	\centering
+	\caption{cSharp behaviour code snippet for selecting an extractor location for the Zerg.}
+	\label{Fig2}
+\end{figure}
 
 \subsection{Hypothesis}
 
-To create a StarCraft bot you need to first have in mind what it needs to do, in the case of this paper the bot needs to 
+To create a StarCraft AI you need to first have in mind what it needs to do, in the case of this paper the AI needs to 
 
 \subsection{Metrics}
 In this paper the StarCraft AI will be measured on its success using two factors in order of importance:
