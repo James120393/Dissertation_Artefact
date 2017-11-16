@@ -61,8 +61,8 @@
 % Linebreaks \\ can be used within to get better formatting as desired.
 % Do not put math or special symbols in the title.
 \title{%
-	How Effective can an Adaptive AI Built With Predefined Expert Strategies be Against Competition Grade AI? \\
-	\large A Planning Approach to StarCraft AI}
+	How Effective can an Adaptive AI Built With Predefined Expert Strategies be Against Competition Grade AI?} %\\
+	%\large A Planning Approach to StarCraft AI}
 
 %
 %
@@ -70,7 +70,6 @@
 \author{\IEEEauthorblockN{James Hellman\\}
 \IEEEauthorblockA{Falmouth Games Academy\\
 UK, Falmouth\\
-Student ID: 1506530\\
 Email: jh182233@falmouth.ac.uk\\}
 }
 
@@ -90,12 +89,14 @@ Effective macro-management (the ability to create armies and expand bases), is e
 \end{abstract}
 
 \section{Introduction}
-\IEEEPARstart{A}{I} can be defined as anything that gives the illusion of intelligence to an appropriate level \cite{AIBook}. In games AI has been used in both single and multi-player environments to help create a more immersive, challenging and fun experience. One such area which AI is prominent is in the RTS genre and since the call for more research to be made for AI in Real-Time Strategy (RTS) games by Michael Buro in 2004 \cite{CallFor}, research in this area has exploded, with hundreds of papers being written \cite{Survey}. This has given rise to the creation of many AI's in RTS games from AI's that are built with pre-defined build orders \cite{Swen} to deep Neural Networks \cite{Deep} that can learn from game-play, which will be covered in more detail later on in the paper.
+\IEEEPARstart{A}{rtificial} Intelligence can be defined as anything that gives the illusion of intelligence to an appropriate level \cite{AIBook}. In games AI has been used in both single and multi-player environments to help create a more immersive, challenging and fun experience. One such area which AI is prominent is in the RTS genre and since the call for more research to be made for AI in Real-Time Strategy (RTS) games by Michael Buro in 2004 \cite{CallFor}, research in this area has exploded, with hundreds of papers being written \cite{Survey}. This has given rise to the creation of many AI's in RTS games from AI's that are built with pre-defined build orders \cite{Swen} to deep Neural Networks \cite{Deep} that can learn from game-play, which will be covered in more detail later on in the paper.
 
-In RTS, strategy selection is perhaps the most important choice any player or AI can make, as this will dictate the actions and reactions which they take during playtime. Though a human player can be proficient at choosing their strategy, by simply scouting the map, finding the enemy and seeing what they are building. The human player can then counter accordingly, and if they countered incorrectly the human player can simply change their strategy to accommodate. Creating an AI to do the same though can be a huge and complex task \cite{Fuzzy}\cite{OnlineEvo}\cite{GoalDriven}, one way to achieve this result without a huge effort is to create a library of expert strategies, and having the AI select the appropriate one throughout the game. This can be achieved using tools such as Advanced Behaviour Oriented Design Environment (ABODE) and Parallel-rooted Ordered Slip-stack Hierarchical (POSH) reactive plans \cite{POSH}, which will also be covered later in the paper. These tools allow for an iterative design approach for AI's in games and in this paper will be focusing on the macro-management with a particular focus on build orders and the selection of strategies rather than micro-management.
+In RTS, strategy selection is perhaps the most important choice any player or AI can make, as this will dictate the actions and reactions which they take during playtime. Though a human player can be proficient at choosing their strategy, by simply scouting the map, finding the enemy and seeing what they are building. The human player can then counter accordingly, and if they countered incorrectly the human player can simply change their strategy to accommodate. Creating an AI to do the same though can be a huge and complex task \cite{Fuzzy}\cite{OnlineEvo}\cite{GoalDriven}, one way to achieve this result without a huge effort is to create a library of expert strategies, and having the AI select the appropriate one throughout the game. This can be achieved using tools such as Advanced Behaviour Oriented Design Environment (ABODE) and Parallel-rooted Ordered Slip-stack Hierarchical (POSH) reactive plans \cite{POSH}, which will also be covered later in the paper. These tools allow for an iterative design approach for AI's in games and in this paper will be focusing on the macro-management with a particular focus on build orders and the selection of strategies rather than micro-management.  the way most papers create their AI is to use replays to train their ai to be able to counter strategies, this can be a slow process, so why not just program expert strategies into the bot and then the only thing the bot has to do is select one and follow it through, with some ability to jump between strategies at key points in-case a counter is detected. 
+
+Imperfect Information.
 
 \section{StarCraft}
-StarCraft is an RTS game developed by Blizzard Entertainment \cite{Blizzard}, and released in 1998. Later that year StarCraft: Brood War was released and took hold as one of the greatest RTS games in gaming history, it was and is still large in the e-sports community. StarCraft 2: Wings of Liberty was released much later in 2010, with most of the game mechanics the same other than balance changes, and the user interface (UI) were kept the same just with a visual overhaul. The premise of StarCraft is to gather resources, build a base, and build an army to then use to destroy an enemies base and army, during playtime there are also many upgrades available for these units to give them the edge over an enemy who did not spend the time acquiring them. There are many ways of doing this each player with a different order of building their armies/bases commonly referred to as their "Build Order" \cite{BuildOrder}. Build orders refer to a players macro-management, whereas in StarCraft Micro-management is a huge part of the game, as those with greater control over individual units can better outmanoeuvre their opponent, and thus defeat them. 
+StarCraft is an RTS game developed by Blizzard Entertainment \cite{Blizzard}\cite{Release}, and released in 1998. Later that year StarCraft: Brood War was released and took hold as one of the greatest RTS games in gaming history, it was and is still large in the e-sports community. StarCraft 2: Wings of Liberty was released much later in 2010, with most of the game mechanics the same other than balance changes, and the user interface (UI) were kept the same just with a visual overhaul. The premise of StarCraft is to gather resources, build a base, and build an army to then use to destroy an enemies base and army, during playtime there are also many upgrades available for these units to give them the edge over an enemy who did not spend the time acquiring them. There are many ways of doing this each player with a different order of building their armies/bases commonly referred to as their "Build Order" \cite{BuildOrder}. Build orders refer to a players macro-management, whereas in StarCraft Micro-management is a huge part of the game, as those with greater control over individual units can better outmanoeuvre their opponent, and thus defeat them. 
 
 \section{Related Work}
 In the StarCraft research community there are many different methods of AI creation. Some focus on micro-management like S. Liu et al \cite{EffectiveMicro} that uses a Genetic Algorithm (GA) and others that focus on macro-management looking at the build order like N. Justesen et al \cite{OnlineEvo}. Many of these research methods are cross depended and utilise more than one method for example, D. Churchill et al \cite{Agents} created the UAlbertaBot, which was intended to automate both build order planning and unit control. Though this paper is focusing on the planning aspect with an implementation of "either a Bayesian or other prediction algorithm" there are many other ways of creating an effective AI.
@@ -120,7 +121,18 @@ Many papers try to create an AI capable of handling all aspects of an RTS \cite{
 Neural Networking are computational models loosely based on the functioning of biological brains \cite{Deep}. Given an input it computes an output by using a large number of neural units, in StarCraft it can be used to predict strategies or in the case of StarCraft 2 with its new architecture it can be used for full game-play. Using a neural network would be impractical for the purpose of this paper as ti would take many months to train.
 
 \subsection{Planning}
-Planning in StarCraft usually deals with the build order that the AI will use usually only dealing with macro-management. There are several different ways to use a build order, some will use a static build order that will not change throughout the game \cite{Swen}, and the more popular route is to allow the AI to jump between build orders during play-time, another term is Reactive Planning \cite{Fuzzy}\cite{OnlineEvo}\cite{GoalDriven}. there has been some work on creating the build orders on the fly by finding out that most optimal method of gathering resource and building units \cite{BuildOrder}. Planning is perhaps the most optimal approach to creating an AI as there is little real-time calculations to make. Through the use of POSH tools \cite{POSH}, you can iteratively design AI prototypes quickly \cite{Swen}.
+Planning in StarCraft usually deals with the build order that the AI will use usually only dealing with macro-management. There are several different ways to use a build order, some will use a static build order that will not change throughout the game \cite{Swen}, and the more popular route is to allow the AI to jump between build orders during play-time, another term is Reactive Planning \cite{Fuzzy}\cite{OnlineEvo}\cite{GoalDriven}. there has been some work on creating the build orders on the fly by finding out that most optimal method of gathering resource and building units \cite{BuildOrder}. Planning is perhaps the most optimal approach to creating an AI as there is little real-time calculations to make. Through the use of POSH tools \cite{POSH}, you can iteratively design AI prototypes and deploy quickly \cite{Swen}. Though many other papers focus on their micro-management abilities they lack the greater control of the game, the ability to macro-management. This lack of large scale control is usually due to the heavy computational requirements of controlling each individual component of the game. This is where 
+
+\subsection{Competition Grade AI}
+In the StarCraft AI community there are many AI's that have been created to compete against each other, and in this paper a competition grade AI is defined as an AI that has been entered to the AI for Interactive Digital Entertainment conference (AAIDE) StarCraft AI Competition. A yearly competition hosted by David Churchill and sponsored by AIIDE. AI's of this grade include:
+\begin{itemize}
+	\item ZZZKBot Winner of the 2017 AIIDE StarCraft AI Competition \cite{ZZZK}
+	\item Iron Winner of the 2016 AIIDE StarCraft AI Competition \cite{Iron}
+	\item UAlbertaBot Winner of the 2013/2011 AIIDE StarCraft AI Competition \cite{UAlbertaBotBot}
+	\item Skynet Winner of the 2012 AIIDE StarCraft AI Competition \cite{Skynet}
+\end{itemize}
+
+These AI's use several strategies along with different factions, and were chosen as they have all previously won the AIIDE StarCraft AI competition \cite{Results}. To ensure this AI is able to defeat them it must be able to counter early rush.
 
 \section{Method and Motivation}
 This paper will be focusing on the implementation of an AI with pre-built build orders and their counters taken from Liquipedia \cite{Liquid}, a website dedicated to StarCraft, on the there they have a collection of strategies that are free to use in any capacity. Building upon these build orders the experiment will also include a method for swapping between the orders at any point, to know when to do this, the AI will scout the map in search of the opponent and compare their current building to its stored build orders and find an appropriate counter. The issue with this method is that in late game the AI will struggle to decide which build order to continue. 
@@ -142,6 +154,10 @@ The POSH plan in the ABODE Environment as seen in Figure 1, is a visual planning
 \end{figure}
 \newpage
 
+\subsection{Hypothesis}
+
+To create a StarCraft bot you need to first have in mind what it needs to do, in the case of this paper the bot needs to 
+
 \subsection{Metrics}
 In this paper the StarCraft AI will be measured on its success using two factors in order of importance:
 \begin{itemize}
@@ -150,6 +166,7 @@ In this paper the StarCraft AI will be measured on its success using two factors
 \end{itemize}
 
 Through these factors the effectiveness of the AI can be determined, as the average time of a StarCraft game can last between 10-20 minutes if the AI survives pas the upper limit of this time or wins the game it will support a greater effectiveness. Though if the AI does not survive past the lower limit of that time or looses it will negate the effectiveness. To begin with the AI will be pitted against the inbuilt AI as a test-bed, if it should have a high effectiveness it will then be put against an open source competition grade AI, and measured from there.
+
 
 % references section
 
