@@ -229,34 +229,34 @@ There are several tools that will be using in this experiment, these include The
 [ExecutableAction("SelectExtractorLocation")]
 public bool SelectExtractorLocation()
 {
-    // enough resources available?
-    if (!CanMorphUnit(bwapi.UnitTypes_Zerg_Extractor) || !Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-    return false;
-    
-    TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
-    // are there any geysers available/visible?
-    IEnumerable<Unit> geysers = Interface()
-        .GetGeysers().Where(geyser => geyser.getResources() > 0);
-    if (geysers.Count() < 1)
-        return false;
+// enough resources available?
+if (!CanMorphUnit(bwapi.UnitTypes_Zerg_Extractor) || !Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+return false;
 
-    // sort by closest path for ground units from selected build base
-    TilePosition closest = geysers
-        .OrderBy(geyser => geyser.getDistance(new Position(buildPosition)))
-        .First().getTilePosition();
+TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
+// are there any geysers available/visible?
+IEnumerable<Unit> geysers = Interface()
+.GetGeysers().Where(geyser => geyser.getResources() > 0);
+if (geysers.Count() < 1)
+return false;
 
-    // if there is a close geyers we are done
-    if (closest is TilePosition)
-    {
-        this.buildLocation = closest;
-        builder = Interface().GetBuilder(buildPosition);
-        //move(new Position(closest), builder);
-        // if (builder.getDistance(new Position(closest)) < DELTADISTANCE)
-        //     return true;
-        return true;
-    }
-    return false;
-}	
+// sort by closest path for ground units from selected build base
+TilePosition closest = geysers
+.OrderBy(geyser => geyser.getDistance(new Position(buildPosition)))
+.First().getTilePosition();
+
+// if there is a close geyser we are done
+if (closest is TilePosition)
+{
+this.buildLocation = closest;
+builder = Interface().GetBuilder(buildPosition);
+//move(new Position(closest), builder);
+// if (builder.getDistance(new Position(closest)) < DELTADISTANCE)
+//     return true;
+return true;
+}
+return false;
+}    
 
 \end{lstlisting}
 \caption{c\# behaviour code snippet for selecting an extractor location for the Zerg, these behaviours are referred to by the POSH plan which determines when they are executed.}
@@ -274,25 +274,25 @@ At each implementation, a test will be made on the AI to show its effectiveness 
 \subsection{Metrics}
 In this work the StarCraft AI will be measured on its success using two factors:
 \begin{itemize}
-	\item Time Survived (Average of 13 minutes or above)
-	\item End game Condition (Whether the AI wins the game or looses)
+\item Time Survived (Average of 13 minutes or above)
+\item Endgame Condition (Whether the AI wins the game or looses)
 \end{itemize}
 
-The average time of each game in the most recent StarCraft AI competition was 13 minutes, with the quickest average being 8 minutes and the longest being 19 minutes. The win ratio of the AI's vary substantially from 17.21\% to a high 83.11\% as can bee seen in Table 1 \cite{Results}. 
+The average time of each game in the most recent StarCraft AI competition was 13-minutes, with the quickest average being 8-minutes and the longest being 19-minutes. The win ratio of the AI's vary substantially from 17.21\% to a high 83.11\% as can be seen in Table 1 \cite{Results}. 
 
-This AI will be considered effective if it can survive past the 13 minute mark, unless it wins the match at an earlier time.
+This AI will be considered effective if it can survive past the 13-minute mark unless it wins the match at an earlier time.
 
-Through these factors, the effectiveness of the AI will be determined, if the AI survives past the 13 minute average time or wins the game it will support a greater effectiveness. Though if the AI does not survive past the lower limit of 8 minutes or loses the Ai will need to be improved and tested again. 
-To begin with, the AI will be pitted against the inbuilt AI as a test-bed, playing 10 matches against the three races. 10 being chosen as if the AI should win each game and or survive well into the upper range then there will be little reason to continue testing against the inbuilt AI as it will most likely continue this way. After the initial testing the AI will then be put against an open source competition grade AI, and 100 games for each AI will be simulated. This number has been chosen as it will give a total of 400 games and will proved strong evidence to support the hypothesis presented here.
+Through these factors, the effectiveness of the AI will be determined, if the AI survives past the 13-minute average time or wins the game it will support a greater effectiveness. Though if the AI does not survive past the lower limit of 8 minutes or loses the Ai will need to be improved and tested again. 
+To begin with, the AI will be pitted against the inbuilt AI as a test-bed, playing 10 matches against the three races. 10 is chosen as if the AI should win each game and or survive well into the upper range then there will be little reason to continue testing against the inbuilt AI as it will most likely continue this way. After the initial testing, the AI will then be put against an open source competition grade AI, and 100 games for each AI will be simulated. This number has been chosen as it will give a total of 400 games and will provide strong evidence to support the hypothesis presented here.
 
 \subsection{Hypothesis}
 
 \begin{itemize}
-	\item \textbf{Hypothesis 1} The AI will survive no less than 13 minutes in a match with the inbuilt AI.
-	\item \textbf{Hypothesis 2} The AI will survive no less than 13 minutes in a match with the competition AI.
-	\item \textbf{Hypothesis 3} The AI will defeat the inbuilt AI
-	\item \textbf{Hypothesis 4} The AI will defeat the competition AI.
-	\item \textbf{Hypothesis 5} The AI will counter the Rush tactic.
+\item \textbf{Hypothesis 1} The AI will survive no less than 13 minutes in a match with the inbuilt AI.
+\item \textbf{Hypothesis 2} The AI will survive no less than 13 minutes in a match with the competition AI.
+\item \textbf{Hypothesis 3} The AI will defeat the inbuilt AI
+\item \textbf{Hypothesis 4} The AI will defeat the competition AI.
+\item \textbf{Hypothesis 5} The AI will counter the Rush tactic.
 \end{itemize}
 
 
