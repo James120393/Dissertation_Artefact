@@ -4,109 +4,274 @@
 ; -------------------------------------------------------------
 (
 (documentation "Your Title" "Your Name" "Your file comments")
-(AP defendBase (minutes 1.0) (
-	RetreatForce
-))
 (AP flee (minutes 1.0) (
 	RetreatForce 
 	someComposite
 ))
-(AP moveAemyOne (minutes 1.0) (
+(AP buildSP (minutes 1.0) (
+	SelectStartBase 
+	PositionSpwnPl 
+	BuildSpwnPl
+))
+(AP buildExtractor (minutes 1.0) (
+	SelectStartBase 
+	SelectExtractorLocation 
+	BuildExtractor
+))
+(AP idle (minutes 1.0) (
+	Idle
+))
+(AP naturalHatchery (minutes 1.0) (
+	SelectNatural 
+	PositionHatchery 
+	BuildHatchery
+))
+(AP counterLure (minutes 1.0) (
+	RespondToLure 
+	AssignProbes
+))
+(AP buildHydraDen (seconds 1.0) (
+	SelectStartBase 
+	PositionHydraDen 
+	BuildHydraDen
+))
+(AP luredDefence (minutes 1.0) (
+	SelectLuredBase 
+	CounterWithForce
+))
+(AP buildThirdHatchery (seconds 1.0) (
+	SelectStartBase 
+	PositionHatchery 
+	BuildHatchery
+))
+(AP zergling (minutes 1.0) (
+	SelectNatural 
+	SelectChoke 
+	MorphZergling
+))
+(AP hydra (minutes 1.0) (
+	SelectStartBase 
+	SelectChoke 
+	MorphHydralisk
+))
+(AP stdHydraArmy (minutes 1.0) (
+	SelectForceStartingLocation 
+	AssignArmyOne
+))
+(AP moveArmyOne (minutes 1.0) (
 	SelectArmyOne 
 	AttackEnemyMainBase 
 	FinishedForce
 ))
-(AP idle (minutes 1.0) (
-	someComposite
+(AP sendDefendForce (minutes 1.0) (
+	SelectAttackedBase 
+	SelectArmyTwo 
+	fendOffUnits
 ))
-(AP sendDefendForce (minutes 1.0) ())
-(AP CanCreateUnits (minutes 1.0) ())
-(AP CanCreateUnits (minutes 1.0) ())
+(AP DefenceHydras (minutes 1.0) (
+	SelectDefenceBase 
+	MorphHydralisk
+))
+(AP DefenceZerglings (minutes 1.0) (
+	SelectDefenceBase 
+	MorphZergling
+))
 (AP ReadyUnits (minutes 1.0) (
 	AssignArmyTwo
 ))
-(C strategySelection (minutes 1.0) (goal ((Success 1.0 !=)))
+(AP stdDragoonArmy (minutes 1.0) (
+	SelectForceStartingLocation 
+	AssignArmyOne
+))
+(AP DefenceDragoons (minutes 1.0) (
+	SelectDefenceBase 
+	TrainDragoon
+))
+(AP naturalNexus (minutes 1.0) (
+	SelectNatural 
+	PositionNexus 
+	BuildNexus
+))
+(AP buildPylon (minutes 1.0) (
+	SelectStartBase 
+	PositionPylon 
+	BuildPylon
+))
+(AP buildForge (minutes 1.0) (
+	SelectStartBase 
+	PositionForge 
+	BuildForge
+))
+(AP buildCyberneticsCore (minutes 1.0) (
+	SelectStartBase 
+	PositionCyberneticsCore 
+	BuildCyberneticsCore
+))
+(AP buildGateway (minutes 1.0) (
+	SelectStartBase 
+	PositionGateway 
+	BuildGateway
+))
+(AP buildAssimilator (minutes 1.0) (
+	SelectStartBase 
+	PositionAssimilator 
+	BuildAssimilator
+))
+(AP buildNaturalPylon (minutes 1.0) (
+	SelectNatural 
+	PositionPylon 
+	BuildPylon
+))
+(AP dragoon (minutes 1.0) (
+	SelectStartBase 
+	SelectChoke 
+	BuildDragoon
+))
+(AP corsair (minutes 1.0) (
+	SelectStartBase 
+	SelectChoke 
+	BuildCorsair
+))
+(C extendToNatural (seconds 1.0) (goal ((HaveNaturalNexus 1.0 ==)))
 	(elements
-		(	(UnknownEnemy (trigger ((EnemyRace 0.0 ==))) PursueJamesStrategy)	(Protoss (trigger ((EnemyRace 2.0 ==))) PursueTwoGatewayExpand)	(Terran (trigger ((EnemyRace 3.0 ==))) PursueTwoGatewayExpand)	(Zerg (trigger ((EnemyRace 1.0 ==))) PursueTwoGatewayExpand)	)
+		(	(BuildNaturalNexus (trigger ((NaturalFound 1.0 ==))) naturalNexus)	)
+	)
+)
+(C stopLuring (seconds 1.0) (goal ((ProbesLured 0.0 ==)))
+	(elements
+		(	(CheckLuring (trigger ((ProbesLured 1.0 ==))) counterLure)	)
+		(	(buildDefence (trigger ((Alarm 0.5 >=))) luredDefence)	)
+	)
+)
+(C extendWorldKnowledge (seconds 1.0) (goal ((GameRunning 1.0 !=)))
+	(elements
+		(	(findExtension (trigger ((DoneExploringLocal 1.0 !=) (NeedProbeAtNatural 1.0 ==))) ProbeNatural)	)
+		(	(probeExploring (trigger ((ProbeCount 9.0 >=) (DoneExploring 1.0 !=))) probeScouting)	)
+	)
+)
+(C strategySelection (seconds 1.0) (goal ((Success 1.0 !=)))
+	(elements
+		(	(UnknownEnemy (trigger ((EnemyRace 0.0 ==))) PursueThreeHatchHydra)	(Protoss (trigger ((EnemyRace 2.0 ==))) PursueThreeHatchHydra)	(Terran (trigger ()) act_Terran)	(Zerg (trigger ((EnemyRace 1.0 ==))) Persue18NexusOpening)	)
+	)
+)
+(C repairBuildings (seconds 1.0) (goal ((BuildingDamaged 0.0 ==)))
+	(elements
+		(	(repairBuilding (trigger ((FindDamagedBuilding))) RepairBuilding)	)
+	)
+)
+(C buildBases (seconds 1.0) (goal ((NeedBuilding 0.0 ==)))
+	(elements
+		(	(18NexusOpening (trigger ((FollowStrategy 1.0 ==))) build18NexusOpening)	)
+	)
+)
+(C createUnits (minutes 1.0) (goal ((GameRunning 0.0 ==)))
+	(elements
+		(	(18NexusUnits (trigger ((FollowStrategy 1.0 ==))) build18NexusForce)	)
+	)
+)
+(C research (seconds 1.0) (goal ((DoneResearch 1.0 ==)))
+	(elements
+		(	(18Nexus (trigger ((FollowStrategy 1.0 ==))) research18NexusOpenin)	)
+	)
+)
+(C attack18NexusOpnening (seconds 1.0) (goal ((GameRunning)))
+	(elements
+		(	(attackArmyOne (trigger ((ArmyOneReady) (KnowEnemyBase))) moveArmyOne)	)
+		(	(buildArmyOne (trigger ((HaveDragoonRange) (DragoonCount 24.0 >=) (ArmyOneReady 0.0 ==))) stdDragoonArmy)	)
 	)
 )
 (C attackEnemy (minutes 1.0) (goal ((GameRunning 0.0 ==)))
 	(elements
-		(	(attackTwoGateway (trigger ((ZealotCount 3.0 >=))) attackTwoGateway)	)
+		(	(attackNexusOpening (trigger ((DragoonCount 24.0 >=))) attackNexusOpening)	)
 	)
 )
-(C attackTwoGateway (seconds 1.0) (goal ((GameRunning 0.0 ==)))
-	(elements
-		(	(attackArmyOne (trigger ((ArmyOneReady) (KnowEnemyBase))) moveAemyOne)	)
-		(	(buildArmyOne (trigger ((SomeSense1))) act_buildArmyOne)	)
-	)
-)
-(C defendLocation (minutes 1.0) (goal ((BaseUnderAttack 0.0 ==)))
+(C defendLocation (seconds 1.0) (goal ((BaseUnderAttack 0.0 ==)))
 	(elements
 		(	(SendArmy (trigger ((ArmyTwoReady))) sendDefendForce)	)
 		(	(ReadyArmyTwo (trigger ((CanCreateUnits) (ArmyTwoReady 1.0 !=))) setDefenceForce)	)
 	)
 )
-(C probeHarvesting (minutes 1.0) (goal ())
-	(elements
-	)
-)
-(C repairBuildings (minutes 1.0) (goal ())
-	(elements
-	)
-)
-(C buildBase (minutes 1.0) (goal ())
-	(elements
-	)
-)
-(C reseach (minutes 1.0) (goal ())
-	(elements
-	)
-)
-(C createUnits (minutes 1.0) (goal ())
-	(elements
-	)
-)
-(C extendWorldKnowledge (minutes 1.0) (goal ())
-	(elements
-	)
-)
 (C setDefenceForce (minutes 1.0) (goal ((ArmyTwoReady)))
 	(elements
 		(	(DefenceCheck (trigger ((DefenderAttackerReadyRatio 0.5 >=))) ReadyUnits)	)
-		(	(CreateDragoons (trigger ()) DefenceDragoons)	)
-		(	(CreateZealots (trigger ()) DefenceZealots)	)
+		(	(CreateDragoons (trigger ((CanCreateUnits) (CyberneticsCoreCount 1.0 >=))) DefenceDregoons)	)
 	)
 )
-(SDC James' (goal ())
+(C attackNexusOpening (minutes 1.0) (goal ((GameRunning)))
+	(elements
+		(	(attackArmyOne (trigger ((ArmyOneReady) (KnowEnemyBase))) moveArmyOne)	)
+		(	(buildArmyOne (trigger ((HaveDragoonRange) (DragoonCount 24.0 >=) (ArmyOneReady 0.0 ==))) stdDragoonArmy)	)
+	)
+)
+(C probeHarvesting (seconds 1.0) (goal ((ProbesLured)))
+	(elements
+		(	(luredProbes (trigger ()) stopLuring)	)
+		(	(miningGas (trigger ((AssimilatorCount 1.0 >=) (ProbesExtractorRatio 0.25 <=))) AssignToGas)	)
+		(	(miningCrystal (trigger ((IdleProbes))) AssignProbes)	)
+	)
+)
+(C research18NexusOpenin (minutes 1.0) (goal ((HaveDragoonRange 1.0 ==) (HaveShields 1.0 ==) (HaveAttack 1.0 ==)))
+	(elements
+		(	(resDragoonRange (trigger ((HaveDragoonRange))) DragoonRangeUpgrade)	)
+		(	(resSheilds (trigger ((HaveSheilds))) SheildsUpgrade)	)
+		(	(resWeapon (trigger ((HaveAttack))) AttackUpgrade)	)
+		(	(doneResearch (trigger ((Success))) FinishedResearch)	)
+	)
+)
+(C build18NexusForce (minutes 1.0) (goal ((Success 0.0 ==)))
+	(elements
+		(	(buildDragoons (trigger ((Supply 22.0 >=) (DragoonCount 1.0 <))) dragoon)	)
+		(	(buildCorsais (trigger ((FollowStrategy 1.0 ==) (StarGateCount 1.0 >=))) corsair)	)
+	)
+)
+(C 18NexusOpening (minutes 1.0) (goal ((NexusCount 2.0 <) (AssimilatorCount 2.0 <) (GatewayCount 3.0 <) (CyberneticsCoreCount 1.0 <) (ProbeCount 14.0 <)))
+	(elements
+		(	(buildNaturalPylon (trigger ((TotalSupply 8.0 ==))) buildNaturalPylon)	)
+		(	(buildPylon (trigger ((AvailableSupply 2.0 <=))) buildPylon)	)
+		(	(buildProbes (trigger ((TotalSupply 17.0 <=) (Supply 12.0 <) (ProbeCount 12.0 <))) BuildProbe)	)
+		(	(buildNaturalNexus (trigger ((Supply 18.0 >=) (NexusCount 2.0 <))) extendToNatural)	)
+		(	(buildForge (trigger ((Supply 10.0 <) (ForgeCount 1.0 <))) buildForge)	)
+		(	(buildCyberneticsCore (trigger ((Supply 22.0 <) (CyberneticsCoreCounbt 1.0 <))) buildCyberneticsCore)	)
+		(	(buildFirstGateway (trigger ((Supply 18.0 <) (GatewayCount 1.0 <))) buildGateway)	)
+		(	(buildSecondGateway (trigger ((Supply 22.0 <) (GatewayCount 3.0 <))) buildGateway)	)
+		(	(buildAssimilator (trigger ((SomeSense1) (AssimilatorCount 1.0 <))) buildAssimilator)	)
+	)
+)
+(C probeScouting (minutes 1.0) (goal ((DoneExploring)))
+	(elements
+		(	(selectProbe (trigger ((DroneCount 9.0 >=) (ProbeScoutAvailable 1.0 !=))) SelectProbeScout)	)
+		(	(explore (trigger ((ProbeScoutAvailable 1.0 ==))) DroneScouting)	)
+	)
+)
+(SDC 18NexusOpening (goal ((GameRunning 0.0 ==)))
 	(drives
 		(
 
-		(strategy (trigger ((GameRunning 1.0 ==))) strategySelection))
+		(strategize (trigger ((GameRunning 1.0 ==))) strategySelection(seconds 1.0)))
 		(
 
-		(retreat (trigger ((ForceIsLosing 1.0 =))) flee)		(
+		(retreat (trigger ((ForceIsLosing 1.0 =))) flee(seconds 0.5))		(
 
-		(attack (trigger ()) attackEnemy)		(
+		(attack (trigger ((ForceReady))) attackEnemy(seconds 0.5))		(
 
-		(defend (trigger ((BaseUnderAttack 1.0 =))) defendLocation))
+		(defend (trigger ((BaseUnderAttack 1.0 ==))) defendLocation(seconds 0.5)))
 		(
 
-		(harvest (trigger ()) probeHarvesting)		(
+		(harvest (trigger ((ProbeCount 1.0 >=) (IdleProbes))) probeHarvesting(seconds 0.5))		(
 
-		(repair (trigger ()) repairBuildings))
+		(repair (trigger ((BuildingDamaged 1.0 ==))) repairBuildings(seconds 0.5)))
 		(
 
-		(build (trigger ()) buildBase)		(
+		(build (trigger ((NeedBuilding 1.0 ==))) buildBases(seconds 0.25))		(
 
-		(research (trigger ()) reseach)		(
+		(research (trigger ((Success))) research(seconds 1.0))		(
 
-		(createForce (trigger ()) createUnits)		(
+		(createForce (trigger ((CanCreateUnits))) createUnits(seconds 0.25))		(
 
-		(explore (trigger ()) extendWorldKnowledge))
+		(explore (trigger ((DoneExploring 0.0 ==))) extendWorldKnowledge))
 		(
 
-		(wait (trigger ()) idle))
+		(wait (trigger ((Success))) idle))
 
 	)
 )
