@@ -151,7 +151,7 @@
 )
 (C strategySelection (seconds 1.0) (goal ((Success 1.0 !=)))
 	(elements
-		(	(UnknownEnemy (trigger ((EnemyRace 0.0 ==))) Persue18NexusOpening)	(Protoss (trigger ((EnemyRace 2.0 ==))) Persue18NexusOpening)	(Terran (trigger ((EnemyRace 3.0 ==))) Persue18NexusOpening)	(Zerg (trigger ((EnemyRace 1.0 ==))) Persue18NexusOpening)	)
+		(	(UnknownEnemy (trigger ((EnemyRace 0.0 ==))) PursueThreeHatchHydra)	(Protoss (trigger ((EnemyRace 2.0 ==))) PursueThreeHatchHydra)	(Terran (trigger ()) act_Terran)	(Zerg (trigger ((EnemyRace 1.0 ==))) Persue18NexusOpening)	)
 	)
 )
 (C repairBuildings (seconds 1.0) (goal ((BuildingDamaged 0.0 ==)))
