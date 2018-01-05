@@ -476,12 +476,12 @@ namespace POSH_StarCraftBot
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Assimilator.getID());
         }
 
-        public IEnumerable<Unit> GetGateWays()
+        public IEnumerable<Unit> GetGateway()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Gateway.getID());
         }
 
-        public IEnumerable<Unit> GetStarGates()
+        public IEnumerable<Unit> GetStargate()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Stargate.getID());
         }
@@ -496,7 +496,7 @@ namespace POSH_StarCraftBot
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Photon_Cannon.getID());
         }
 
-        public IEnumerable<Unit> GetFleetBeacon()
+        public IEnumerable<Unit> GetFleetbeacon()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Fleet_Beacon.getID());
         }

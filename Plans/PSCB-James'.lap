@@ -13,50 +13,16 @@
 	PositionSpwnPl 
 	BuildSpwnPl
 ))
-(AP buildExtractor (minutes 1.0) (
-	SelectStartBase 
-	SelectExtractorLocation 
-	BuildExtractor
-))
 (AP idle (minutes 1.0) (
 	Idle
-))
-(AP naturalHatchery (minutes 1.0) (
-	SelectNatural 
-	PositionHatchery 
-	BuildHatchery
 ))
 (AP counterLure (minutes 1.0) (
 	RespondToLure 
 	AssignProbes
 ))
-(AP buildHydraDen (seconds 1.0) (
-	SelectStartBase 
-	PositionHydraDen 
-	BuildHydraDen
-))
 (AP luredDefence (minutes 1.0) (
 	SelectLuredBase 
 	CounterWithForce
-))
-(AP buildThirdHatchery (seconds 1.0) (
-	SelectStartBase 
-	PositionHatchery 
-	BuildHatchery
-))
-(AP zergling (minutes 1.0) (
-	SelectNatural 
-	SelectChoke 
-	MorphZergling
-))
-(AP hydra (minutes 1.0) (
-	SelectStartBase 
-	SelectChoke 
-	MorphHydralisk
-))
-(AP stdHydraArmy (minutes 1.0) (
-	SelectForceStartingLocation 
-	AssignArmyOne
 ))
 (AP moveArmyOne (minutes 1.0) (
 	SelectArmyOne 
@@ -67,14 +33,6 @@
 	SelectAttackedBase 
 	SelectArmyTwo 
 	fendOffUnits
-))
-(AP DefenceHydras (minutes 1.0) (
-	SelectDefenceBase 
-	MorphHydralisk
-))
-(AP DefenceZerglings (minutes 1.0) (
-	SelectDefenceBase 
-	MorphZergling
 ))
 (AP ReadyUnits (minutes 1.0) (
 	AssignArmyTwo
@@ -125,12 +83,12 @@
 (AP dragoon (minutes 1.0) (
 	SelectStartBase 
 	SelectChoke 
-	BuildDragoon
+	TrainDragoon
 ))
 (AP corsair (minutes 1.0) (
 	SelectStartBase 
 	SelectChoke 
-	BuildCorsair
+	TrainCorsair
 ))
 (C extendToNatural (seconds 1.0) (goal ((HaveNaturalNexus 1.0 ==)))
 	(elements
@@ -161,7 +119,7 @@
 )
 (C buildBases (seconds 1.0) (goal ((NeedBuilding 0.0 ==)))
 	(elements
-		(	(18NexusOpening (trigger ((FollowStrategy 1.0 ==))) build18NexusOpening)	)
+		(	(18NexusOpening (trigger ((FollowStrategy 1.0 ==))) 18NexusOpening)	)
 	)
 )
 (C createUnits (minutes 1.0) (goal ((GameRunning 0.0 ==)))
@@ -220,15 +178,15 @@
 )
 (C build18NexusForce (minutes 1.0) (goal ((Success 0.0 ==)))
 	(elements
-		(	(buildDragoons (trigger ((Supply 22.0 >=) (DragoonCount 1.0 <))) dragoon)	)
-		(	(buildCorsais (trigger ((FollowStrategy 1.0 ==) (StarGateCount 1.0 >=))) corsair)	)
+		(	(trainDragoons (trigger ((Supply 22.0 >=) (DragoonCount 1.0 <))) dragoon)	)
+		(	(trainCorsais (trigger ((FollowStrategy 1.0 ==) (StarGateCount 1.0 >=))) corsair)	)
 	)
 )
 (C 18NexusOpening (minutes 1.0) (goal ((NexusCount 2.0 <) (AssimilatorCount 2.0 <) (GatewayCount 3.0 <) (CyberneticsCoreCount 1.0 <) (ProbeCount 14.0 <)))
 	(elements
 		(	(buildNaturalPylon (trigger ((TotalSupply 8.0 ==))) buildNaturalPylon)	)
 		(	(buildPylon (trigger ((AvailableSupply 2.0 <=))) buildPylon)	)
-		(	(buildProbes (trigger ((TotalSupply 17.0 <=) (Supply 12.0 <) (ProbeCount 12.0 <))) BuildProbe)	)
+		(	(buildProbes (trigger ((TotalSupply 17.0 <=) (Supply 12.0 <) (ProbeCount 12.0 <))) TrainProbe)	)
 		(	(buildNaturalNexus (trigger ((Supply 18.0 >=) (NexusCount 2.0 <))) extendToNatural)	)
 		(	(buildForge (trigger ((Supply 10.0 <) (ForgeCount 1.0 <))) buildForge)	)
 		(	(buildCyberneticsCore (trigger ((Supply 22.0 <) (CyberneticsCoreCounbt 1.0 <))) buildCyberneticsCore)	)
@@ -239,7 +197,7 @@
 )
 (C probeScouting (minutes 1.0) (goal ((DoneExploring)))
 	(elements
-		(	(selectProbe (trigger ((DroneCount 9.0 >=) (ProbeScoutAvailable 1.0 !=))) SelectProbeScout)	)
+		(	(selectProbe (trigger ((ProbeCount 9.0 >=) (ProbeScoutAvailable 1.0 !=))) SelectProbeScout)	)
 		(	(explore (trigger ((ProbeScoutAvailable 1.0 ==))) DroneScouting)	)
 	)
 )

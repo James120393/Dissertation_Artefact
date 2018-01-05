@@ -93,6 +93,7 @@ namespace POSH_StarCraftBot.behaviours
             return PossibleBuildLocation(start, ++xSpace, ++ySpace, --iterations, builder, building);
         }
 
+
         protected int CountUnbuiltBuildings(UnitType type)
         {
             int count = 0;
@@ -135,7 +136,7 @@ namespace POSH_StarCraftBot.behaviours
         protected bool Build(UnitType type, int timeout = 10)
         {
             bool building = false;
-            if (buildLocation is TilePosition && CanMorphUnit(type) && builder is Unit && !builder.isConstructing() && !builder.isBeingConstructed())
+            if (buildLocation is TilePosition && builder is Unit && !builder.isConstructing() && !builder.isBeingConstructed())
             {
                 if (!buildQueue.ContainsKey(type.getID()) || !(buildQueue[type.getID()] is Dictionary<Unit, TilePosition>))
                     buildQueue[type.getID()] = new Dictionary<Unit, TilePosition>();
@@ -539,6 +540,257 @@ namespace POSH_StarCraftBot.behaviours
 
                 return Build(bwapi.UnitTypes_Protoss_Assimilator);
             }
+            return false;
+        }
+
+        /// <summary>
+        /// Select suitable location for the forge
+        /// </summary>
+        /// <returns></returns>
+        [ExecutableAction("PositionForge")]
+        public bool PositionForge()
+        {
+            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+                return false;
+            // TODO: this needs to be changed to a better location around the base taking exits and resources into account
+            TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
+            builder = Interface().GetBuilder(buildPosition);
+
+            buildPosition = PossibleBuildLocation(buildPosition, 1, 1, 100, builder, bwapi.UnitTypes_Protoss_Forge);
+            buildLocation = buildPosition;
+
+            if (buildPosition is TilePosition)
+            {
+                move(new Position(buildPosition), builder);
+                return true;
+            }
+            return false;
+        }
+
+        [ExecutableAction("BuildForge")]
+        public bool BuildForge()
+        {
+            return Build(bwapi.UnitTypes_Protoss_Forge);
+        }
+
+        /// <summary>
+        /// Select suitable location for the Cybernetics Core
+        /// </summary>
+        /// <returns></returns>
+        [ExecutableAction("PositionCyberneticsCore")]
+        public bool PositionCyberneticsCore()
+        {
+            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+                return false;
+            // TODO: this needs to be changed to a better location around the base taking exits and resources into account
+            TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
+            builder = Interface().GetBuilder(buildPosition);
+
+            buildPosition = PossibleBuildLocation(buildPosition, 1, 1, 200, builder, bwapi.UnitTypes_Protoss_Cybernetics_Core);
+            buildLocation = buildPosition;
+            if (buildPosition is TilePosition)
+            {
+                move(new Position(buildPosition), builder);
+                return true;
+            }
+
+            return false;
+        }
+
+        [ExecutableAction("BuildCyberneticsCore")]
+        public bool BuildCyberneticsCore()
+        {
+            return Build(bwapi.UnitTypes_Protoss_Cybernetics_Core);
+        }
+
+
+        [ExecutableAction("PositionNexus")]
+        public bool PositionNexus()
+        {
+            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+                return false;
+
+            TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
+            builder = Interface().GetBuilder(buildPosition);
+            buildPosition = PossibleBuildLocation(buildPosition, 1, 1, 100, builder, bwapi.UnitTypes_Protoss_Nexus);
+
+            buildLocation = buildPosition;
+
+            move(new Position(buildPosition), builder);
+
+            // if (builder.getDistance(new Position(buildPosition)) < DELTADISTANCE )
+            //     return true;
+
+            return true;
+        }
+
+        [ExecutableAction("BuildNexus")]
+        public bool BuildNexus()
+        {
+            return Build(bwapi.UnitTypes_Protoss_Nexus);
+        }
+
+        [ExecutableAction("PositionPylon")]
+        public bool PositionPylon()
+        {
+            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+                return false;
+            TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
+            builder = Interface().GetBuilder(buildPosition);
+            buildPosition = PossibleBuildLocation(buildPosition, 1, 1, 200, builder, bwapi.UnitTypes_Protoss_Pylon);
+
+            buildLocation = buildPosition;
+
+            move(new Position(buildPosition), builder);
+            if (builder.getDistance(new Position(buildPosition)) < DELTADISTANCE)
+                return true;
+
+            return false;
+        }
+
+        [ExecutableAction("BuildPylon")]
+        public bool BuildPylon()
+        {
+            return Build(bwapi.UnitTypes_Protoss_Pylon);
+        }
+
+        [ExecutableAction("PositionCannon")]
+        public bool PositionCannon()
+        {
+            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+                return false;
+            TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
+            builder = Interface().GetBuilder(buildPosition);
+            buildPosition = PossibleBuildLocation(buildPosition, 1, 1, 120, builder, bwapi.UnitTypes_Protoss_Photon_Cannon);
+
+            move(new Position(buildPosition), builder);
+            if (builder.getDistance(new Position(buildPosition)) < DELTADISTANCE)
+                return true;
+
+            return false;
+        }
+
+        [ExecutableAction("BuildCannon")]
+        public bool BuildCannon()
+        {
+            return Build(bwapi.UnitTypes_Protoss_Photon_Cannon);
+        }
+
+        [ExecutableAction("RepairBuilding")]
+        public bool RepairBuilding()
+        {
+            if (repairDrone == null || repairDrone.getHitPoints() <= 0 || buildingToRepair == null || buildingToRepair.getHitPoints() <= 0)
+                return false;
+            move(buildingToRepair.getPosition(), repairDrone);
+            return repairDrone.repair(buildingToRepair, true);
+        }
+
+
+        [ExecutableAction("FinishedEighteenNexusOpening")]
+        public bool FinishedEighteenNexusOpening()
+        {
+            needBuilding = false;
+
+            return needBuilding;
+        }
+
+        //
+        // SENSES
+        //
+        [ExecutableSense("NeedBuilding")]
+        public bool NeedBuilding()
+        {
+            return needBuilding;
+        }
+
+        [ExecutableSense("NexusCount")]
+        public int NexusCount()
+        {
+            return Interface().GetNexus().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Nexus) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Nexus);
+        }
+
+        [ExecutableSense("ForgeCount")]
+        public int ForgeCount()
+        {
+            return Interface().GetForge().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Forge) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Forge);
+        }
+        [ExecutableSense("AssimilatorCount")]
+        public int AssimilatorCount()
+        {
+            return Interface().GetAssimilator().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Assimilator) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Assimilator);
+        }
+
+        [ExecutableSense("CyberneticsCoreCount")]
+        public int CyberneticsCoreCount()
+        {
+            return Interface().GetCyberneticsCore().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Cybernetics_Core) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Cybernetics_Core);
+        }
+
+        [ExecutableSense("GatewayCount")]
+        public int GatewayCount()
+        {
+            return Interface().GetGateway().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Gateway) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Gateway);
+        }
+
+        [ExecutableSense("PylonCount")]
+        public int PylonCount()
+        {
+            return Interface().GetPylon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Pylon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Pylon);
+        }
+
+        [ExecutableSense("CannonCount")]
+        public int CannonCount()
+        {
+            return Interface().GetCannon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Photon_Cannon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Photon_Cannon);
+        }
+
+        [ExecutableSense("StargateCount")]
+        public int StargateCount()
+        {
+            return Interface().GetStargate().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Stargate) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Stargate);
+        }
+
+        [ExecutableSense("FleetbeaconCount")]
+        public int FleetbeaconCount()
+        {
+            return Interface().GetFleetbeacon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Fleet_Beacon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Fleet_Beacon);
+        }
+
+
+
+        /// <summary>
+        /// Select a unit for building a structure
+        /// </summary>
+        /// <returns></returns>
+        [ExecutableSense("HaveBuilder")]
+        public bool HaveBuilder()
+        {
+            builder = UnitManager().GetDrone();
+
+            return (builder is Unit) ? true : false;
+        }
+
+        [ExecutableSense("HaveNaturalNexus")]
+        public bool NaturalNExus()
+        {
+            TilePosition natural = Interface().baseLocations.ContainsKey((int)BuildSite.Natural) ? Interface().baseLocations[(int)BuildSite.Natural] : null;
+            TilePosition start = Interface().baseLocations[(int)BuildSite.StartingLocation];
+
+            // natural not known
+            if (natural == null)
+                return false;
+
+            // arbitratry distance measure to determine if the hatchery is closer to the natural or the starting location
+            double dist = new Position(natural).getDistance(new Position(start)) / 3;
+
+            if (Interface().GetHatcheries().Where(hatch => hatch.getDistance(new Position(natural)) < dist).Count() > 0)
+                return true;
+
+            foreach (Unit unit in this.buildingInProgress.Keys)
+                if (unit.getType().getID() == bwapi.UnitTypes_Protoss_Nexus.getID() &&
+                    unit.getDistance(new Position(natural)) < dist)
+                    return true;
+
             return false;
         }
 
