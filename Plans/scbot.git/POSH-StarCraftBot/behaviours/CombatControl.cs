@@ -258,8 +258,8 @@ namespace POSH_StarCraftBot.behaviours
             return stopAttacks;
         }
 
-        [ExecutableAction("AttackEnemyMainBase")]
-        public bool AttackEnemyMainBase()
+        [ExecutableAction("AttackEnemy")]
+        public bool AttackEnemy()
         {
             return AttackLocation(ForceLocations.EnemyStart);
                 
@@ -277,6 +277,11 @@ namespace POSH_StarCraftBot.behaviours
             return AttackLocation(ForceLocations.NotAssigned);
         }
 
+        [ExecutableAction("FendOffUnits")]
+        public bool FendOffUnits()
+        {
+            return AttackLocation(ForceLocations.OwnStart);
+        }
 
         [ExecutableAction("SelectForceStartingLocation")]
         public bool SelectForceStartingLocation()

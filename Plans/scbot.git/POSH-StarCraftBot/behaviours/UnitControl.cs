@@ -153,6 +153,16 @@ namespace POSH_StarCraftBot.behaviours
 
             return true;
         }
+        
+        protected internal Unit GetProbe()
+        {
+            if (IdleProbes())
+                return Interface().GetIdleProbes().ElementAt(0);
+            //TODO:  here we could possibly take of the fact that we remove a busy probe from its current task which is not a good thing sometimes
+            // this is especially the case if it is the last drone mining
+
+            return (Interface().GetProbes(1).Count() > 0) ? Interface().GetProbes(1).ElementAt(0) : null;
+        }
 
         public bool ProbesToResource(IEnumerable<Unit> resources, Dictionary<int, List<Unit>> mined, int threshold, bool onlyIdle, int maxUnits)
         {
@@ -350,13 +360,13 @@ namespace POSH_StarCraftBot.behaviours
         ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
 
         [ExecutableSense("IdleProbes")]
-        public bool IdleDrones()
+        public bool IdleProbes()
         {
             return (Interface().GetIdleProbes().Count() > 0) ? true : false;
         }
 
         [ExecutableSense("ProbeCount")]
-        public int DroneCount()
+        public int ProbeCount()
         {
             return Interface().ProbeCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Probe);
         }
@@ -379,7 +389,7 @@ namespace POSH_StarCraftBot.behaviours
             return Interface().HydraliskCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Dark_Templar);
         }
         [ExecutableSense("CorsairCount")]
-        public int MutaliskCount()
+        public int CorsairCount()
         {
             return Interface().CorsairCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Corsair);
         }

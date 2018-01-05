@@ -429,14 +429,6 @@ namespace POSH_StarCraftBot.behaviours
         /// Select a unit for building a structure
         /// </summary>
         /// <returns></returns>
-        [ExecutableSense("HaveBuilder")]
-        public bool HaveBuilder()
-        {
-            builder = UnitManager().GetDrone();
-
-            return (builder is Unit) ? true : false;
-        }
-
         [ExecutableSense("HaveNaturalHatchery")]
         public bool NaturalHatchery()
         {
@@ -676,16 +668,6 @@ namespace POSH_StarCraftBot.behaviours
             return Build(bwapi.UnitTypes_Protoss_Photon_Cannon);
         }
 
-        [ExecutableAction("RepairBuilding")]
-        public bool RepairBuilding()
-        {
-            if (repairDrone == null || repairDrone.getHitPoints() <= 0 || buildingToRepair == null || buildingToRepair.getHitPoints() <= 0)
-                return false;
-            move(buildingToRepair.getPosition(), repairDrone);
-            return repairDrone.repair(buildingToRepair, true);
-        }
-
-
         [ExecutableAction("FinishedEighteenNexusOpening")]
         public bool FinishedEighteenNexusOpening()
         {
@@ -697,12 +679,6 @@ namespace POSH_StarCraftBot.behaviours
         //
         // SENSES
         //
-        [ExecutableSense("NeedBuilding")]
-        public bool NeedBuilding()
-        {
-            return needBuilding;
-        }
-
         [ExecutableSense("NexusCount")]
         public int NexusCount()
         {
@@ -765,7 +741,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("HaveBuilder")]
         public bool HaveBuilder()
         {
-            builder = UnitManager().GetDrone();
+            builder = UnitManager().GetProbe();
 
             return (builder is Unit) ? true : false;
         }

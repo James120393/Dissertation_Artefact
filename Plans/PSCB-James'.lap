@@ -8,11 +8,6 @@
 	RetreatForce 
 	someComposite
 ))
-(AP buildSP (minutes 1.0) (
-	SelectStartBase 
-	PositionSpwnPl 
-	BuildSpwnPl
-))
 (AP idle (minutes 1.0) (
 	Idle
 ))
@@ -30,9 +25,9 @@
 	FinishedForce
 ))
 (AP sendDefendForce (minutes 1.0) (
-	SelectAttackedBase 
+	BaseUnderAttack 
 	SelectArmyTwo 
-	fendOffUnits
+	FendOffUnits
 ))
 (AP ReadyUnits (minutes 1.0) (
 	AssignArmyTwo
@@ -42,7 +37,7 @@
 	AssignArmyOne
 ))
 (AP DefenceDragoons (minutes 1.0) (
-	SelectDefenceBase 
+	SelectStartBase 
 	TrainDragoon
 ))
 (AP naturalNexus (minutes 1.0) (
@@ -152,7 +147,7 @@
 (C setDefenceForce (minutes 1.0) (goal ((ArmyTwoReady)))
 	(elements
 		(	(DefenceCheck (trigger ((DefenderAttackerReadyRatio 0.5 >=))) ReadyUnits)	)
-		(	(CreateDragoons (trigger ((CanCreateUnits) (CyberneticsCoreCount 1.0 >=))) DefenceDregoons)	)
+		(	(CreateDragoons (trigger ((CanCreateUnits) (CyberneticsCoreCount 1.0 >=))) DefenceDragoons)	)
 	)
 )
 (C attackNexusOpening (minutes 1.0) (goal ((GameRunning)))
@@ -201,7 +196,7 @@
 		(	(explore (trigger ((ProbeScoutAvailable 1.0 ==))) DroneScouting)	)
 	)
 )
-(SDC 18NexusOpening (goal ((GameRunning 0.0 ==)))
+(SDC EighteenNexusOpening (goal ((GameRunning 0.0 ==)))
 	(drives
 		(
 
