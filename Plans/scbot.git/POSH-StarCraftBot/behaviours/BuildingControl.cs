@@ -646,6 +646,30 @@ namespace POSH_StarCraftBot.behaviours
             return Build(bwapi.UnitTypes_Protoss_Pylon);
         }
 
+        [ExecutableAction("PositionGateway")]
+        public bool PositionGateway()
+        {
+            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+                return false;
+            TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
+            builder = Interface().GetBuilder(buildPosition);
+            buildPosition = PossibleBuildLocation(buildPosition, 1, 1, 160, builder, bwapi.UnitTypes_Protoss_Gateway);
+
+            buildLocation = buildPosition;
+
+            move(new Position(buildPosition), builder);
+            if (builder.getDistance(new Position(buildPosition)) < DELTADISTANCE)
+                return true;
+
+            return false;
+        }
+
+        [ExecutableAction("BuildGateway")]
+        public bool BuildGateway()
+        {
+            return Build(bwapi.UnitTypes_Protoss_Gateway);
+        }
+
         [ExecutableAction("PositionCannon")]
         public bool PositionCannon()
         {

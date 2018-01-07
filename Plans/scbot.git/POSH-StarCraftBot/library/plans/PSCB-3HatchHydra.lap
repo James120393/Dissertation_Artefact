@@ -4,129 +4,87 @@
 ; -------------------------------------------------------------
 (
 (documentation "Your Title" "Your Name" "Your file comments")
-(AP NaturalNexus (minutes 1.0) (
-	SelectNatural 
-	PositionNexus 
-	BuildNexus
+(AP defendBase (minutes 1.0) (
+	RetreatForce
 ))
-(AP BuildPylon (minutes 1.0) (
-	SelectStartBase 
-	PositionPylon 
-	BuildPylon
-))
-(AP BuildForge (minutes 1.0) (
-	SelectStartBase 
-	PositionForge 
+(AP buildForge (minutes 1.0) (
+	PosiitionForge 
 	BuildForge
 ))
-(AP BuildCyberneticsCore (minutes 1.0) (
-	SelectStartBase 
-	PositionCyberneticsCore 
-	BuildCyberneticsCore
+(AP buildAssimilator (minutes 1.0) (
+	SelectAssimilatorLocation 
+	BuildAssimilator
 ))
-(AP BuildGateway (minutes 1.0) (
-	SelectStartBase 
+(AP buildGateway (minutes 1.0) (
 	PositionGateway 
 	BuildGateway
 ))
-(AP BuildAssimilator (minutes 1.0) (
-	SelectStartBase 
-	PositionAssimilator 
-	BuildAssimilator
-))
-(AP BuildNaturalPylon (minutes 1.0) (
+(AP expandBase (minutes 1.0) (
 	SelectNatural 
+	BuildNexus
+))
+(AP buildProbes (minutes 1.0) (
+	BuildProbe
+))
+(AP buildPylon (minutes 1.0) (
 	PositionPylon 
 	BuildPylon
 ))
-(AP Dragoon (minutes 1.0) (
-	SelectStartBase 
-	SelectChoke 
-	TrainDragoon
+(AP idle (minutes 1.0) (
+	Idle
 ))
-(AP Corsair (minutes 1.0) (
-	SelectStartBase 
-	SelectChoke 
-	TrainCorsair
-))
-(C ExtendToNatural (seconds 1.0) (goal ((HaveNaturalNexus 1.0 ==)))
+(C buildForce (minutes 1.0) (goal ())
 	(elements
-		(	(BuildNaturalNexus (trigger ((NaturalFound 1.0 ==))) naturalNexus)	)
+		(	(buildZealots (trigger ((ZealotCount 6.0 <=))) TrainZealots)	)
 	)
 )
-(C StopLuring (seconds 1.0) (goal ((ProbesLured 0.0 ==)))
+(C attack (minutes 1.0) (goal ())
 	(elements
-		(	(CheckLuring (trigger ((ProbesLured 1.0 ==))) counterLure)	)
-		(	(buildDefence (trigger ((Alarm 0.5 >=))) luredDefence)	)
+		(	(attackBase (trigger ()) AttackBase)	)
 	)
 )
-(C StrategySelection (seconds 1.0) (goal ((Success 1.0 !=)))
+(C scout (minutes 1.0) (goal ())
 	(elements
-		(	(UnknownEnemy (trigger ((EnemyRace 0.0 ==))) Persue18NexusOpening))
 	)
 )
-(C RepairBuildings (seconds 1.0) (goal ((BuildingDamaged 0.0 ==)))
+(C researchUpgrades (minutes 1.0) (goal ())
 	(elements
-		(	(repairBuilding (trigger ((FindDamagedBuilding))) RepairBuilding)	)
 	)
 )
-(C AttackEnemy (minutes 1.0) (goal ((GameRunning 0.0 ==)))
+(C buildBase (minutes 1.0) (goal ())
 	(elements
-		(	(attackNexusOpening (trigger ((DragoonCount 24.0 >=))) attackNexusOpening)	)
+		(	(sendProbes (trigger ((IdleProbes 1.0 >=))) AssignProbes)	)
+		(	(buildPylon (trigger ((AvaiableSupply 2.0 <=))) buildPylon)	)
+		(	(buildProbes (trigger ((ProbeCount 20.0 <=))) buildProbes)	)
+		(	(buildNexus (trigger ((TotalSupply 13.0 >=))) expandBase)	)
+		(	(buildGateway (trigger ((TotalSupply 11.0 >=) (PylonCount 1.0 >=) (GatewayCount 2.0 <=))) buildGateway)	)
+		(	(buildAssimilator (trigger ((TotalSupply 16.0 >=))) buildAssimilator)	)
+		(	(buildForge (trigger ((TotalSupply 11.0 >=))) buildForge)	)
 	)
 )
-(C ProbeHarvesting (seconds 1.0) (goal ((ProbesLured)))
-	(elements
-		(	(luredProbes (trigger ()) stopLuring)	)
-		(	(miningGas (trigger ((AssimilatorCount 1.0 >=) (ProbesExtractorRatio 0.25 <=))) AssignToGas)	)
-		(	(miningCrystal (trigger ((IdleProbes))) AssignProbes)	)
-	)
-)
-(C EighteenNexusOpening (minutes 1.0) (goal ((NexusCount 2.0 <) (AssimilatorCount 2.0 <) (GatewayCount 3.0 <) (CyberneticsCoreCount 1.0 <) (ProbeCount 14.0 <)))
-	(elements
-		(	(buildNaturalPylon (trigger ((TotalSupply 8.0 ==))) buildNaturalPylon)	)
-		(	(buildPylon (trigger ((AvailableSupply 2.0 <=))) buildPylon)	)
-		(	(buildProbes (trigger ((TotalSupply 17.0 <=) (Supply 12.0 <) (ProbeCount 12.0 <))) TrainProbe)	)
-		(	(buildNaturalNexus (trigger ((Supply 18.0 >=) (NexusCount 2.0 <))) extendToNatural)	)
-		(	(buildForge (trigger ((Supply 10.0 <) (ForgeCount 1.0 <))) buildForge)	)
-		(	(buildCyberneticsCore (trigger ((Supply 22.0 <) (CyberneticsCoreCounbt 1.0 <))) buildCyberneticsCore)	)
-		(	(buildFirstGateway (trigger ((Supply 18.0 <) (GatewayCount 1.0 <))) buildGateway)	)
-		(	(buildSecondGateway (trigger ((Supply 22.0 <) (GatewayCount 3.0 <))) buildGateway)	)
-		(	(buildAssimilator (trigger ((SomeSense1) (AssimilatorCount 1.0 <))) buildAssimilator)	)
-	)
-)
-(C ProbeScouting (minutes 1.0) (goal ((DoneExploring)))
-	(elements
-		(	(selectProbe (trigger ((ProbeCount 9.0 >=) (ProbeScoutAvailable 1.0 !=))) SelectProbeScout)	)
-		(	(explore (trigger ((ProbeScoutAvailable 1.0 ==))) DroneScouting)	)
-	)
-)
-(SDC EighteenNexusOpening (goal ((GameRunning 0.0 ==)))
+(SDC BasicBuild (goal ())
 	(drives
 		(
 
-		(strategize (trigger ((GameRunning 1.0 ==))) strategySelection(seconds 1.0)))
+		(defend (trigger ((BaseUnderAttack 0.1 =))) defendBase))
 		(
 
-		(retreat (trigger ((ForceIsLosing 1.0 =))) flee(seconds 0.5))
-
-		(attack (trigger ((ForceReady))) attackEnemy(seconds 0.5))
-
-		(defend (trigger ((BaseUnderAttack 1.0 ==))) defendLocation(seconds 0.5)))
+		(retreat (trigger ((ForceIsLosing 1.0 =))) defendBase))
 		(
 
-		(harvest (trigger ((ProbeCount 1.0 >=) (IdleProbes))) probeHarvesting(seconds 0.5))
-
-		(repair (trigger ((BuildingDamaged 1.0 ==))) repairBuildings(seconds 0.5)))
+		(createForce (trigger ((BuildArmy 1.0 =))) buildForce))
 		(
 
-		(build (trigger ((NeedBuilding 1.0 ==))) buildBases(seconds 0.25))
+		(attack (trigger ((AttackPrepared 1.0 =))) attack))
+		(
 
-		(research (trigger ((Success))) research(seconds 1.0))
+		(scoutMap (trigger ()) scout))
+		(
 
-		(createForce (trigger ((CanCreateUnits))) createUnits(seconds 0.25))
+		(research (trigger ((needUpgrade 1.0 =))) researchUpgrades))
+		(
 
-		(explore (trigger ((DoneExploring 0.0 ==))) extendWorldKnowledge))
+		(build (trigger ((needBuilding 1.0 =))) buildBase))
 		(
 
 		(wait (trigger ((Success))) idle))
