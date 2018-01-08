@@ -88,7 +88,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\bwapi-clr-client\bwapi-clr\bwapi-clr.csproj">
+    <ProjectReference Include="C:\Users\james\Documents\StarCraftAI - Project\BWAPI\bwapi-mono-bridge2\Source\bwapi-clr-client\bwapi-clr\bwapi-clr.csproj">
       <Project>{6657C37C-4F1B-4972-AAB0-B395EE5F53DF}</Project>
       <Name>bwapi-clr</Name>
     </ProjectReference>
