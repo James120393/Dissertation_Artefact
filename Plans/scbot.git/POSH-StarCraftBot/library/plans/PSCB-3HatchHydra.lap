@@ -4,54 +4,55 @@
 ; -------------------------------------------------------------
 (
 (documentation "Your Title" "Your Name" "Your file comments")
-(AP defendBase (minutes 1.0) (
+(AP defendBase (minutes 0.01) (
 	RetreatForce
 ))
-(AP buildForge (minutes 1.0) (
+(AP buildForge (minutes 0.01) (
 	PositionForge 
 	BuildForge
 ))
-(AP buildAssimilator (minutes 1.0) (
+(AP buildAssimilator (minutes 0.01) (
 	SelectAssimilatorLocation 
 	BuildAssimilator
 ))
-(AP buildGateway (minutes 1.0) (
+(AP buildGateway (minutes 0.01) (
 	PositionGateway 
 	BuildGateway
 ))
-(AP expandBase (minutes 1.0) (
+(AP expandBase (minutes 0.01) (
 	SelectNatural 
 	BuildNexus
 ))
-(AP buildProbes (minutes 1.0) (
+(AP buildProbes (minutes 0.01) (
 	BuildProbe
 ))
-(AP buildPylon (minutes 1.0) (
+(AP buildPylon (minutes 0.01) (
 	PositionPylon 
 	BuildPylon
+	AssignProbes
 ))
-(AP idle (minutes 1.0) (
+(AP idle (minutes 0.01) (
 	Idle
 ))
-(C buildForce (minutes 1.0) (goal ())
+(C buildForce (minutes 0.01) (goal ())
 	(elements
 		(	(buildZealots (trigger ((ZealotCount 6.0 <=))) TrainZealot)	)
 	)
 )
-(C attack (minutes 1.0) (goal ())
+(C attack (minutes 0.01) (goal ())
 	(elements
 		(	(attackBase (trigger ()) AttackEnemy)	)
 	)
 )
-(C buildBase (minutes 1.0) (goal ())
+(C buildBase (minutes 0.01) (goal ())
 	(elements
 		(	(sendProbes (trigger ((IdleProbes 1.0 >=))) AssignProbes)	)
 		(	(buildPylon (trigger ((AvailableSupply 2.0 <=))) buildPylon)	)
-		(	(buildProbes (trigger ((ProbeCount 12.0 <=))) BuildProbe)	)
-		(	(buildNexus (trigger ((TotalSupply 13.0 >=))) expandBase)	)
-		(	(buildGateway (trigger ((TotalSupply 11.0 >=) (PylonCount 1.0 >=) (GatewayCount 2.0 <=))) buildGateway)	)
-		(	(buildAssimilator (trigger ((TotalSupply 16.0 >=))) buildAssimilator)	)
-		(	(buildForge (trigger ((TotalSupply 11.0 >=))) buildForge)	)
+		(	(buildProbes (trigger ((ProbeCount 7.0 <=))) BuildProbe)	)
+		(	(buildNexus (trigger ((TotalSupply 17.0 >=))) expandBase)	)
+		(	(buildGateway (trigger ((TotalSupply 17.0 >=))) buildGateway)	)
+		(	(buildAssimilator (trigger ((TotalSupply 17.0 >=))) buildAssimilator)	)
+		(	(buildForge (trigger ((TotalSupply 17.0 >=))) buildForge)	)
 	)
 )
 (SDC BasicBuild (goal ())

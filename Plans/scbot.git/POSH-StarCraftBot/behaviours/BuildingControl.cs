@@ -134,7 +134,7 @@ namespace POSH_StarCraftBot.behaviours
         }
 
         //Function to build a building
-        protected bool Build(UnitType type, int timeout = 10)
+        protected bool Build(UnitType type, int timeout = 5)
         {
             bool building = false;
             if (buildLocation is TilePosition && builder is Unit && !builder.isConstructing() && !builder.isBeingConstructed())
@@ -612,7 +612,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("BuildPylon")]
         public bool BuildPylon()
         {
-            return Build(bwapi.UnitTypes_Protoss_Pylon);
+            return Build(bwapi.UnitTypes_Protoss_Pylon);            
         }
 
 
