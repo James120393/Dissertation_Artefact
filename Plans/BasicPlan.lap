@@ -43,7 +43,7 @@
 		(	(attackBase (trigger ()) AttackBase)	)
 	)
 )
-(C scout (minutes 1.0) (goal ())
+(C scout (minutes 1.0) (goal ((Success)))
 	(elements
 	)
 )
@@ -62,7 +62,7 @@
 		(	(buildForge (trigger ((TotalSupply 11.0 >=))) buildForge)	)
 	)
 )
-(SDC BasicBuild (goal ())
+(SDC BasicBuild (goal ((Fail)))
 	(drives
 		(
 
@@ -78,7 +78,7 @@
 		(attack (trigger ((AttackPrepared 1.0 =))) attack))
 		(
 
-		(scoutMap (trigger ()) scout))
+		(scoutMap (trigger ((Success))) scout))
 		(
 
 		(research (trigger ((needUpgrade 1.0 =))) researchUpgrades))
