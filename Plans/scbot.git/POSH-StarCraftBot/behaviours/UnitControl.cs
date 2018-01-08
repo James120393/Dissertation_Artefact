@@ -58,22 +58,13 @@ namespace POSH_StarCraftBot.behaviours
             return morphingUnits[type.getID()].Count;
         }
 
-        protected int CheckForTrainingUnits(UnitType type)
-        {
-            if (!trainingUnits.ContainsKey(type.getID()))
-                return 0;
-            trainingUnits[type.getID()].RemoveAll(unit => !unit.isTraining());
-
-            return trainingUnits[type.getID()].Count;
-        }
-
         protected internal Unit GetDrone()
         {
             if (IdleDrones())
                 return Interface().GetIdleDrones().ElementAt(0);
             //TODO:  here we could possibly take of the fact that we remove a busy drone from its current task which is not a good thing sometimes
             // this is especially the case if it is the last drone mining
-            
+
             return (Interface().GetDrones(1).Count() > 0) ? Interface().GetDrones(1).ElementAt(0) : null;
         }
 
@@ -82,19 +73,19 @@ namespace POSH_StarCraftBot.behaviours
             return (pos.xConst() * 1000) + pos.yConst();
         }
 
-        public bool DronesToResource(IEnumerable<Unit> resources, Dictionary<int, List<Unit>> mined, int threshold, bool onlyIdle,int maxUnits)
+        public bool DronesToResource(IEnumerable<Unit> resources, Dictionary<int, List<Unit>> mined, int threshold, bool onlyIdle, int maxUnits)
         {
             IEnumerable<Unit> drones;
-            int [] mineralTypes = {bwapi.UnitTypes_Resource_Mineral_Field.getID(), bwapi.UnitTypes_Resource_Mineral_Field_Type_2.getID(),bwapi.UnitTypes_Resource_Mineral_Field_Type_3.getID()};
+            int[] mineralTypes = { bwapi.UnitTypes_Resource_Mineral_Field.getID(), bwapi.UnitTypes_Resource_Mineral_Field_Type_2.getID(), bwapi.UnitTypes_Resource_Mineral_Field_Type_3.getID() };
             bool executed = false;
             if (onlyIdle)
                 drones = Interface().GetIdleDrones();
             else
                 drones = Interface().GetDrones().Where(drone => !Interface().IsBuilder(drone));
-           
+
             if (drones.Count() < 1 || resources.Count() < 1)
                 return executed;
-            
+
             // update all minded Patches by removing non harvesting drones or dead ones
             foreach (KeyValuePair<int, List<Unit>> patch in minedPatches)
             {
@@ -105,7 +96,7 @@ namespace POSH_StarCraftBot.behaviours
             {
                 if (maxUnits < 1)
                     break;
-                
+
                 if (resources.Contains(drone.getOrderTarget()) && drone.getTarget().getResources() > 0 &&
                     mined.ContainsKey(ConvertTilePosition(drone.getOrderTarget().getTilePosition())))
                 {
@@ -130,96 +121,14 @@ namespace POSH_StarCraftBot.behaviours
                     }
 
                 }
-                int secCounter = patchPositions.Count()+1;
-                while ( !(drone.getTarget() is Unit && drone.getTarget().getID() == finalPatch.getID()) && !drone.isMoving() && secCounter-- > 0)
+                int secCounter = patchPositions.Count() + 1;
+                while (!(drone.getTarget() is Unit && drone.getTarget().getID() == finalPatch.getID()) && !drone.isMoving() && secCounter-- > 0)
                 {
                     executed = drone.gather(finalPatch, false);
                     maxUnits--;
                     System.Threading.Thread.Sleep(50);
                     // if (_debug_)
                     Console.Out.WriteLine("Drone is gathering: " + executed);
-                }
-
-               
-               
-                positionValue = ConvertTilePosition(finalPatch.getTilePosition());
-                if (!mined.ContainsKey(positionValue))
-                {
-                    mined.Add( positionValue ,new List<Unit>());
-                }
-
-                mined[positionValue].Add(drone);
-            }
-
-            return true;
-        }
-        
-        protected internal Unit GetProbe()
-        {
-            if (IdleProbes())
-                return Interface().GetIdleProbes().ElementAt(0);
-            //TODO:  here we could possibly take of the fact that we remove a busy probe from its current task which is not a good thing sometimes
-            // this is especially the case if it is the last drone mining
-
-            return (Interface().GetProbes(1).Count() > 0) ? Interface().GetProbes(1).ElementAt(0) : null;
-        }
-
-        public bool ProbesToResource(IEnumerable<Unit> resources, Dictionary<int, List<Unit>> mined, int threshold, bool onlyIdle, int maxUnits)
-        {
-            IEnumerable<Unit> probes;
-            int[] mineralTypes = { bwapi.UnitTypes_Resource_Mineral_Field.getID(), bwapi.UnitTypes_Resource_Mineral_Field_Type_2.getID(), bwapi.UnitTypes_Resource_Mineral_Field_Type_3.getID() };
-            bool executed = false;
-            if (onlyIdle)
-                probes = Interface().GetIdleProbes();
-            else
-                probes = Interface().GetProbes().Where(probe => !Interface().IsBuilder(probe));
-
-            if (probes.Count() < 1 || resources.Count() < 1)
-                return executed;
-
-            // update all minded Patches by removing non harvesting probes or dead ones
-            foreach (KeyValuePair<int, List<Unit>> patch in minedPatches)
-            {
-                patch.Value.RemoveAll(probe => (probe.getHitPoints() <= 0 || probe.getOrderTarget() == null || ConvertTilePosition(probe.getOrderTarget().getTilePosition()) != patch.Key));
-            }
-
-            foreach (Unit probe in probes)
-            {
-                if (maxUnits < 1)
-                    break;
-
-                if (resources.Contains(probe.getOrderTarget()) && probe.getTarget().getResources() > 0 &&
-                    mined.ContainsKey(ConvertTilePosition(probe.getOrderTarget().getTilePosition())))
-                {
-                    Console.Out.WriteLine("test");
-                    continue;
-                }
-
-                IEnumerable<Unit> patchPositions = resources.
-                    Where(patch => patch.hasPath(probe)).
-                    OrderBy(patch => probe.getDistance(patch));
-                Unit finalPatch = patchPositions.First();
-                int positionValue;
-
-                foreach (Unit position in patchPositions)
-                {
-                    positionValue = ConvertTilePosition(position.getTilePosition());
-                    // a better distribution over resources would be beneficial 
-                    if (!mined.ContainsKey(positionValue) || mined[positionValue].Count <= threshold)
-                    {
-                        finalPatch = position;
-                        break;
-                    }
-
-                }
-                int secCounter = patchPositions.Count() + 1;
-                while (!(probe.getTarget() is Unit && probe.getTarget().getID() == finalPatch.getID()) && !probe.isMoving() && secCounter-- > 0)
-                {
-                    executed = probe.gather(finalPatch, false);
-                    maxUnits--;
-                    System.Threading.Thread.Sleep(50);
-                    // if (_debug_)
-                    Console.Out.WriteLine("Probe is gathering: " + executed);
                 }
 
 
@@ -230,7 +139,7 @@ namespace POSH_StarCraftBot.behaviours
                     mined.Add(positionValue, new List<Unit>());
                 }
 
-                mined[positionValue].Add(probe);
+                mined[positionValue].Add(drone);
             }
 
             return true;
@@ -269,9 +178,102 @@ namespace POSH_StarCraftBot.behaviours
             return false;
         }
 
+        // Check to see if any units are currently being trained
+        protected int CheckForTrainingUnits(UnitType type)
+        {
+            if (!trainingUnits.ContainsKey(type.getID()))
+                return 0;
+            trainingUnits[type.getID()].RemoveAll(unit => !unit.isTraining());
+
+            return trainingUnits[type.getID()].Count;
+        }
+
+        // Get any idle probes
+        protected internal Unit GetProbe()
+        {
+            if (IdleProbes())
+                return Interface().GetIdleProbes().ElementAt(0);
+            //TODO:  here we could possibly take of the fact that we remove a busy probe from its current task which is not a good thing sometimes
+            // this is especially the case if it is the last drone mining
+
+            return (Interface().GetProbes(1).Count() > 0) ? Interface().GetProbes(1).ElementAt(0) : null;
+        }
+
+
+        // Function to send probes to gather minerals
+        public bool ProbesToResource(IEnumerable<Unit> resources, Dictionary<int, List<Unit>> mined, int threshold, bool onlyIdle, int maxUnits)
+        {
+            IEnumerable<Unit> probes;
+            int[] mineralTypes = { bwapi.UnitTypes_Resource_Mineral_Field.getID(), bwapi.UnitTypes_Resource_Mineral_Field_Type_2.getID(), bwapi.UnitTypes_Resource_Mineral_Field_Type_3.getID() };
+            bool executed = false;
+            if (onlyIdle)
+                probes = Interface().GetIdleProbes();
+            else
+                probes = Interface().GetProbes().Where(probe => !Interface().IsBuilder(probe));
+
+            if (probes.Count() < 1 || resources.Count() < 1)
+                return executed;
+
+            // Update all minded Patches by removing non harvesting probes or dead ones
+            foreach (KeyValuePair<int, List<Unit>> patch in minedPatches)
+            {
+                patch.Value.RemoveAll(probe => (probe.getHitPoints() <= 0 || probe.getOrderTarget() == null || ConvertTilePosition(probe.getOrderTarget().getTilePosition()) != patch.Key));
+            }
+
+            foreach (Unit probe in probes)
+            {
+                if (maxUnits < 1)
+                    break;
+
+                if (resources.Contains(probe.getOrderTarget()) && probe.getTarget().getResources() > 0 &&
+                    mined.ContainsKey(ConvertTilePosition(probe.getOrderTarget().getTilePosition())))
+                {
+                    Console.Out.WriteLine("test");
+                    continue;
+                }
+
+                IEnumerable<Unit> patchPositions = resources.
+                    Where(patch => patch.hasPath(probe)).
+                    OrderBy(patch => probe.getDistance(patch));
+                Unit finalPatch = patchPositions.First();
+                int positionValue;
+
+                foreach (Unit position in patchPositions)
+                {
+                    positionValue = ConvertTilePosition(position.getTilePosition());
+                    // A better distribution over resources would be beneficial 
+                    if (!mined.ContainsKey(positionValue) || mined[positionValue].Count <= threshold)
+                    {
+                        finalPatch = position;
+                        break;
+                    }
+
+                }
+                int secCounter = patchPositions.Count() + 1;
+                while (!(probe.getTarget() is Unit && probe.getTarget().getID() == finalPatch.getID()) && !probe.isMoving() && secCounter-- > 0)
+                {
+                    executed = probe.gather(finalPatch, false);
+                    maxUnits--;
+                    System.Threading.Thread.Sleep(50);
+                    // if (_debug_)
+                    Console.Out.WriteLine("Probe is gathering: " + executed);
+                }
+
+                positionValue = ConvertTilePosition(finalPatch.getTilePosition());
+                if (!mined.ContainsKey(positionValue))
+                {
+                    mined.Add(positionValue, new List<Unit>());
+                }
+
+                mined[positionValue].Add(probe);
+            }
+
+            return true;
+        }
+
+        // Function to Train units
         protected bool TrainUnit(UnitType type)
         {
-
             if (CanTrainUnit(type))
             {
                 int targetLocation = (int)BuildSite.StartingLocation;
@@ -294,22 +296,25 @@ namespace POSH_StarCraftBot.behaviours
                     else
                         gateway.move(new Position(Interface().baseLocations[targetLocation]));
                 return trainWorked;
-
             }
             return false;
         }
 
-        [ExecutableAction("FinishedForce")]
+
+        //
+        // SENSES
+        //
+
+        // Action to tell the AI that its forces are finished being trained
+        [ExecutableSense("FinishedForce")]
         public bool FinishedForce()
         {
             forceReady = true;
             return forceReady;
         }
 
-        //
-        // SENSES
-        //
 
+        // Sense to tell the AI that their forces are ready
         [ExecutableSense("ForceReady")]
         public bool ForceReady()
         {
@@ -359,35 +364,47 @@ namespace POSH_StarCraftBot.behaviours
 
         ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
 
+        // Sense to tell the AI how many Idle Probes it has
         [ExecutableSense("IdleProbes")]
         public bool IdleProbes()
         {
             return (Interface().GetIdleProbes().Count() > 0) ? true : false;
         }
 
+
+        //Sense to tell the AI how many Probes it has
         [ExecutableSense("ProbeCount")]
         public int ProbeCount()
         {
             return Interface().ProbeCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Probe);
         }
 
+
+        //Sense to tell the AI how many Dragoons it has
         [ExecutableSense("DragoonCount")]
         public int DragoonCount()
         {
             return Interface().DragoonCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Dragoon);
         }
 
+
+        //Sense to tell the AI how many Zealots it has
         [ExecutableSense("ZealotCount")]
         public int ZealotCount()
         {
             return Interface().ZealotCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Zealot);
         }
 
+
+        //Sense to tell the AI how many Dark Templars it has
         [ExecutableSense("DarkTemplarCount")]
         public int DarkTemplarCount()
         {
             return Interface().HydraliskCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Dark_Templar);
         }
+
+
+        //Sense to tell the AI how many Corsairs it has
         [ExecutableSense("CorsairCount")]
         public int CorsairCount()
         {
@@ -438,30 +455,39 @@ namespace POSH_StarCraftBot.behaviours
 
         ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
 
+        //Action to tell the AI to Build a Protoss Probe
         [ExecutableAction("BuildProbe")]
         public bool BuildProbe()
         {
             return TrainUnit(bwapi.UnitTypes_Protoss_Probe);
         }
 
+
+        //Action to tell the AI to Build a Protoss Zealot
         [ExecutableAction("TrainZealot")]
         public bool TrainZealot()
         {
             return MorphUnit(bwapi.UnitTypes_Protoss_Zealot);
         }
 
+
+        //Action to tell the AI to Build a Protoss Dragoon
         [ExecutableAction("TrainDragoon")]
         public bool TrainDragoon()
         {
             return TrainUnit(bwapi.UnitTypes_Protoss_Dragoon);
         }
 
+
+        //Action to tell the AI to Build a Protoss Corsair
         [ExecutableAction("TrainCorsair")]
         public bool TrainCorsair()
         {
             return MorphUnit(bwapi.UnitTypes_Protoss_Corsair);
         }
 
+
+        //Action to tell the AI to Build a Protoss Dark Templar
         [ExecutableAction("TrainDarkTemplar")]
         public bool TrainDarkTemplar()
         {
@@ -470,6 +496,8 @@ namespace POSH_StarCraftBot.behaviours
 
         ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
 
+
+        //Action to tell the AI to Assign Probes to gather minerals
         [ExecutableAction("AssignProbes")]
         public bool ProbesToMineral()
         {
@@ -477,6 +505,8 @@ namespace POSH_StarCraftBot.behaviours
             return ProbesToResource(mineralPatches, minedPatches, 2, true, 1);
         }
 
+
+        //Action to tell the AI to Assign Probes to gather Vespin Gas
         [ExecutableAction("AssignToGas")]
         public bool ProbesToGas()
         {

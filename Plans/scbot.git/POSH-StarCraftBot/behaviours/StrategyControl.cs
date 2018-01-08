@@ -315,6 +315,13 @@ namespace POSH_StarCraftBot.behaviours
         // SENSES
         //
 
+        [ExecutableSense("NaturalFound")]
+        public bool NaturalFound()
+        {
+            return (Interface().baseLocations.ContainsKey((int)BuildSite.Natural) && Interface().baseLocations[(int)BuildSite.Natural] is TilePosition);
+        }
+
+
         [ExecutableSense("CanCreateUnits")]
         public bool CanCreateUnits()
         {
@@ -332,6 +339,7 @@ namespace POSH_StarCraftBot.behaviours
             }
             return false;
         }
+        
 
         [ExecutableSense("DoneExploring")]
         public bool DoneExploring()
@@ -341,6 +349,7 @@ namespace POSH_StarCraftBot.behaviours
 
             return false;
         }
+
 
         [ExecutableSense("NeedOverlordAtNatural")]
         public bool NeedOverlordAtNatural()
@@ -375,6 +384,7 @@ namespace POSH_StarCraftBot.behaviours
 
             return true;
         }
+
 
         [ExecutableSense("DoneExploringLocal")]
         public bool DoneExploringLocal()
@@ -416,6 +426,7 @@ namespace POSH_StarCraftBot.behaviours
             return -1;
         }
 
+
         [ExecutableSense("GameRunning")]
         public bool GameRunning()
         {
@@ -446,6 +457,16 @@ namespace POSH_StarCraftBot.behaviours
             return false;
         }
 
+
+        [ExecutableSense("Alarm")]
+        public float Alarm()
+        {
+            alarm = (alarm < 0.0f) ? 0.0f : alarm - 0.05f;
+
+            return alarm;
+        }
+
+
         [ExecutableSense("ProbeAssimilatorRatio")]
         public float ProbeAssimilatorRatio()
         {
@@ -456,26 +477,18 @@ namespace POSH_StarCraftBot.behaviours
             return Interface().GetProbes().Where(probe => probe.isGatheringGas()).Count() / Interface().GetProbes().Where(probe => probe.isGatheringMinerals()).Count();
         }
 
+
         [ExecutableSense("ProbesLured")]
         public bool ProbesLured()
         {
             return Interface().GetProbes().Where(probe => probe.isUnderAttack()).Count() > 0;
         }
 
-        [ExecutableSense("Alarm")]
-        public float Alarm()
-        {
-            alarm = (alarm < 0.0f) ? 0.0f : alarm - 0.05f;
-            
-            return alarm;
-        }
 
         [ExecutableSense("ProbeScoutAvailable")]
         public bool ProbeScoutAvailable()
         {
             return (probeScout is Unit && probeScout.getHitPoints() > 0 && !probeScout.isConstructing() && !probeScout.isRepairing()) ? true : false;
-        }
-
-
+        }        
     }
 }

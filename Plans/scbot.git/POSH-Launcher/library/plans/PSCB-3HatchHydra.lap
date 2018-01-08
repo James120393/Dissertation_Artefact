@@ -47,7 +47,7 @@
 	(elements
 		(	(sendProbes (trigger ((IdleProbes 1.0 >=))) AssignProbes)	)
 		(	(buildPylon (trigger ((AvailableSupply 2.0 <=))) buildPylon)	)
-		(	(buildProbes (trigger ((ProbeCount 20.0 <=))) BuildProbe)	)
+		(	(buildProbes (trigger ((ProbeCount 12.0 <=))) BuildProbe)	)
 		(	(buildNexus (trigger ((TotalSupply 13.0 >=))) expandBase)	)
 		(	(buildGateway (trigger ((TotalSupply 11.0 >=) (PylonCount 1.0 >=) (GatewayCount 2.0 <=))) buildGateway)	)
 		(	(buildAssimilator (trigger ((TotalSupply 16.0 >=))) buildAssimilator)	)

@@ -37,19 +37,7 @@ namespace POSH_StarCraftBot.behaviours
             return Interface().GetHydraDens().Where(den => !den.isUpgrading() && den.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Grooved_Spines);
         }
 
-        ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
-        [ExecutableAction("AttackUpgrade")]
-        public bool AttackUpgrade()
-        {
-            return Interface().GetForge().Where(forge => forge.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Protoss_Ground_Weapons);
-        }
 
-        [ExecutableAction("DragoonRangeUpgrade")]
-        public bool DragoonRangeUpgrade()
-        {
-            return Interface().GetCyberneticsCore().Where(core => core.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Singularity_Charge);
-        }
-        ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
         [ExecutableAction("FinishedResearch")]
         public bool FinishedResearch()
         {
@@ -57,6 +45,24 @@ namespace POSH_StarCraftBot.behaviours
             return finishedResearch;
         }
 
+        ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
+
+        //Action to tell AI to research the Protoss attack upgrade 1
+        [ExecutableAction("AttackUpgrade")]
+        public bool AttackUpgrade()
+        {
+            return Interface().GetForge().Where(forge => forge.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Protoss_Ground_Weapons);
+        }
+
+
+        //Action to tell AI to research the Protoss Dragoon Range upgrade
+        [ExecutableAction("DragoonRangeUpgrade")]
+        public bool DragoonRangeUpgrade()
+        {
+            return Interface().GetCyberneticsCore().Where(core => core.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Singularity_Charge);
+        }
+
+        ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////////
 
 
         //
@@ -104,12 +110,6 @@ namespace POSH_StarCraftBot.behaviours
             return Interface().MineralCount();
         }
 
-        [ExecutableSense("NaturalFound")]
-        public bool NaturalFound()
-        {
-            return (Interface().baseLocations.ContainsKey((int)BuildSite.Natural) && Interface().baseLocations[(int)BuildSite.Natural] is TilePosition);
-        }
-
         [ExecutableSense("HaveHydraSpeed")]
         public bool HaveHydraSpeed()
         {
@@ -123,24 +123,21 @@ namespace POSH_StarCraftBot.behaviours
         }
 
         ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
-        [ExecutableSense("StopDragoonResearch")]
-        public int StopDragoonResearch()
-        {
-            return Interface().TotalSupply();
-        }
 
+        //Sense to tell AI if they have the protoss attack upgreade 1
         [ExecutableSense("HaveAttackUpgrade")]
         public bool HaveAttackUpgrade()
         {
             return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Ground_Weapons) > 0);
         }
 
+
+        //Sense to tell AI if they have the protoss Dragoon range upgreade
         [ExecutableSense("HaveDragoonRange")]
         public bool HaveDragoonRange()
         {
             return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Singularity_Charge) > 0);
         }        
-        ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
-        
+        ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////////        
     }
 }

@@ -28,6 +28,7 @@ namespace POSH_StarCraftBot
         protected internal Dictionary<long, Unit> UnitCreated { get; private set; }
         protected internal Dictionary<long, Unit> UnitDestroyed { get; private set; }
         protected internal Dictionary<long, Unit> UnitMorphed { get; private set; }
+        protected internal Dictionary<long, Unit> UnitTrained { get; private set; }
         protected internal Dictionary<long, Unit> UnitRenegade { get; private set; }
 
         private int[] mapDim;
@@ -82,6 +83,7 @@ namespace POSH_StarCraftBot
             UnitCreated = new Dictionary<long, Unit>();
             UnitDestroyed = new Dictionary<long, Unit>();
             UnitMorphed = new Dictionary<long, Unit>();
+            UnitTrained = new Dictionary<long, Unit>();
             UnitRenegade = new Dictionary<long, Unit>();
 
             baseLocations = new Dictionary<int, TilePosition>();
@@ -353,12 +355,15 @@ namespace POSH_StarCraftBot
             return bwapi.Broodwar.getMinerals().Where(patch => patch.getResources() > 0);
         }
 
+
+        ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
         //
         //
         // Protoss Units
         //
         //
 
+        //Function to return an available builder
         protected internal Unit GetBuilder(TilePosition location)
         {
             if (!forces.ContainsKey(ForceLocations.Build) || !(forces[ForceLocations.Build] is List<UnitAgent>))
@@ -378,48 +383,66 @@ namespace POSH_StarCraftBot
                 return null;
             forces[ForceLocations.Build].Add(new UnitAgent(builder, null, null));
             return builder;
-
         }
 
+
+        //Return the number of Probes under the AI's control
         public int ProbeCount()
         {
             return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Probe);
         }
 
+
+        //Return the number of Zealots under the AI's control
         public int ZealotCount()
         {
             return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Zealot);
         }
 
+
+        //Return the number of Dragoons under the AI's control
         public int DragoonCount()
         {
             return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Dragoon);
         }
 
+
+        //Return the number of Corsairs under the AI's control
         public int CorsairCount()
         {
             return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Corsair);
         }
 
+
+        //Return the number of Observers under the AI's control
         public int ObserverCount()
         {
             return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Observer);
         }
 
+
+        //Return the number of Probes under the AI's control Plus their location
         public IEnumerable<Unit> GetProbes(int amount)
         {
             return GetProbes().Take(amount);
         }
+
+
+        //Return the Location of all Probes under the AI's control
         public IEnumerable<Unit> GetProbes()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Probe.getID());
         }
 
+
+        //Return any Idle Probes under the AI's control
         public IEnumerable<Unit> GetIdleProbes()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Probe.getID()).Where(probe => probe.isIdle() && !IsBuilder(probe));
         }
 
+
+        //Test to see if a Probe can build
         protected internal bool IsBuilder(Unit probe)
         {
             if (!forces.ContainsKey(ForceLocations.Build) || !(forces[ForceLocations.Build] is List<UnitAgent>))
@@ -430,21 +453,29 @@ namespace POSH_StarCraftBot
 
         }
 
+
+        //Return the number of Zealots under the AI's control Plus their location
         public IEnumerable<Unit> GetZealot(int amount)
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Zealot.getID()).Take(amount);
         }
 
+
+        //Return the number of Dragoons under the AI's control Plus their location
         public IEnumerable<Unit> GetDragoon(int amount)
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Dragoon.getID()).Take(amount);
         }
 
+
+        //Return the number of Corsairs under the AI's control Plus their location
         public IEnumerable<Unit> GetCorsair(int amount)
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Corsair.getID()).Take(amount);
         }
 
+
+        //Return the number of Observers under the AI's control Plus their location
         public IEnumerable<Unit> GetObserver(int amount)
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Observer.getID()).Take(amount);
@@ -456,50 +487,70 @@ namespace POSH_StarCraftBot
         //
         //
 
+        //Return the number of Nexus' under the AI's control Plus their location
         public IEnumerable<Unit> GetNexus()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Nexus.getID());
         }
 
+
+        //Return the number of Forges under the AI's control Plus their location
         public IEnumerable<Unit> GetForge()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Forge.getID());
         }
 
+
+        //Return the number of Cybernetics Cores under the AI's control Plus their location
         public IEnumerable<Unit> GetCyberneticsCore()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Cybernetics_Core.getID());
         }
 
+
+        //Return the number of Assimilators under the AI's control Plus their location
         public IEnumerable<Unit> GetAssimilator()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Assimilator.getID());
         }
 
+
+        //Return the number of Gateways under the AI's control Plus their location
         public IEnumerable<Unit> GetGateway()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Gateway.getID());
         }
 
+
+        //Return the number of Stargates under the AI's control Plus their location
         public IEnumerable<Unit> GetStargate()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Stargate.getID());
         }
 
+
+        //Return the number of Pylons under the AI's control Plus their location
         public IEnumerable<Unit> GetPylon()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Pylon.getID());
         }
 
+
+        //Return the number of Cannons under the AI's control Plus their location
         public IEnumerable<Unit> GetCannon()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Photon_Cannon.getID());
         }
 
+
+        //Return the number of Fleet Beacons under the AI's control Plus their location
         public IEnumerable<Unit> GetFleetbeacon()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Fleet_Beacon.getID());
         }
+        
+        ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
+
 
         /// <summary>
         /// Clears the internal dictionaries which keep track of the incomming information from the game.

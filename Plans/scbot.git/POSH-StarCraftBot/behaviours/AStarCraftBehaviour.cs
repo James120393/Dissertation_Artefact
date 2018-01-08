@@ -74,8 +74,10 @@ namespace POSH_StarCraftBot.behaviours
         }
         ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
 
+        // Function to see if the AI can afford to build a building
         protected bool CanBuildBuilding(UnitType unit)
         {
+            // Check the prices against the resources gathered
             if (unit.gasPrice() <= Interface().GasCount() &&
                 unit.mineralPrice() <= Interface().MineralCount() &&
                 unit.supplyRequired() <= Interface().AvailableSupply()
@@ -85,8 +87,10 @@ namespace POSH_StarCraftBot.behaviours
             return false;
         }
 
+        // Function to see if the AI can afford to train a unit
         protected bool CanTrainUnit(UnitType unit)
         {
+            // Check the prices against the resources gathered
             if (unit.gasPrice() <= Interface().GasCount() &&
                 unit.mineralPrice() <= Interface().MineralCount() &&
                 unit.supplyRequired() <= Interface().AvailableSupply()
@@ -94,6 +98,6 @@ namespace POSH_StarCraftBot.behaviours
                 return true;
             return false;
         }
-
+        ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
     }
 }

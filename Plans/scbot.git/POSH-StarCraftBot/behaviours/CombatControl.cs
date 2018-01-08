@@ -575,9 +575,5 @@ namespace POSH_StarCraftBot.behaviours
 
             return false;
         }
-
-
-
-
     }
 }

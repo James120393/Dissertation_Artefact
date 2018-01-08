@@ -133,6 +133,7 @@ namespace POSH_StarCraftBot.behaviours
             return buildingInProgress.Where(pair => pair.Key.getType().getID() == type.getID()).Count();
         }
 
+        //Function to build a building
         protected bool Build(UnitType type, int timeout = 10)
         {
             bool building = false;
@@ -152,15 +153,37 @@ namespace POSH_StarCraftBot.behaviours
                     building = builder.build(buildLocation, type);
                     System.Threading.Thread.Sleep(50);
                 }
+
                 if (building)
                     buildQueue[type.getID()][builder] = buildLocation;
-
-
                 return building;
-
             }
             return false;
         }
+
+        ////////////////////////////////////////////////////////////////////////James' Code////////////////////////////////////////////////////////////////////////
+        // Function to position buildings taking he unit type for the building size
+        // an xSpace Value, ySpace Value and Z for in iterations
+        protected bool Position(UnitType type, int X, int Y, int Z)
+        {
+            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+                return false;
+            // TODO: this needs to be changed to a better location around the base taking exits and resources into account
+            TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
+            builder = Interface().GetBuilder(buildPosition); 
+            // Take the input coordinates for the building and set the position to that
+            buildPosition = PossibleBuildLocation(buildPosition, X, Y, Z, builder, type);
+            buildLocation = buildPosition;
+
+            if (buildPosition is TilePosition)
+            {
+                move(new Position(buildPosition), builder);
+                return true;
+            }
+            return false;
+        }
+        ////////////////////////////////////////////////////////////////////////James' Code////////////////////////////////////////////////////////////////////////
+
 
         //
         // ACTIONS
@@ -209,9 +232,6 @@ namespace POSH_StarCraftBot.behaviours
             }
             return false;
         }
-
-
-
 
         /// <summary>
         /// Select suitable location for the spawning pool
@@ -486,109 +506,78 @@ namespace POSH_StarCraftBot.behaviours
         }
 
 
-
-
         ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
 
+
+        // Action for finding a suitable loaction for the Protoss Assimiltor to harvest Vespin Gas
         [ExecutableAction("SelectAssimilatorLocation")]
         public bool SelectAssimilatorLocation()
         {
-            // enough resources available?
+            // Enough resources available?
             if (!CanBuildBuilding(bwapi.UnitTypes_Protoss_Assimilator) || !Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
                 return false;
 
             TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
-            // are there any geysers available/visible?
-            IEnumerable<Unit> geysers = Interface()
-                .GetGeysers().Where(geyser => geyser.getResources() > 0);
+            // Are there any geysers available/visible?
+            IEnumerable<Unit> geysers = Interface().GetGeysers().Where(geyser => geyser.getResources() > 0);
             if (geysers.Count() < 1)
                 return false;
 
-
-            // sort by closest path for ground units from selected build base
+            // Sort by closest path for ground units from selected build base
             TilePosition closest = geysers
                 .OrderBy(geyser => geyser.getDistance(new Position(buildPosition)))
                 .First().getTilePosition();
             
-            // if there is a close geyers we are done
+            // If there is a close geyers we are done
             if (closest is TilePosition)
             {
                 this.buildLocation = closest;
                 builder = Interface().GetBuilder(buildPosition);
-                //move(new Position(closest), builder);
-                // if (builder.getDistance(new Position(closest)) < DELTADISTANCE)
-                //     return true;
                 return true;
             }
-
             return false;
         }
 
+
+        // Action to use the suitable location to build the protoss Assimilator
         [ExecutableAction("BuildAssimilator")]
         public bool BuildAssimilator()
         {
+            //Check to see if the AI can afford the building
             if (CanBuildBuilding(bwapi.UnitTypes_Protoss_Assimilator) && buildLocation is TilePosition)
             {
-
+                // Call the build function feeding in the unit ID
                 return Build(bwapi.UnitTypes_Protoss_Assimilator);
             }
             return false;
         }
 
-        /// <summary>
-        /// Select suitable location for the forge
-        /// </summary>
-        /// <returns></returns>
+
+        // Action for finding a suitable loaction for the Protoss Forge
         [ExecutableAction("PositionForge")]
         public bool PositionForge()
         {
-            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-                return false;
-            // TODO: this needs to be changed to a better location around the base taking exits and resources into account
-            TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
-            builder = Interface().GetBuilder(buildPosition);
-
-            buildPosition = PossibleBuildLocation(buildPosition, 1, 1, 100, builder, bwapi.UnitTypes_Protoss_Forge);
-            buildLocation = buildPosition;
-
-            if (buildPosition is TilePosition)
-            {
-                move(new Position(buildPosition), builder);
-                return true;
-            }
-            return false;
+            return Position(bwapi.UnitTypes_Protoss_Forge, 1, 1, 300);
         }
 
+
+        // Action to use the suitable location to build the protoss Forge
         [ExecutableAction("BuildForge")]
         public bool BuildForge()
         {
             return Build(bwapi.UnitTypes_Protoss_Forge);
         }
 
-        /// <summary>
-        /// Select suitable location for the Cybernetics Core
-        /// </summary>
-        /// <returns></returns>
+
+        // Action for finding a suitable loaction for the Protoss Cybernetics Core
         [ExecutableAction("PositionCyberneticsCore")]
         public bool PositionCyberneticsCore()
         {
-            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-                return false;
-            // TODO: this needs to be changed to a better location around the base taking exits and resources into account
-            TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
-            builder = Interface().GetBuilder(buildPosition);
-
-            buildPosition = PossibleBuildLocation(buildPosition, 1, 1, 200, builder, bwapi.UnitTypes_Protoss_Cybernetics_Core);
-            buildLocation = buildPosition;
-            if (buildPosition is TilePosition)
-            {
-                move(new Position(buildPosition), builder);
-                return true;
-            }
-
-            return false;
+            return Position(bwapi.UnitTypes_Protoss_Cybernetics_Core, 1, 1, 200);
         }
 
+
+        // Action to use the suitable location to build the protoss Cybernetics Core
         [ExecutableAction("BuildCyberneticsCore")]
         public bool BuildCyberneticsCore()
         {
@@ -596,102 +585,86 @@ namespace POSH_StarCraftBot.behaviours
         }
 
 
+        // Action for finding a suitable loaction for the Protoss Nexus
         [ExecutableAction("PositionNexus")]
         public bool PositionNexus()
         {
-            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-                return false;
-
-            TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
-            builder = Interface().GetBuilder(buildPosition);
-            buildPosition = PossibleBuildLocation(buildPosition, 1, 1, 100, builder, bwapi.UnitTypes_Protoss_Nexus);
-
-            buildLocation = buildPosition;
-
-            move(new Position(buildPosition), builder);
-
-            // if (builder.getDistance(new Position(buildPosition)) < DELTADISTANCE )
-            //     return true;
-
-            return true;
+            return Position(bwapi.UnitTypes_Protoss_Nexus, 1, 1, 100);
         }
 
+
+        // Action to use the suitable location to build the protoss Nexus
         [ExecutableAction("BuildNexus")]
         public bool BuildNexus()
         {
             return Build(bwapi.UnitTypes_Protoss_Nexus);
         }
 
+        // Action for finding a suitable loaction for the Protoss Pylon
         [ExecutableAction("PositionPylon")]
         public bool PositionPylon()
         {
-            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-                return false;
-            TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
-            builder = Interface().GetBuilder(buildPosition);
-            buildPosition = PossibleBuildLocation(buildPosition, 1, 1, 200, builder, bwapi.UnitTypes_Protoss_Pylon);
-
-            buildLocation = buildPosition;
-
-            move(new Position(buildPosition), builder);
-            if (builder.getDistance(new Position(buildPosition)) < DELTADISTANCE)
-                return true;
-
-            return false;
+            return Position(bwapi.UnitTypes_Protoss_Pylon, 1, 1, 100);
         }
 
+
+        // Action to use the suitable location to build the protoss Pylon
         [ExecutableAction("BuildPylon")]
         public bool BuildPylon()
         {
             return Build(bwapi.UnitTypes_Protoss_Pylon);
         }
 
+
+        // Action for finding a suitable loaction for the Protoss Pylon that is used for defense
+        [ExecutableAction("PositionChokePylon")]
+        public bool PositionChokePylon()
+        {
+            //TODO Create function to select the appropriate choke point for the pylon to be built
+            return Position(bwapi.UnitTypes_Protoss_Pylon, 1, 1, 500);
+        }
+
+
+        // Action to use the suitable location to build the protoss Pylon that is used for defense
+        [ExecutableAction("BuildChokePylon")]
+        public bool BuildChokePylon()
+        {
+            return Build(bwapi.UnitTypes_Protoss_Pylon);
+        }
+
+
+        // Action for finding a suitable loaction for the Protoss Gateway
         [ExecutableAction("PositionGateway")]
         public bool PositionGateway()
         {
-            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-                return false;
-            TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
-            builder = Interface().GetBuilder(buildPosition);
-            buildPosition = PossibleBuildLocation(buildPosition, 1, 1, 160, builder, bwapi.UnitTypes_Protoss_Gateway);
-
-            buildLocation = buildPosition;
-
-            move(new Position(buildPosition), builder);
-            if (builder.getDistance(new Position(buildPosition)) < DELTADISTANCE)
-                return true;
-
-            return false;
+            return Position(bwapi.UnitTypes_Protoss_Gateway, 1, 1, 150);
         }
 
+
+        // Action to use the suitable location to build the protoss GateWay
         [ExecutableAction("BuildGateway")]
         public bool BuildGateway()
         {
             return Build(bwapi.UnitTypes_Protoss_Gateway);
         }
 
+
+        // Action for finding a suitable loaction for the Protoss Photon Cannon
         [ExecutableAction("PositionCannon")]
         public bool PositionCannon()
         {
-            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-                return false;
-            TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
-            builder = Interface().GetBuilder(buildPosition);
-            buildPosition = PossibleBuildLocation(buildPosition, 1, 1, 120, builder, bwapi.UnitTypes_Protoss_Photon_Cannon);
-
-            move(new Position(buildPosition), builder);
-            if (builder.getDistance(new Position(buildPosition)) < DELTADISTANCE)
-                return true;
-
-            return false;
+            //TODO Create function to select the appropriate choke point for the cannon to be built
+            return Position(bwapi.UnitTypes_Protoss_Photon_Cannon, 1, 1, 550);
         }
 
+        // Action to use the suitable location to build the protoss Photon Cannon
         [ExecutableAction("BuildCannon")]
         public bool BuildCannon()
         {
             return Build(bwapi.UnitTypes_Protoss_Photon_Cannon);
         }
 
+        // Action to tell the AI that this build order is finished
         [ExecutableAction("FinishedEighteenNexusOpening")]
         public bool FinishedEighteenNexusOpening()
         {
@@ -700,56 +673,77 @@ namespace POSH_StarCraftBot.behaviours
             return needBuilding;
         }
 
+
         //
         // SENSES
         //
+
+
+        // Sense to return the number of protoss Nexus'
         [ExecutableSense("NexusCount")]
         public int NexusCount()
         {
             return Interface().GetNexus().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Nexus) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Nexus);
         }
 
+
+        // Sense to return the number of protoss Forges
         [ExecutableSense("ForgeCount")]
         public int ForgeCount()
         {
             return Interface().GetForge().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Forge) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Forge);
         }
+
+
+        // Sense to return the number of protoss Assimilators
         [ExecutableSense("AssimilatorCount")]
         public int AssimilatorCount()
         {
             return Interface().GetAssimilator().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Assimilator) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Assimilator);
         }
 
+
+        // Sense to return the number of protoss Cybernetics Cores
         [ExecutableSense("CyberneticsCoreCount")]
         public int CyberneticsCoreCount()
         {
             return Interface().GetCyberneticsCore().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Cybernetics_Core) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Cybernetics_Core);
         }
 
+
+        // Sense to return the number of protoss Gateways
         [ExecutableSense("GatewayCount")]
         public int GatewayCount()
         {
             return Interface().GetGateway().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Gateway) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Gateway);
         }
 
+
+        // Sense to return the number of protoss Pylon's
         [ExecutableSense("PylonCount")]
         public int PylonCount()
         {
             return Interface().GetPylon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Pylon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Pylon);
         }
 
+
+        // Sense to return the number of protoss Cannon's
         [ExecutableSense("CannonCount")]
         public int CannonCount()
         {
             return Interface().GetCannon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Photon_Cannon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Photon_Cannon);
         }
 
+
+        // Sense to return the number of protoss StarGates
         [ExecutableSense("StargateCount")]
         public int StargateCount()
         {
             return Interface().GetStargate().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Stargate) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Stargate);
         }
 
+
+        // Sense to return the number of protoss Fleet Beacon's
         [ExecutableSense("FleetbeaconCount")]
         public int FleetbeaconCount()
         {
@@ -757,11 +751,7 @@ namespace POSH_StarCraftBot.behaviours
         }
 
 
-
-        /// <summary>
-        /// Select a unit for building a structure
-        /// </summary>
-        /// <returns></returns>
+        // Select a unit for building a structure
         [ExecutableSense("HaveBuilder")]
         public bool HaveBuilder()
         {
@@ -770,20 +760,21 @@ namespace POSH_StarCraftBot.behaviours
             return (builder is Unit) ? true : false;
         }
 
+        // Sense to tell the AI whether they have a Nexus at their natural expansion
         [ExecutableSense("HaveNaturalNexus")]
-        public bool NaturalNExus()
+        public bool HaveNaturalNExus()
         {
             TilePosition natural = Interface().baseLocations.ContainsKey((int)BuildSite.Natural) ? Interface().baseLocations[(int)BuildSite.Natural] : null;
             TilePosition start = Interface().baseLocations[(int)BuildSite.StartingLocation];
 
-            // natural not known
+            // Natural not known
             if (natural == null)
                 return false;
 
-            // arbitratry distance measure to determine if the hatchery is closer to the natural or the starting location
+            // Arbitratry distance measure to determine if the Nexus is closer to the natural or the starting location
             double dist = new Position(natural).getDistance(new Position(start)) / 3;
 
-            if (Interface().GetHatcheries().Where(hatch => hatch.getDistance(new Position(natural)) < dist).Count() > 0)
+            if (Interface().GetNexus().Where(nexus => nexus.getDistance(new Position(natural)) < dist).Count() > 0)
                 return true;
 
             foreach (Unit unit in this.buildingInProgress.Keys)
@@ -793,6 +784,6 @@ namespace POSH_StarCraftBot.behaviours
 
             return false;
         }
-
     }
+    ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
 }
