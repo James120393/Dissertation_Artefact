@@ -44,7 +44,12 @@ namespace POSH_StarCraftBot.behaviours
             return finishedResearch;
         }
 
-
+        [ExecutableAction("researchUpgrades")]
+        public bool ResearchUpgrades()
+        {
+            //TODO: fix that this does nothing right now
+            return false;
+        }
 
         //
         // SENSES
@@ -53,6 +58,13 @@ namespace POSH_StarCraftBot.behaviours
         public int StopHydraResearch()
         {
             return Interface().TotalSupply();
+        }
+
+        [ExecutableSense("needUpgrade")]
+        public bool NeedUpgrade()
+        {
+            //TODO: fix that this does nothing right now
+            return false;
         }
 
         [ExecutableSense("DoneResearch")]

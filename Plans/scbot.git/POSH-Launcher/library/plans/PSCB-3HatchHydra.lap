@@ -19,7 +19,7 @@
 	Idle
 ))
 (AP expandBase (minutes 1.0) (
-	SelSecondBase 
+	SelectNatural 
 	BuildHatchery
 ))
 (C buildBase (minutes 1.0) (goal ())
@@ -34,10 +34,6 @@
 		(	(buildHydraDen (trigger ((TotalSupply 24 ==))) UpgradeHatchery)	)
 	)
 )
-(C researchUpgrades (minutes 1.0) (goal ())
-	(elements
-	)
-)
 (C buildForce (minutes 1.0) (goal ())
 	(elements
 		(	(buildZerglings (trigger ((ZerglingCount 6.0 <=))) MorphZergling)	)
@@ -45,11 +41,7 @@
 )
 (C attack (minutes 1.0) (goal ())
 	(elements
-		(	(attackBase (trigger ()) AttackBase)	)
-	)
-)
-(C scout (minutes 1.0) (goal ())
-	(elements
+		(	(attackBase (trigger ()) AttackEnemyMainBase)	)
 	)
 )
 (SDC 3HatchHydra (goal ())
@@ -68,13 +60,10 @@
 		(attack (trigger ((AttackPrepared 1.0 =))) attack))
 		(
 
-		(scoutMap (trigger ()) scout))
-		(
-
 		(research (trigger ((needUpgrade 1.0 =))) researchUpgrades))
 		(
 
-		(build (trigger ((needBuilding 1.0 =))) buildBase))
+		(build (trigger ((NeedBuilding 1.0 =))) buildBase))
 		(
 
 		(wait (trigger ((Success))) idle))
