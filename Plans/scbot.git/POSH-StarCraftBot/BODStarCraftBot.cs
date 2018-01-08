@@ -142,7 +142,7 @@ namespace POSH_StarCraftBot
 
         //
         //
-        // Resources
+        // Zerg Resources
         //
         //
 
@@ -180,6 +180,29 @@ namespace POSH_StarCraftBot
         // Zerg Units
         //
         //
+
+        protected internal Unit GetBuilder(TilePosition location)
+        {
+            if (!forces.ContainsKey(ForceLocations.Build) || !(forces[ForceLocations.Build] is List<UnitAgent>))
+            {
+                forces[ForceLocations.Build] = new List<UnitAgent>();
+            }
+            else
+            {
+                forces[ForceLocations.Build].RemoveAll(unit => unit.SCUnit.getBuildType().isBuilding() || unit.SCUnit.isMorphing()|| unit.SCUnit.getHitPoints() <= 0);
+            }
+            if (forces[ForceLocations.Build].Count > 0)
+                return forces[ForceLocations.Build].OrderBy(unit => unit.SCUnit.getDistance(new Position(location))).First().SCUnit;
+
+            Unit builder = GetDrones().Where(drone=> !IsBuilder(drone)).OrderBy(drone => drone.getDistance(new Position(location))).First();
+
+            if (!(builder is Unit))
+                return null;
+            forces[ForceLocations.Build].Add(new UnitAgent(builder, null, null));
+            return builder;
+
+        }
+
 
         public int LarvaeCount()
         {
@@ -239,6 +262,16 @@ namespace POSH_StarCraftBot
         public IEnumerable<Unit> GetIdleDrones()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Drone.getID()).Where(drone => drone.isIdle() && !IsBuilder(drone));
+        }
+
+        protected internal bool IsBuilder(Unit drone)
+        {
+            if (!forces.ContainsKey(ForceLocations.Build) || !(forces[ForceLocations.Build] is List<UnitAgent>))
+                return false;
+
+            forces[ForceLocations.Build].RemoveAll(unit => unit.SCUnit.getBuildType().isBuilding() || unit.SCUnit.getHitPoints() <= 0);
+            return (forces[ForceLocations.Build].Where(unit => unit.SCUnit.getID() == drone.getID()).Count() > 0) ? true : false;
+
         }
 
         public IEnumerable<Unit> GetZerglings(int amount)
@@ -353,154 +386,6 @@ namespace POSH_StarCraftBot
             return bwapi.Broodwar.getMinerals().Where(patch => patch.getResources() > 0);
         }
 
-        //
-        //
-        // Protoss Units
-        //
-        //
-
-        protected internal Unit GetBuilder(TilePosition location)
-        {
-            if (!forces.ContainsKey(ForceLocations.Build) || !(forces[ForceLocations.Build] is List<UnitAgent>))
-            {
-                forces[ForceLocations.Build] = new List<UnitAgent>();
-            }
-            else
-            {
-                forces[ForceLocations.Build].RemoveAll(unit => unit.SCUnit.getBuildType().isBuilding() || unit.SCUnit.getHitPoints() <= 0);
-            }
-            if (forces[ForceLocations.Build].Count > 0)
-                return forces[ForceLocations.Build].OrderBy(unit => unit.SCUnit.getDistance(new Position(location))).First().SCUnit;
-
-            Unit builder = GetProbes().Where(probe => !IsBuilder(probe)).OrderBy(probe => probe.getDistance(new Position(location))).First();
-
-            if (!(builder is Unit))
-                return null;
-            forces[ForceLocations.Build].Add(new UnitAgent(builder, null, null));
-            return builder;
-
-        }
-
-        public int ProbeCount()
-        {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Probe);
-        }
-
-        public int ZealotCount()
-        {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Zealot);
-        }
-
-        public int DragoonCount()
-        {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Dragoon);
-        }
-
-        public int CorsairCount()
-        {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Corsair);
-        }
-
-        public int ObserverCount()
-        {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Observer);
-        }
-
-        public IEnumerable<Unit> GetProbes(int amount)
-        {
-            return GetProbes().Take(amount);
-        }
-        public IEnumerable<Unit> GetProbes()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Probe.getID());
-        }
-
-        public IEnumerable<Unit> GetIdleProbes()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Probe.getID()).Where(probe => probe.isIdle() && !IsBuilder(probe));
-        }
-
-        protected internal bool IsBuilder(Unit probe)
-        {
-            if (!forces.ContainsKey(ForceLocations.Build) || !(forces[ForceLocations.Build] is List<UnitAgent>))
-                return false;
-
-            forces[ForceLocations.Build].RemoveAll(unit => unit.SCUnit.getBuildType().isBuilding() || unit.SCUnit.getHitPoints() <= 0);
-            return (forces[ForceLocations.Build].Where(unit => unit.SCUnit.getID() == probe.getID()).Count() > 0) ? true : false;
-
-        }
-
-        public IEnumerable<Unit> GetZealot(int amount)
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Zealot.getID()).Take(amount);
-        }
-
-        public IEnumerable<Unit> GetDragoon(int amount)
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Dragoon.getID()).Take(amount);
-        }
-
-        public IEnumerable<Unit> GetCorsair(int amount)
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Corsair.getID()).Take(amount);
-        }
-
-        public IEnumerable<Unit> GetObserver(int amount)
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Observer.getID()).Take(amount);
-        }
-
-        //
-        //
-        // Protoss Buildings
-        //
-        //
-
-        public IEnumerable<Unit> GetNexus()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Nexus.getID());
-        }
-
-        public IEnumerable<Unit> GetForge()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Forge.getID());
-        }
-
-        public IEnumerable<Unit> GetCyberneticsCore()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Cybernetics_Core.getID());
-        }
-
-        public IEnumerable<Unit> GetAssimilator()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Assimilator.getID());
-        }
-
-        public IEnumerable<Unit> GetGateway()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Gateway.getID());
-        }
-
-        public IEnumerable<Unit> GetStargate()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Stargate.getID());
-        }
-
-        public IEnumerable<Unit> GetPylon()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Pylon.getID());
-        }
-
-        public IEnumerable<Unit> GetCannon()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Photon_Cannon.getID());
-        }
-
-        public IEnumerable<Unit> GetFleetbeacon()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Fleet_Beacon.getID());
-        }
-
         /// <summary>
         /// Clears the internal dictionaries which keep track of the incomming information from the game.
         /// </summary>
@@ -515,6 +400,8 @@ namespace POSH_StarCraftBot
                 leaseTime = 0L;
 
             emptyDictionaryBeforeTimeStamp(10000L, new Dictionary<long, Unit>[] { UnitDestroyed, UnitEvade, UnitShow, UnitHide, UnitCreated, UnitDestroyed, UnitMorphed, UnitRenegade });
+
+
         }
 
         private void emptyDictionaryBeforeTimeStamp(long timestamp, Dictionary<long, Unit>[] memories)

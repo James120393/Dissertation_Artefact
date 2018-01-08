@@ -72,28 +72,6 @@ namespace POSH_StarCraftBot.behaviours
 
             return false;
         }
-        ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
-
-        protected bool CanBuildBuilding(UnitType unit)
-        {
-            if (unit.gasPrice() <= Interface().GasCount() &&
-                unit.mineralPrice() <= Interface().MineralCount() &&
-                unit.supplyRequired() <= Interface().AvailableSupply()
-                )
-                if (unit.isBuilding())
-                    return true;
-            return false;
-        }
-
-        protected bool CanTrainUnit(UnitType unit)
-        {
-            if (unit.gasPrice() <= Interface().GasCount() &&
-                unit.mineralPrice() <= Interface().MineralCount() &&
-                unit.supplyRequired() <= Interface().AvailableSupply()
-                )
-                return true;
-            return false;
-        }
 
     }
 }

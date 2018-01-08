@@ -12,13 +12,13 @@ using POSH_StarCraftBot.logic;
 namespace POSH_StarCraftBot.behaviours
 {
 
-    public enum Strategy { EighteenNexusOpening = 0, TwoHatchMuta = 1, Zergling = 2 }
+    public enum Strategy { ThreeHatchHydra = 0, TwoHatchMuta = 1, Zergling = 2 }
 
     public class StrategyControl : AStarCraftBehaviour
     {
         private Unit scout;
         private Position lureCentroid;
-        private Unit probeScout;
+        private Unit droneScout;
         /// <summary>
         /// The scout counter contains the number of bases we already discovered moving from Startlocation towards the most distant ones.
         /// bases are retrieved using bwta.getBaselocations
@@ -88,23 +88,23 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("RespondToLure")]
         public bool RespondToLure()
         {
-            IEnumerable<Unit> probes = Interface().GetProbes().Where(probe => probe.isUnderAttack());
+            IEnumerable<Unit> drones = Interface().GetDrones().Where(drone => drone.isUnderAttack());
 
-            if (probes.Count() > 1)
-                lureCentroid = CombatControl.CalculateCentroidPosition(probes);
-            foreach (Unit probe in probes)
+            if (drones.Count() > 1)
+                lureCentroid = CombatControl.CalculateCentroidPosition(drones);
+            foreach (Unit drone in drones)
             {
-                if (probe.isCarryingMinerals())
+                if (drone.isCarryingMinerals())
                 {
-                    probe.gather(Interface().GetExtractors().OrderBy(extr => extr.getDistance(probe)).First());
+                    drone.gather(Interface().GetExtractors().OrderBy(extr => extr.getDistance(drone)).First());
                 }
-                else if (probe.isCarryingGas())
+                else if (drone.isCarryingGas())
                 {
-                    probe.gather(Interface().GetMineralPatches().OrderBy(extr => extr.getDistance(probe)).First());
+                    drone.gather(Interface().GetMineralPatches().OrderBy(extr => extr.getDistance(drone)).First());
                 }
                 else
                 {
-                    probe.move(new Position(Interface().baseLocations[(int)BuildSite.StartingLocation]));
+                    drone.move(new Position(Interface().baseLocations[(int)BuildSite.StartingLocation]));
                 }
                 alarm += 0.1f;
 
@@ -181,13 +181,13 @@ namespace POSH_StarCraftBot.behaviours
             return executed;
         }
 
-        [ExecutableAction("SelectProbeScout")]
-        public bool SelectProbeScout()
+        [ExecutableAction("SelectDroneScout")]
+        public bool SelectDroneScout()
         {
             Unit scout = null;
-            IEnumerable<Unit> units = Interface().GetProbes().Where(probe =>
-                probe.getHitPoints() > 0 &&
-                !Interface().IsBuilder(probe));
+            IEnumerable<Unit> units = Interface().GetDrones().Where(drone =>
+                drone.getHitPoints() > 0 &&
+                !Interface().IsBuilder(drone) );
 
             foreach (Unit unit in units)
             {
@@ -201,37 +201,37 @@ namespace POSH_StarCraftBot.behaviours
             {
                 scout = units.First();
             }
-            probeScout = scout;
+            droneScout = scout;
 
-            return (probeScout is Unit && probeScout.getHitPoints() > 0) ? true : false;
+            return (droneScout is Unit && droneScout.getHitPoints() > 0) ? true : false;
         }
 
-        [ExecutableAction("ProbeScouting")]
-        public bool ProbeScouting()
+        [ExecutableAction("DroneScouting")]
+        public bool DroneScouting()
         {
-            if (probeScout == null || probeScout.getHitPoints() <= 0 || probeScout.isConstructing())
+            if (droneScout == null || droneScout.getHitPoints() <= 0 || droneScout.isConstructing())
                 return false;
 
             if (scoutCounter == bwta.getBaseLocations().Where(loc =>
-                    bwta.getGroundDistance(loc.getTilePosition(), probeScout.getTilePosition()) >= 0).Count() )
+                    bwta.getGroundDistance(loc.getTilePosition(), droneScout.getTilePosition()) >= 0).Count() )
                 scoutCounter = 1;
 
 
-            if (probeScout.isUnderAttack())
+            if (droneScout.isUnderAttack())
             {
                 if (Interface().baseLocations.ContainsKey((int)BuildSite.Natural))
-                    probeScout.move(new Position(Interface().baseLocations[(int)BuildSite.Natural]));
+                    droneScout.move(new Position(Interface().baseLocations[(int)BuildSite.Natural]));
                 else
-                    probeScout.move(new Position(Interface().baseLocations[(int)BuildSite.StartingLocation]));
+                    droneScout.move(new Position(Interface().baseLocations[(int)BuildSite.StartingLocation]));
                 return false;
             }
 
-            if (probeScout.isMoving())
+            if (droneScout.isMoving())
                 return true;
 
-            if (probeScout.getPosition().getDistance(
+            if (droneScout.getPosition().getDistance(
                 bwta.getBaseLocations().Where(loc =>
-                    bwta.getGroundDistance(loc.getTilePosition(), probeScout.getTilePosition()) >= 0).OrderBy(loc =>
+                    bwta.getGroundDistance(loc.getTilePosition(), droneScout.getTilePosition()) >= 0).OrderBy(loc =>
                     bwta.getGroundDistance(loc.getTilePosition(),Interface().baseLocations[(int)BuildSite.StartingLocation]))
                     .ElementAt(scoutCounter-1)
                     .getPosition()
@@ -239,29 +239,29 @@ namespace POSH_StarCraftBot.behaviours
             {
                 // close to another base location
                 if (!Interface().baseLocations.ContainsKey(scoutCounter))
-                    Interface().baseLocations[scoutCounter] = new TilePosition(probeScout.getTargetPosition());
+                    Interface().baseLocations[scoutCounter] = new TilePosition(droneScout.getTargetPosition());
                 scoutCounter++;
             }
             else
             {
 
-                bool executed = probeScout.move(bwta.getBaseLocations().Where(loc =>
-                    bwta.getGroundDistance(loc.getTilePosition(), probeScout.getTilePosition()) >= 0).OrderBy(loc =>
+                bool executed = droneScout.move(bwta.getBaseLocations().Where(loc =>
+                    bwta.getGroundDistance(loc.getTilePosition(), droneScout.getTilePosition()) >= 0).OrderBy(loc =>
                     bwta.getGroundDistance(loc.getTilePosition(),Interface().baseLocations[(int)BuildSite.StartingLocation]))
                     .ElementAt(scoutCounter-1)
                     .getPosition());
                 // if (_debug_)
-                Console.Out.WriteLine("Probe is scouting: " + executed); 
+                Console.Out.WriteLine("Drone is scouting: " + executed); 
             }
 
             return true;
         }
 
-        [ExecutableAction("Pursue18NexusOpening")]
-        public bool Pursue18NexusOpening()
+        [ExecutableAction("PursueThreeHatchHydra")]
+        public bool PursueThreeHatchHydra()
         {
-            currentStrategy = Strategy.EighteenNexusOpening;
-            return (currentStrategy == Strategy.EighteenNexusOpening) ? true : false;
+            currentStrategy = Strategy.ThreeHatchHydra;
+            return (currentStrategy == Strategy.ThreeHatchHydra) ? true : false;
         }
 
         [ExecutableAction("SelectChoke")]
@@ -321,8 +321,8 @@ namespace POSH_StarCraftBot.behaviours
             if (Interface().GetLarvae().Count() == 0)
                 return false;
             switch (currentStrategy){
-                case Strategy.EighteenNexusOpening:
-                    return (Interface().GetCyberneticsCore().Count() > 0) ? true : false;
+                case Strategy.ThreeHatchHydra:
+                    return (Interface().GetHydraDens().Count() > 0) ? true : false;
                 case Strategy.TwoHatchMuta:
                     return (Interface().GetLairs().Count() > 0 && Interface().GetSpire().Count() > 0) ? true : false;
                 case Strategy.Zergling:
@@ -433,7 +433,7 @@ namespace POSH_StarCraftBot.behaviours
             //TODO: implement proper logic for dete cting when to switch between different strats.
             if (startStrategy)
             {
-                currentStrategy = Strategy.EighteenNexusOpening;
+                currentStrategy = Strategy.ThreeHatchHydra;
                 startStrategy = false;
             }
             return (int)currentStrategy;
@@ -446,20 +446,20 @@ namespace POSH_StarCraftBot.behaviours
             return false;
         }
 
-        [ExecutableSense("ProbeAssimilatorRatio")]
-        public float ProbeAssimilatorRatio()
+        [ExecutableSense("DroneExtractorRatio")]
+        public float DroneExtractorRatio()
         {
-            if (Interface().GetAssimilator().Count() < 0 || Interface().GetAssimilator().Where(ex => ex.isCompleted() && ex.getResources() > 0 && ex.getHitPoints() > 0).Count() < 1)
+            if (Interface().GetExtractors().Count() < 0 || Interface().GetExtractors().Where(ex => ex.isCompleted() && ex.getResources() > 0 && ex.getHitPoints() > 0).Count() < 1)
                 return 1;
-            if (Interface().GetProbes().Count() < 1 || Interface().GetProbes().Where(probe => probe.isGatheringMinerals()).Count() < 1)
+            if (Interface().GetDrones().Count() < 1 || Interface().GetDrones().Where(drone => drone.isGatheringMinerals()).Count() < 1)
                 return 1;
-            return Interface().GetProbes().Where(probe => probe.isGatheringGas()).Count() / Interface().GetProbes().Where(probe => probe.isGatheringMinerals()).Count();
+            return Interface().GetDrones().Where(drone => drone.isGatheringGas()).Count() / Interface().GetDrones().Where(drone => drone.isGatheringMinerals()).Count();
         }
 
-        [ExecutableSense("ProbesLured")]
-        public bool ProbesLured()
+        [ExecutableSense("DronesLured")]
+        public bool DronesLured()
         {
-            return Interface().GetProbes().Where(probe => probe.isUnderAttack()).Count() > 0;
+            return Interface().GetDrones().Where(drone => drone.isUnderAttack()).Count() > 0;
         }
 
         [ExecutableSense("Alarm")]
@@ -470,10 +470,10 @@ namespace POSH_StarCraftBot.behaviours
             return alarm;
         }
 
-        [ExecutableSense("ProbeScoutAvailable")]
-        public bool ProbeScoutAvailable()
+        [ExecutableSense("DroneScoutAvailable")]
+        public bool DroneScoutAvailable()
         {
-            return (probeScout is Unit && probeScout.getHitPoints() > 0 && !probeScout.isConstructing() && !probeScout.isRepairing()) ? true : false;
+            return (droneScout is Unit && droneScout.getHitPoints() > 0 && !droneScout.isConstructing() && !droneScout.isRepairing()) ? true : false;
         }
 
 

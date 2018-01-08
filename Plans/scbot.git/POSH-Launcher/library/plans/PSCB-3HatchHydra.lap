@@ -3,39 +3,44 @@
 ; lost the next time the tool is used.
 ; -------------------------------------------------------------
 (
-(documentation "Your Title" "Your Name" "Your file comments")
+
 (AP defendBase (minutes 1.0) (
 	RetreatForce
 ))
-(AP buildForge (minutes 1.0) (
-	PosiitionForge 
-	BuildForge
+(AP buildSP (minutes 1.0) (
+	PositionSpwnPl 
+	BuildSpwnPl
 ))
-(AP buildAssimilator (minutes 1.0) (
-	SelectAssimilatorLocation 
-	BuildAssimilator
-))
-(AP buildGateway (minutes 1.0) (
-	PositionGateway 
-	BuildGateway
-))
-(AP expandBase (minutes 1.0) (
-	SelectNatural 
-	BuildNexus
-))
-(AP buildProbes (minutes 1.0) (
-	BuildProbe
-))
-(AP buildPylon (minutes 1.0) (
-	PositionPylon 
-	BuildPylon
+(AP buildExtractor (minutes 1.0) (
+	SelectExtractorLocation 
+	BuildExtractor
 ))
 (AP idle (minutes 1.0) (
 	Idle
 ))
+(AP expandBase (minutes 1.0) (
+	SelSecondBase 
+	BuildHatchery
+))
+(C buildBase (minutes 1.0) (goal ())
+	(elements
+		(	(sendDrones (trigger ((IdleDrones 1 >=))) DronesToMineral)	)
+		(	(morphOverlord (trigger ((TotalSupply 12 ==))) MorphOverlord)	)
+		(	(morphDrones (trigger ((TotalSupply 13 <=) (AvailableSupply 5 >))) MorphDrone)	)
+		(	(buildHatchery (trigger ((TotalSupply 13.0 ==))) expandBase)	)
+		(	(buildSpawningPool (trigger ((TotalSupply 11 ==))) buildSP)	)
+		(	(buildExtractor (trigger ((TotalSupply 16.0 ==))) buildExtractor)	)
+		(	(upgradeToLair (trigger ((Gas 100 >=))) UpgradeHatchery)	)
+		(	(buildHydraDen (trigger ((TotalSupply 24 ==))) UpgradeHatchery)	)
+	)
+)
+(C researchUpgrades (minutes 1.0) (goal ())
+	(elements
+	)
+)
 (C buildForce (minutes 1.0) (goal ())
 	(elements
-		(	(buildZealots (trigger ((ZealotCount 6.0 <=))) TrainZealots)	)
+		(	(buildZerglings (trigger ((ZerglingCount 6.0 <=))) MorphZergling)	)
 	)
 )
 (C attack (minutes 1.0) (goal ())
@@ -47,26 +52,11 @@
 	(elements
 	)
 )
-(C researchUpgrades (minutes 1.0) (goal ())
-	(elements
-	)
-)
-(C buildBase (minutes 1.0) (goal ())
-	(elements
-		(	(sendProbes (trigger ((IdleProbes 1.0 >=))) AssignProbes)	)
-		(	(buildPylon (trigger ((AvaiableSupply 2.0 <=))) buildPylon)	)
-		(	(buildProbes (trigger ((ProbeCount 20.0 <=))) buildProbes)	)
-		(	(buildNexus (trigger ((TotalSupply 13.0 >=))) expandBase)	)
-		(	(buildGateway (trigger ((TotalSupply 11.0 >=) (PylonCount 1.0 >=) (GatewayCount 2.0 <=))) buildGateway)	)
-		(	(buildAssimilator (trigger ((TotalSupply 16.0 >=))) buildAssimilator)	)
-		(	(buildForge (trigger ((TotalSupply 11.0 >=))) buildForge)	)
-	)
-)
-(SDC BasicBuild (goal ())
+(SDC 3HatchHydra (goal ())
 	(drives
 		(
 
-		(defend (trigger ((BaseUnderAttack 0.1 =))) defendBase))
+		(defend (trigger ((BaseUnderAttack 1.0 =))) defendBase))
 		(
 
 		(retreat (trigger ((ForceIsLosing 1.0 =))) defendBase))

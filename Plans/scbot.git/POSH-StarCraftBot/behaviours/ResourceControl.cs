@@ -37,19 +37,6 @@ namespace POSH_StarCraftBot.behaviours
             return Interface().GetHydraDens().Where(den => !den.isUpgrading() && den.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Grooved_Spines);
         }
 
-        ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
-        [ExecutableAction("AttackUpgrade")]
-        public bool AttackUpgrade()
-        {
-            return Interface().GetForge().Where(forge => forge.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Protoss_Ground_Weapons);
-        }
-
-        [ExecutableAction("DragoonRangeUpgrade")]
-        public bool DragoonRangeUpgrade()
-        {
-            return Interface().GetCyberneticsCore().Where(core => core.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Singularity_Charge);
-        }
-        ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
         [ExecutableAction("FinishedResearch")]
         public bool FinishedResearch()
         {
@@ -122,25 +109,6 @@ namespace POSH_StarCraftBot.behaviours
             return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Grooved_Spines) > 0);
         }
 
-        ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
-        [ExecutableSense("StopDragoonResearch")]
-        public int StopDragoonResearch()
-        {
-            return Interface().TotalSupply();
-        }
-
-        [ExecutableSense("HaveAttackUpgrade")]
-        public bool HaveAttackUpgrade()
-        {
-            return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Ground_Weapons) > 0);
-        }
-
-        [ExecutableSense("HaveDragoonRange")]
-        public bool HaveDragoonRange()
-        {
-            return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Singularity_Charge) > 0);
-        }        
-        ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
         
     }
 }
