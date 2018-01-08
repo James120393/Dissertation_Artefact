@@ -8,7 +8,7 @@
 	RetreatForce
 ))
 (AP buildForge (minutes 1.0) (
-	PosiitionForge 
+	PositionForge 
 	BuildForge
 ))
 (AP buildAssimilator (minutes 1.0) (
@@ -35,27 +35,19 @@
 ))
 (C buildForce (minutes 1.0) (goal ())
 	(elements
-		(	(buildZealots (trigger ((ZealotCount 6.0 <=))) TrainZealots)	)
+		(	(buildZealots (trigger ((ZealotCount 6.0 <=))) TrainZealot)	)
 	)
 )
 (C attack (minutes 1.0) (goal ())
 	(elements
-		(	(attackBase (trigger ()) AttackBase)	)
-	)
-)
-(C scout (minutes 1.0) (goal ())
-	(elements
-	)
-)
-(C researchUpgrades (minutes 1.0) (goal ())
-	(elements
+		(	(attackBase (trigger ()) AttackEnemy)	)
 	)
 )
 (C buildBase (minutes 1.0) (goal ())
 	(elements
 		(	(sendProbes (trigger ((IdleProbes 1.0 >=))) AssignProbes)	)
-		(	(buildPylon (trigger ((AvaiableSupply 2.0 <=))) buildPylon)	)
-		(	(buildProbes (trigger ((ProbeCount 20.0 <=))) buildProbes)	)
+		(	(buildPylon (trigger ((AvailableSupply 2.0 <=))) buildPylon)	)
+		(	(buildProbes (trigger ((ProbeCount 20.0 <=))) BuildProbe)	)
 		(	(buildNexus (trigger ((TotalSupply 13.0 >=))) expandBase)	)
 		(	(buildGateway (trigger ((TotalSupply 11.0 >=) (PylonCount 1.0 >=) (GatewayCount 2.0 <=))) buildGateway)	)
 		(	(buildAssimilator (trigger ((TotalSupply 16.0 >=))) buildAssimilator)	)
@@ -78,13 +70,7 @@
 		(attack (trigger ((AttackPrepared 1.0 =))) attack))
 		(
 
-		(scoutMap (trigger ()) scout))
-		(
-
-		(research (trigger ((needUpgrade 1.0 =))) researchUpgrades))
-		(
-
-		(build (trigger ((needBuilding 1.0 =))) buildBase))
+		(build (trigger ((NeedBuilding 1.0 =))) buildBase))
 		(
 
 		(wait (trigger ((Success))) idle))

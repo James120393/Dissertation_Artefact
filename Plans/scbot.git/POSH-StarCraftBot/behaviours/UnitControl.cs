@@ -277,7 +277,7 @@ namespace POSH_StarCraftBot.behaviours
                 int targetLocation = (int)BuildSite.StartingLocation;
                 if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
                     targetLocation = (int)Interface().currentBuildSite;
-                IEnumerable<Unit> gateways = Interface().GetGateway();
+                IEnumerable<Unit> gateways = Interface().GetNexus();
                 if (gateways.Count() <= 0)
                     return false;
                 Unit gateway = gateways.OrderBy(unit => unit.getDistance(new Position(Interface().baseLocations[targetLocation]))).First();
