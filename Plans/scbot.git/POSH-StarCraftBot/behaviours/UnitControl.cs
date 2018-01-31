@@ -333,7 +333,6 @@ namespace POSH_StarCraftBot.behaviours
         //
         // SENSES
         //
-
         // Action to tell the AI that its forces are finished being trained
         [ExecutableSense("FinishedForce")]
         public bool FinishedForce()
@@ -528,7 +527,7 @@ namespace POSH_StarCraftBot.behaviours
 
         //Action to tell the AI to Assign Probes to gather minerals
         [ExecutableAction("AssignProbes")]
-        public bool ProbesToMineral()
+        public bool AssignProbes()
         {
             IEnumerable<Unit> mineralPatches = Interface().GetMineralPatches();
             return ProbesToResource(mineralPatches, minedPatches, 2, true, 1);
@@ -537,7 +536,7 @@ namespace POSH_StarCraftBot.behaviours
 
         //Action to tell the AI to Assign Probes to gather Vespin Gas
         [ExecutableAction("AssignToGas")]
-        public bool ProbesToGas()
+        public bool AssignToGas()
         {
             IEnumerable<Unit> extractors = Interface().GetExtractors();
 

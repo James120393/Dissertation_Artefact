@@ -160,8 +160,8 @@ namespace POSH_StarCraftBot.behaviours
         /// Find Path to Natural Extension using Overlord 
         /// </summary>
         /// <returns></returns>
-        [ExecutableAction("OverLordToNatural")]
-        public bool OverLordToNatural()
+        [ExecutableAction("ProbeToNatural")]
+        public bool ProbeToNatural()
         {
             bool executed = false;
 
@@ -183,7 +183,7 @@ namespace POSH_StarCraftBot.behaviours
             {
                 executed = scout.move(target, false);
                 if (_debug_)
-                    Console.Out.WriteLine("Overlord to Natural: " + executed);
+                    Console.Out.WriteLine("Probe to Natural: " + executed);
                 System.Threading.Thread.Sleep(50);
             }
             return executed;
@@ -359,8 +359,8 @@ namespace POSH_StarCraftBot.behaviours
         }
 
 
-        [ExecutableSense("NeedOverlordAtNatural")]
-        public bool NeedOverlordAtNatural()
+        [ExecutableSense("NeedProbeAtNatural")]
+        public bool NeedProbeAtNatural()
         {
             if (Interface().baseLocations.ContainsKey((int)BuildSite.Natural))
                 return false;
@@ -385,7 +385,7 @@ namespace POSH_StarCraftBot.behaviours
                 Interface().baseLocations[(int)BuildSite.Natural] = pos.First().getTilePosition();
                 
                 //if (_debug_)
-                    Console.Out.WriteLine("overlord to natural: " + Interface().baseLocations[(int)BuildSite.Natural].xConst() + " " + Interface().baseLocations[(int)BuildSite.Natural].yConst());
+                    Console.Out.WriteLine("probe to natural: " + Interface().baseLocations[(int)BuildSite.Natural].xConst() + " " + Interface().baseLocations[(int)BuildSite.Natural].yConst());
                     scout = null;
                 return false;
             }
@@ -450,12 +450,12 @@ namespace POSH_StarCraftBot.behaviours
         public int FollowStrategy()
         {
             //TODO: implement proper logic for dete cting when to switch between different strats.
-            if (startStrategy)
-            {
-                currentStrategy = Strategy.EighteenNexusOpening;
-                startStrategy = false;
-            }
-            return (int)currentStrategy;
+            //if (startStrategy)
+            //{
+              //  currentStrategy = Strategy.EighteenNexusOpening;
+                //startStrategy = false;
+            //}
+            return 1;
         }
 
         [ExecutableSense("BuildArmy")]

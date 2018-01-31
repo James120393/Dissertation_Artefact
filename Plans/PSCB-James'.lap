@@ -5,8 +5,7 @@
 (
 (documentation "Your Title" "Your Name" "Your file comments")
 (AP flee (minutes 1.0) (
-	RetreatForce 
-	someComposite
+	RetreatForce
 ))
 (AP idle (minutes 1.0) (
 	Idle
@@ -22,7 +21,7 @@
 (AP moveArmyOne (minutes 1.0) (
 	SelectArmyOne 
 	AttackEnemy 
-	FinishedForce
+	ForceReady
 ))
 (AP sendDefendForce (minutes 1.0) (
 	BaseUnderAttack 
@@ -67,7 +66,7 @@
 ))
 (AP buildAssimilator (minutes 1.0) (
 	SelectStartBase 
-	PositionAssimilator 
+	SelectAssimilatorLocation 
 	BuildAssimilator
 ))
 (AP buildNaturalPylon (minutes 1.0) (
@@ -88,7 +87,7 @@
 (C extendToNatural (seconds 1.0) (goal ((HaveNaturalNexus 1.0 ==)))
 	(elements
 		(	
-		(BuildNaturalNexus (trigger ((NaturalFound 1.0 ==))) naturalNexus)	)
+		(BuildNaturalNexus (trigger ((NaturalFound 1.0 ==) (ForceReady 1.0 ==))) naturalNexus)	)
 	)
 )
 (C stopLuring (seconds 1.0) (goal ((ProbesLured 0.0 ==)))
@@ -165,7 +164,7 @@
 (C setDefenceForce (minutes 1.0) (goal ((ArmyTwoReady)))
 	(elements
 		(	
-		(DefenceCheck (trigger ((DefenderAttackerReadyRatio 0.5 >=))) ReadyUnits)	)
+		(DefenceCheck (trigger ()) ReadyUnits)	)
 		(	
 		(CreateDragoons (trigger ((CanCreateUnits) (CyberneticsCoreCount 1.0 >=))) DefenceDragoons)	)
 	)
@@ -183,17 +182,17 @@
 		(	
 		(luredProbes (trigger ()) stopLuring)	)
 		(	
-		(miningGas (trigger ((AssimilatorCount 1.0 >=) (ProbesExtractorRatio 0.25 <=))) AssignToGas)	)
+		(miningGas (trigger ((AssimilatorCount 1.0 >=) (ProbeAssimilatorRatio 0.25 <=))) AssignToGas)	)
 		(	
 		(miningCrystal (trigger ((IdleProbes))) AssignProbes)	)
 	)
 )
-(C research18NexusOpenin (minutes 1.0) (goal ((HaveDragoonRange 1.0 ==) (HaveShields 1.0 ==) (HaveAttack 1.0 ==)))
+(C research18NexusOpenin (minutes 1.0) (goal ((HaveDragoonRange 1.0 ==) (HaveShield 1.0 ==) (HaveAttack 1.0 ==)))
 	(elements
 		(	
 		(resDragoonRange (trigger ((HaveDragoonRange))) DragoonRangeUpgrade)	)
 		(	
-		(resSheilds (trigger ((HaveShields))) SheildsUpgrade)	)
+		(resSheilds (trigger ((HaveShield))) SheildsUpgrade)	)
 		(	
 		(resWeapon (trigger ((HaveAttack))) AttackUpgrade)	)
 		(	
@@ -205,7 +204,7 @@
 		(	
 		(trainDragoons (trigger ((Supply 22.0 >=) (DragoonCount 1.0 <))) dragoon)	)
 		(	
-		(trainCorsais (trigger ((FollowStrategy 1.0 ==) (StarGateCount 1.0 >=))) corsair)	)
+		(trainCorsais (trigger ((FollowStrategy 1.0 ==) (StargateCount 1.0 >=))) corsair)	)
 	)
 )
 (C 18NexusOpening (minutes 1.0) (goal ((NexusCount 2.0 <) (AssimilatorCount 2.0 <) (GatewayCount 3.0 <) (CyberneticsCoreCount 1.0 <) (ProbeCount 14.0 <)))

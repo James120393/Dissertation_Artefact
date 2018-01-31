@@ -62,6 +62,12 @@ namespace POSH_StarCraftBot.behaviours
             return Interface().GetCyberneticsCore().Where(core => core.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Singularity_Charge);
         }
 
+        //Action to tell AI to research the Protoss Shield upgrade
+        [ExecutableAction("ShieldUpgrade")]
+        public bool ShieldUpgrade()
+        {
+            return Interface().GetCyberneticsCore().Where(core => core.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Protoss_Plasma_Shields);
+        }
         ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////////
 
 
@@ -125,8 +131,8 @@ namespace POSH_StarCraftBot.behaviours
         ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
 
         //Sense to tell AI if they have the protoss attack upgreade 1
-        [ExecutableSense("HaveAttackUpgrade")]
-        public bool HaveAttackUpgrade()
+        [ExecutableSense("HaveAttack")]
+        public bool HaveAttack()
         {
             return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Ground_Weapons) > 0);
         }
@@ -137,7 +143,14 @@ namespace POSH_StarCraftBot.behaviours
         public bool HaveDragoonRange()
         {
             return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Singularity_Charge) > 0);
-        }        
+        }
+
+        //Sense to tell AI if they have the protoss Shield upgreade
+        [ExecutableSense("HaveShield")]
+        public bool HaveShield()
+        {
+            return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Plasma_Shields) > 0);
+        }       
         ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////////        
     }
 }
