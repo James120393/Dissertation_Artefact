@@ -38,9 +38,6 @@
 	ProbeScouting 
 	SelectProbeScout
 ))
-(AP triggerBuildArmy (minutes 1.0) (
-	Success
-))
 (C buildForce (minutes 1.0) (goal ())
 	(elements
 		(	(buildZealots (trigger ((ZealotCount 6.0 <=))) TrainZealot)	)
@@ -54,18 +51,16 @@
 (C buildBase (minutes 1.0) (goal ())
 	(elements
 		(	(sendProbes (trigger ((IdleProbes 1.0 >=))) AssignProbes)	)
-		(	(buildPylon (trigger ((TotalSupply 9.0 ==))) buildPylon)	)
+		(	(buildPylon (trigger ((AvailableSupply 2.0 <=))) buildPylon)	)
 		(	(buildProbes (trigger ((ProbeCount 10.0 <=))) buildProbes)	)
-		(	(buildGateway (trigger ((TotalSupply 17.0 >=) (PylonCount 1.0 >=) (GatewayCount 0.0 ==))) buildGateway)	)
-		(	(needArmy (trigger ((GatewayCount 0.0 !=))) triggerBuildArmy)	)
-		(	(buildPylon (trigger ((TotalSupply 17.0 >=) (AvailableSupply 2.0 <=))) buildPylon)	)
+		(	(buildNexus (trigger ((TotalSupply 23.0 >=))) expandBase)	)
+		(	(buildGateway (trigger ((TotalSupply 17.0 >=) (PylonCount 1.0 >=) (GatewayCount 1.0 <=))) buildGateway)	)
 		(	(buildAssimilator (trigger ((TotalSupply 23.0 >=) (GatewayCount 1.0 >=))) buildAssimilator)	)
 		(	(buildForge (trigger ((TotalSupply 23.0 >=) (GatewayCount 1.0 >=))) buildForge)	)
 		(	(buildSecondGateway (trigger ((TotalSupply 23.0 >=) (PylonCount 2.0 >=) (GatewayCount 2.0 <=))) buildGateway)	)
-		(	(buildNexus (trigger ((TotalSupply 23.0 >=))) expandBase)	)
 	)
 )
-(SDC BasicBuild (goal ())
+(SDC BasicBuild (goal ((Success)))
 	(drives
 		(
 

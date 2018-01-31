@@ -71,8 +71,6 @@ namespace POSH_StarCraftBot
 
         void IStarcraftBot.onStart()
         {
-            bwapi.Broodwar.setLocalSpeed(0);
-            bwapi.Broodwar.setFrameSkip(200);
             System.Console.WriteLine("Starting Match!");
             bwapi.Broodwar.sendText("Hello world! This is POSH!");
             mapDim = new int[2];

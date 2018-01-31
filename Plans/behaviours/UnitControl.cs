@@ -48,135 +48,11 @@ namespace POSH_StarCraftBot.behaviours
         //
         // INTERNAL
         //
-
-        protected int CheckForMorphingUnits(UnitType type)
-        {
-            if (!morphingUnits.ContainsKey(type.getID()))
-                return 0;
-            morphingUnits[type.getID()].RemoveAll(unit=> !unit.isMorphing());
-
-            return morphingUnits[type.getID()].Count;
-        }
-
-        protected internal Unit GetDrone()
-        {
-            if (IdleDrones())
-                return Interface().GetIdleDrones().ElementAt(0);
-            //TODO:  here we could possibly take of the fact that we remove a busy drone from its current task which is not a good thing sometimes
-            // this is especially the case if it is the last drone mining
-
-            return (Interface().GetDrones(1).Count() > 0) ? Interface().GetDrones(1).ElementAt(0) : null;
-        }
-
         private int ConvertTilePosition(TilePosition pos)
         {
             return (pos.xConst() * 1000) + pos.yConst();
         }
 
-        public bool DronesToResource(IEnumerable<Unit> resources, Dictionary<int, List<Unit>> mined, int threshold, bool onlyIdle, int maxUnits)
-        {
-            IEnumerable<Unit> drones;
-            int[] mineralTypes = { bwapi.UnitTypes_Resource_Mineral_Field.getID(), bwapi.UnitTypes_Resource_Mineral_Field_Type_2.getID(), bwapi.UnitTypes_Resource_Mineral_Field_Type_3.getID() };
-            bool executed = false;
-            if (onlyIdle)
-                drones = Interface().GetIdleDrones();
-            else
-                drones = Interface().GetDrones().Where(drone => !Interface().IsBuilder(drone));
-
-            if (drones.Count() < 1 || resources.Count() < 1)
-                return executed;
-
-            // update all minded Patches by removing non harvesting drones or dead ones
-            foreach (KeyValuePair<int, List<Unit>> patch in minedPatches)
-            {
-                patch.Value.RemoveAll(drone => (drone.getHitPoints() <= 0 || drone.getOrderTarget() == null || ConvertTilePosition(drone.getOrderTarget().getTilePosition()) != patch.Key));
-            }
-
-            foreach (Unit drone in drones)
-            {
-                if (maxUnits < 1)
-                    break;
-
-                if (resources.Contains(drone.getOrderTarget()) && drone.getTarget().getResources() > 0 &&
-                    mined.ContainsKey(ConvertTilePosition(drone.getOrderTarget().getTilePosition())))
-                {
-                    Console.Out.WriteLine("test");
-                    continue;
-                }
-
-                IEnumerable<Unit> patchPositions = resources.
-                    Where(patch => patch.hasPath(drone)).
-                    OrderBy(patch => drone.getDistance(patch));
-                Unit finalPatch = patchPositions.First();
-                int positionValue;
-
-                foreach (Unit position in patchPositions)
-                {
-                    positionValue = ConvertTilePosition(position.getTilePosition());
-                    // a better distribution over resources would be beneficial 
-                    if (!mined.ContainsKey(positionValue) || mined[positionValue].Count <= threshold)
-                    {
-                        finalPatch = position;
-                        break;
-                    }
-
-                }
-                int secCounter = patchPositions.Count() + 1;
-                while (!(drone.getTarget() is Unit && drone.getTarget().getID() == finalPatch.getID()) && !drone.isMoving() && secCounter-- > 0)
-                {
-                    executed = drone.gather(finalPatch, false);
-                    maxUnits--;
-                    System.Threading.Thread.Sleep(50);
-                    // if (_debug_)
-                    Console.Out.WriteLine("Drone is gathering: " + executed);
-                }
-
-
-
-                positionValue = ConvertTilePosition(finalPatch.getTilePosition());
-                if (!mined.ContainsKey(positionValue))
-                {
-                    mined.Add(positionValue, new List<Unit>());
-                }
-
-                mined[positionValue].Add(drone);
-            }
-
-            return true;
-        }
-
-        protected bool MorphUnit(UnitType type)
-        {
-
-            if (CanMorphUnit(type))
-            {
-                int targetLocation = (int)BuildSite.StartingLocation;
-                if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-                    targetLocation = (int)Interface().currentBuildSite;
-                IEnumerable<Unit> larvae = Interface().GetLarvae();
-                if (larvae.Count() <= 0)
-                    return false;
-                Unit larva = larvae.OrderBy(unit => unit.getDistance(new Position(Interface().baseLocations[targetLocation]))).First();
-                bool morphWorked = larva.morph(type);
-
-                // create new list to monitor specific type of unit
-                if (!morphingUnits.ContainsKey(type.getID()))
-                    morphingUnits[type.getID()] = new List<Unit>();
-
-                // adding the moved unit to the appropriate unit list
-                if (morphingUnits[type.getID()].Where(unit => unit.getID() == larva.getID()).Count() == 0)
-                    morphingUnits[type.getID()].Add(larva);
-
-                if (morphWorked)
-                    if (Interface().forcePoints.ContainsKey(Interface().currentForcePoint))
-                        larva.move(new Position(Interface().forcePoints[Interface().currentForcePoint]));
-                    else
-                        larva.move(new Position(Interface().baseLocations[targetLocation]));
-                return morphWorked;
-
-            }
-            return false;
-        }
 
         // Check to see if any units are currently being trained
         protected int CheckForTrainingUnits(UnitType type)
@@ -187,6 +63,7 @@ namespace POSH_StarCraftBot.behaviours
 
             return trainingUnits[type.getID()].Count;
         }
+
 
         // Get any idle probes
         protected internal Unit GetProbe()
@@ -256,7 +133,7 @@ namespace POSH_StarCraftBot.behaviours
                     maxUnits--;
                     System.Threading.Thread.Sleep(50);
                     // if (_debug_)
-                    //Console.Out.WriteLine("Probe is gathering: " + executed);
+                    Console.Out.WriteLine("Probe is gathering: " + executed);
                 }
 
                 positionValue = ConvertTilePosition(finalPatch.getTilePosition());
@@ -272,35 +149,6 @@ namespace POSH_StarCraftBot.behaviours
         }
 
         // Function to Train units
-        protected bool TrainProbe(UnitType type)
-        {
-            if (CanTrainUnit(type))
-            {
-                int targetLocation = (int)BuildSite.StartingLocation;
-                if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-                    targetLocation = (int)Interface().currentBuildSite;
-                IEnumerable<Unit> gateways = Interface().GetNexus();
-                if (gateways.Count() <= 0)
-                    return false;
-                Unit gateway = gateways.OrderBy(unit => unit.getDistance(new Position(Interface().baseLocations[targetLocation]))).First();
-                bool trainWorked = gateway.train(type);
-
-                // create new list to monitor specific type of unit
-                if (!trainingUnits.ContainsKey(type.getID()))
-                    trainingUnits[type.getID()] = new List<Unit>();
-
-                // adding the moved unit to the appropriate unit list
-                if (trainWorked)
-                    if (Interface().forcePoints.ContainsKey(Interface().currentForcePoint))
-                        gateway.move(new Position(Interface().forcePoints[Interface().currentForcePoint]));
-                    else
-                        gateway.move(new Position(Interface().baseLocations[targetLocation]));
-                return trainWorked;
-            }
-            return false;
-        }
-
-        // Function to Train units
         protected bool TrainUnit(UnitType type)
         {
             if (CanTrainUnit(type))
@@ -308,11 +156,11 @@ namespace POSH_StarCraftBot.behaviours
                 int targetLocation = (int)BuildSite.StartingLocation;
                 if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
                     targetLocation = (int)Interface().currentBuildSite;
-                IEnumerable<Unit> building = Interface().GetGateway();
-                if (building.Count() <= 0)
+                IEnumerable<Unit> nexuss = Interface().GetNexus();
+                if (nexuss.Count() <= 0)
                     return false;
-                Unit gateway = building.OrderBy(unit => unit.getDistance(new Position(Interface().baseLocations[targetLocation]))).First();
-                bool trainWorked = gateway.train(type);
+                Unit nexus = nexuss.OrderBy(unit => unit.getDistance(new Position(Interface().baseLocations[targetLocation]))).First();
+                bool trainWorked = nexus.train(type);
 
                 // create new list to monitor specific type of unit
                 if (!trainingUnits.ContainsKey(type.getID()))
@@ -321,9 +169,9 @@ namespace POSH_StarCraftBot.behaviours
                 // adding the moved unit to the appropriate unit list
                 if (trainWorked)
                     if (Interface().forcePoints.ContainsKey(Interface().currentForcePoint))
-                        gateway.move(new Position(Interface().forcePoints[Interface().currentForcePoint]));
+                        nexus.move(new Position(Interface().forcePoints[Interface().currentForcePoint]));
                     else
-                        gateway.move(new Position(Interface().baseLocations[targetLocation]));
+                        nexus.move(new Position(Interface().baseLocations[targetLocation]));
                 return trainWorked;
             }
             return false;
@@ -348,47 +196,6 @@ namespace POSH_StarCraftBot.behaviours
         public bool ForceReady()
         {
             return forceReady;
-        }
-
-        [ExecutableSense("IdleDrones")]
-        public bool IdleDrones()
-        {
-            return (Interface().GetIdleDrones().Count() > 0) ? true : false;
-        }
-
-        [ExecutableSense("DroneCount")]
-        public int DroneCount()
-        {
-            return Interface().DroneCount() + CheckForMorphingUnits(bwapi.UnitTypes_Zerg_Drone);
-        }
-
-        [ExecutableSense("OverlordCount")]
-        public int OverlordCount()
-        {
-            return Interface().OverlordCount() + CheckForMorphingUnits(bwapi.UnitTypes_Zerg_Overlord);
-        }
-
-        [ExecutableSense("ZerglingCount")]
-        public int ZerglingCount()
-        {
-            return Interface().ZerglingCount() + CheckForMorphingUnits(bwapi.UnitTypes_Zerg_Zergling);
-        }
-
-        [ExecutableSense("HydraliskCount")]
-        public int HydraliskCount()
-        {
-            return Interface().HydraliskCount() + CheckForMorphingUnits(bwapi.UnitTypes_Zerg_Hydralisk);
-        }
-        [ExecutableSense("MutaliskCount")]
-        public int MutaliskCount()
-        {
-            return Interface().MutaliskCount() + CheckForMorphingUnits(bwapi.UnitTypes_Zerg_Mutalisk);
-        }
-
-        [ExecutableSense("LurkerCount")]
-        public int LurkerCount()
-        {
-            return Interface().LurkerCount() + CheckForMorphingUnits(bwapi.UnitTypes_Zerg_Lurker);
         }
 
         ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
@@ -429,7 +236,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("DarkTemplarCount")]
         public int DarkTemplarCount()
         {
-            return Interface().HydraliskCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Dark_Templar);
+            return Interface().DarkTemplarCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Dark_Templar);
         }
 
 
@@ -440,55 +247,15 @@ namespace POSH_StarCraftBot.behaviours
             return Interface().CorsairCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Corsair);
         }
 
-        ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
         //
         // ACTIONS
         //
-
-        [ExecutableAction("MorphDrone")]
-        public bool MorphDrone()
-        {
-
-            return MorphUnit(bwapi.UnitTypes_Zerg_Drone);
-        }
-
-        [ExecutableAction("MorphZergling")]
-        public bool MorphZergling()
-        {
-            return MorphUnit(bwapi.UnitTypes_Zerg_Zergling);
-        }
-
-        [ExecutableAction("MorphOverlord")]
-        public bool MorphOverlord()
-        {
-            return CheckForMorphingUnits(bwapi.UnitTypes_Zerg_Overlord) >= 1 ? false: MorphUnit(bwapi.UnitTypes_Zerg_Overlord);
-        }
-
-        [ExecutableAction("MorphHydralisk")]
-        public bool MorphHydralisk()
-        {
-            return MorphUnit(bwapi.UnitTypes_Zerg_Hydralisk);
-        }
-
-        [ExecutableAction("MorphMutalisk")]
-        public bool MorphMutalisk()
-        {
-            return MorphUnit(bwapi.UnitTypes_Zerg_Mutalisk);
-        }
-
-        [ExecutableAction("MorphLurker")]
-        public bool MorphLurker()
-        {
-            return MorphUnit(bwapi.UnitTypes_Zerg_Lurker);
-        }
-
-        ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
 
         //Action to tell the AI to Build a Protoss Probe
         [ExecutableAction("BuildProbe")]
         public bool BuildProbe()
         {
-            return TrainProbe(bwapi.UnitTypes_Protoss_Probe);
+            return TrainUnit(bwapi.UnitTypes_Protoss_Probe);
         }
 
 
@@ -512,7 +279,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("TrainCorsair")]
         public bool TrainCorsair()
         {
-            return MorphUnit(bwapi.UnitTypes_Protoss_Corsair);
+            return TrainUnit(bwapi.UnitTypes_Protoss_Corsair);
         }
 
 
@@ -520,7 +287,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("TrainDarkTemplar")]
         public bool TrainDarkTemplar()
         {
-            return MorphUnit(bwapi.UnitTypes_Protoss_Dark_Templar);
+            return TrainUnit(bwapi.UnitTypes_Protoss_Dark_Templar);
         }
 
         ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
@@ -539,7 +306,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("AssignToGas")]
         public bool ProbesToGas()
         {
-            IEnumerable<Unit> extractors = Interface().GetExtractors();
+            IEnumerable<Unit> extractors = Interface().GetAssimilator();
 
             return ProbesToResource(extractors, minedGas, 6, false, 1);
         }

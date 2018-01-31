@@ -4,55 +4,65 @@
 ; -------------------------------------------------------------
 (
 (documentation "Your Title" "Your Name" "Your file comments")
-(AP defendBase (minutes 0.01) (
+(AP defendBase (minutes 1.0) (
 	RetreatForce
 ))
-(AP buildForge (minutes 0.01) (
+(AP buildForge (minutes 1.0) (
 	PositionForge 
 	BuildForge
 ))
-(AP buildAssimilator (minutes 0.01) (
+(AP buildAssimilator (minutes 1.0) (
 	SelectAssimilatorLocation 
 	BuildAssimilator
 ))
-(AP buildGateway (minutes 0.01) (
+(AP buildGateway (minutes 1.0) (
 	PositionGateway 
 	BuildGateway
 ))
-(AP expandBase (minutes 0.01) (
+(AP expandBase (minutes 1.0) (
 	SelectNatural 
 	BuildNexus
 ))
-(AP buildProbes (minutes 0.01) (
+(AP buildProbes (minutes 1.0) (
 	BuildProbe
 ))
-(AP buildPylon (minutes 0.01) (
+(AP buildPylon (minutes 1.0) (
 	PositionPylon 
-	BuildPylon
+	BuildPylon 
 	AssignProbes
 ))
-(AP idle (minutes 0.01) (
+(AP idle (minutes 1.0) (
 	Idle
 ))
-(C buildForce (minutes 0.01) (goal ())
+(AP sendProbeToScout (minutes 1.0) (
+	ProbeScouting 
+	SelectProbeScout
+))
+(AP triggerBuildArmy (minutes 1.0) (
+	Success
+))
+(C buildForce (minutes 1.0) (goal ())
 	(elements
 		(	(buildZealots (trigger ((ZealotCount 6.0 <=))) TrainZealot)	)
 	)
 )
-(C attack (minutes 0.01) (goal ())
+(C attack (minutes 1.0) (goal ())
 	(elements
-		(	(attackBase (trigger ()) AttackEnemy)	)
+		(	(attackEnemy (trigger ()) AttackEnemy)	)
 	)
 )
-(C buildBase (minutes 0.01) (goal ())
+(C buildBase (minutes 1.0) (goal ())
 	(elements
 		(	(sendProbes (trigger ((IdleProbes 1.0 >=))) AssignProbes)	)
-		(	(buildPylon (trigger ((AvailableSupply 2.0 <=))) buildPylon)	)
-		(	(buildProbes (trigger ((ProbeCount 7.0 <=))) BuildProbe)	)
-		(	(buildNexus (trigger ((TotalSupply 17.0 >=))) expandBase)	)
-		(	(buildGateway (trigger ((TotalSupply 17.0 >=))) buildGateway)	)
-		(	(buildAssimilator (trigger ((TotalSupply 17.0 >=))) buildAssimilator)	)
-		(	(buildForge (trigger ((TotalSupply 17.0 >=))) buildForge)	)
+		(	(buildPylon (trigger ((TotalSupply 9.0 ==))) buildPylon)	)
+		(	(buildProbes (trigger ((ProbeCount 10.0 <=))) buildProbes)	)
+		(	(buildGateway (trigger ((TotalSupply 17.0 >=) (PylonCount 1.0 >=) (GatewayCount 0.0 ==))) buildGateway)	)
+		(	(needArmy (trigger ((GatewayCount 0.0 !=))) triggerBuildArmy)	)
+		(	(buildPylon (trigger ((TotalSupply 17.0 >=) (AvailableSupply 2.0 <=))) buildPylon)	)
+		(	(buildAssimilator (trigger ((TotalSupply 23.0 >=) (GatewayCount 1.0 >=))) buildAssimilator)	)
+		(	(buildForge (trigger ((TotalSupply 23.0 >=) (GatewayCount 1.0 >=))) buildForge)	)
+		(	(buildSecondGateway (trigger ((TotalSupply 23.0 >=) (PylonCount 2.0 >=) (GatewayCount 2.0 <=))) buildGateway)	)
+		(	(buildNexus (trigger ((TotalSupply 23.0 >=))) expandBase)	)
 	)
 )
 (SDC BasicBuild (goal ())

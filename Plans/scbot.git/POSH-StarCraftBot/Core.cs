@@ -109,8 +109,7 @@ namespace POSH_StarCraftBot
             reconnect();
 
             //TODO: remove the match speed
-            bwapi.Broodwar.setLocalSpeed(0);
-            
+
             //wait for game to start
             System.Console.WriteLine("waiting to enter match\n");
             while (!bwapi.Broodwar.isInGame())
@@ -141,6 +140,7 @@ namespace POSH_StarCraftBot
                                 client.onStart();
                             oThread.Start();
                             initDone = true;
+
                             break;
                         case EventType_Enum.MatchEnd:
                             foreach (BWAPI.IStarcraftBot client in clients.Values)
@@ -236,7 +236,7 @@ namespace POSH_StarCraftBot
                             break;
                     }
                 }
-                System.Threading.Thread.Sleep(50);
+                //System.Threading.Thread.Sleep(0);
                 bwapiclient.BWAPIClient.update();
                 if (!bwapiclient.BWAPIClient.isConnected())
                 {

@@ -28,7 +28,6 @@ namespace POSH_StarCraftBot.behaviours
         private bool startStrategy = true;
         private float alarm = 0.0f;
         private GamePhase phase;
-        private bool buildArmy = false;
 
 
         public StrategyControl(AgentBase agent)
@@ -53,13 +52,6 @@ namespace POSH_StarCraftBot.behaviours
         //
         // ACTIONS
         //
-        [ExecutableAction("NeedArmy")]
-        public bool NeedArmy()
-        {
-            buildArmy = true;
-            return buildArmy;
-        }
-
         [ExecutableAction("SelectNatural")]
         public bool SelectNatural()
         {
@@ -104,7 +96,7 @@ namespace POSH_StarCraftBot.behaviours
             {
                 if (probe.isCarryingMinerals())
                 {
-                    probe.gather(Interface().GetExtractors().OrderBy(extr => extr.getDistance(probe)).First());
+                    probe.gather(Interface().GetAssimilator().OrderBy(extr => extr.getDistance(probe)).First());
                 }
                 else if (probe.isCarryingGas())
                 {
@@ -156,38 +148,6 @@ namespace POSH_StarCraftBot.behaviours
          return false;
         }
 
-        /// <summary>
-        /// Find Path to Natural Extension using Overlord 
-        /// </summary>
-        /// <returns></returns>
-        [ExecutableAction("OverLordToNatural")]
-        public bool OverLordToNatural()
-        {
-            bool executed = false;
-
-            if ( Interface().baseLocations.ContainsKey((int)BuildSite.Natural)  || (scout is Unit && scout.getHitPoints() > 0 && scout.isMoving()))
-                return executed;
-            TilePosition startLoc = Interface().baseLocations[(int)BuildSite.StartingLocation];
-
-            if (scout == null || scout.getHitPoints() == 0)
-                scout = Interface().GetOverlord().Where(ol => !ol.isMoving()).OrderByDescending(ol => ol.getTilePosition().getDistance(startLoc)).First();
-            IOrderedEnumerable<BaseLocation> pos = bwta.getBaseLocations()
-                .Where(baseLoc => !baseLoc.getTilePosition().opEquals(startLoc) && bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()) > 0)
-                .OrderBy(baseLoc => bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()));
-
-            if (pos.Count() < 1)
-                return false;
-
-            Position target = new Position(pos.First().getTilePosition());
-            while ( (!scout.getTargetPosition().opEquals(target) || !scout.isMoving()) )
-            {
-                executed = scout.move(target, false);
-                if (_debug_)
-                    Console.Out.WriteLine("Overlord to Natural: " + executed);
-                System.Threading.Thread.Sleep(50);
-            }
-            return executed;
-        }
 
         [ExecutableAction("SelectProbeScout")]
         public bool SelectProbeScout()
@@ -333,15 +293,15 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("CanCreateUnits")]
         public bool CanCreateUnits()
         {
-            if (Interface().GetLarvae().Count() == 0)
+            if (Interface().GetGateway().Count() == 0)
                 return false;
             switch (currentStrategy){
                 case Strategy.EighteenNexusOpening:
-                    return (Interface().GetCyberneticsCore().Count() > 0) ? true : false;
-                case Strategy.TwoHatchMuta:
-                    return (Interface().GetLairs().Count() > 0 && Interface().GetSpire().Count() > 0) ? true : false;
-                case Strategy.Zergling:
-                    return (Interface().GetHatcheries().Count() > 0 || Interface().GetLairs().Count() > 0 ) ? true : false;
+                    return (Interface().GetGateway().Count() > 0) && Interface().GetCyberneticsCore().Count() > 0 ? true : false;
+                //case Strategy.TwoHatchMuta:
+                    //return (Interface().GetCyberteticsCore().Count() > 0 && Interface().GetSpire().Count() > 0) ? true : false;
+                //case Strategy.Zergling:
+                    //return (Interface().GetHatcheries().Count() > 0 || Interface().GetLairs().Count() > 0 ) ? true : false;
                 default:
                     break;
             }
@@ -356,41 +316,6 @@ namespace POSH_StarCraftBot.behaviours
                 return true;
 
             return false;
-        }
-
-
-        [ExecutableSense("NeedOverlordAtNatural")]
-        public bool NeedOverlordAtNatural()
-        {
-            if (Interface().baseLocations.ContainsKey((int)BuildSite.Natural))
-                return false;
-            if (scout == null || scout.getHitPoints() == 0 )
-                return true;
-            
-            TilePosition startLoc = Interface().baseLocations[(int)BuildSite.StartingLocation];
-
-            IOrderedEnumerable<BaseLocation> pos = bwta.getBaseLocations()
-                .Where(baseLoc => !baseLoc.getTilePosition().opEquals(startLoc) && bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()) > 0)
-                .OrderBy(baseLoc => bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()));
-            Console.Out.WriteLine("startLoc: "+startLoc.xConst()+" "+startLoc.yConst());
-            foreach(BaseLocation poi in pos)
-                Console.Out.WriteLine("Loc: " + poi.getTilePosition().xConst() + " " + poi.getTilePosition().yConst() + " dist: " + bwta.getGroundDistance(startLoc, poi.getTilePosition()));
-            if (pos.Count() < 1)
-                return true;
-
-            double dist = scout.getDistance(pos.First().getPosition());
-            Console.Out.WriteLine("distance from natural: "+dist);
-            if (dist < DELTADISTANCE && !Interface().baseLocations.ContainsKey((int)BuildSite.Natural))
-            {
-                Interface().baseLocations[(int)BuildSite.Natural] = pos.First().getTilePosition();
-                
-                //if (_debug_)
-                    Console.Out.WriteLine("overlord to natural: " + Interface().baseLocations[(int)BuildSite.Natural].xConst() + " " + Interface().baseLocations[(int)BuildSite.Natural].yConst());
-                    scout = null;
-                return false;
-            }
-
-            return true;
         }
 
 
@@ -461,7 +386,8 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("BuildArmy")]
         public bool BuildArmy()
         {
-            return buildArmy;
+
+            return false;
         }
 
 

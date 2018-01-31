@@ -1,6 +1,6 @@
 ﻿# Starcraft Bot init file
 
-[PSCB-3HatchHydra]
+[PSCB-James]
 Core.botname = POSHSCBot
 #Core.team = 0
 #Core.ip = 127.0.0.1
