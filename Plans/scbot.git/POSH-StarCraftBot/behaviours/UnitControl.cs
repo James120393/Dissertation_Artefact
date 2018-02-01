@@ -538,9 +538,9 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("AssignToGas")]
         public bool AssignToGas()
         {
-            IEnumerable<Unit> extractors = Interface().GetExtractors();
+            IEnumerable<Unit> assimilators = Interface().GetAssimilator();
 
-            return ProbesToResource(extractors, minedGas, 6, false, 1);
+            return ProbesToResource(assimilators, minedGas, 6, true, 1);
         }
 
         

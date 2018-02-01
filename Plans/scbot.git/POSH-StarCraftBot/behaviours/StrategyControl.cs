@@ -481,7 +481,7 @@ namespace POSH_StarCraftBot.behaviours
                 return 1;
             if (Interface().GetProbes().Count() < 1 || Interface().GetProbes().Where(probe => probe.isGatheringMinerals()).Count() < 1)
                 return 1;
-            return Interface().GetProbes().Where(probe => probe.isGatheringGas()).Count() / Interface().GetProbes().Where(probe => probe.isGatheringMinerals()).Count();
+            return Interface().GetProbes().Where(probe => probe.isGatheringGas()).Count() / Interface().GetProbes().Where(probe => !probe.isGatheringMinerals()).Count();
         }
 
 

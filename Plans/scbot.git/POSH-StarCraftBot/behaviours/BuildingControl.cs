@@ -14,6 +14,7 @@ namespace POSH_StarCraftBot.behaviours
     {
 
         TilePosition buildLocation;
+        Chokepoint chokepoint;
         Dictionary<int, Unit> destroyedBuildings;
         Unit buildingToRepair;
         Unit repairDrone;
@@ -89,7 +90,6 @@ namespace POSH_StarCraftBot.behaviours
                     return start.opAdd(new TilePosition(pos));
                 }
             }
-
             return PossibleBuildLocation(start, ++xSpace, ++ySpace, --iterations, builder, building);
         }
 
@@ -154,8 +154,8 @@ namespace POSH_StarCraftBot.behaviours
                     //System.Threading.Thread.Sleep(0);
                 }
 
-                //if (building)
-                  //  buildQueue[type.getID()][builder] = buildLocation;
+                if (building && timeout <= 0)
+                    buildQueue[type.getID()][builder] = buildLocation;
                 return building;
             }
             return false;
@@ -182,6 +182,7 @@ namespace POSH_StarCraftBot.behaviours
             }
             return false;
         }
+
         ////////////////////////////////////////////////////////////////////////James' Code////////////////////////////////////////////////////////////////////////
 
 

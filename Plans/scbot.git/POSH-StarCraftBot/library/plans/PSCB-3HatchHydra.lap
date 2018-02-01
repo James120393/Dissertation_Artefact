@@ -75,7 +75,6 @@
 	BuildPylon
 ))
 (AP dragoon (minutes 1.0) (
-	SelectStartBase 
 	SelectChoke 
 	TrainDragoon
 ))
@@ -84,10 +83,10 @@
 	SelectChoke 
 	TrainCorsair
 ))
-(C extendWorldKnowledge (seconds 1.0) (goal ((GameRunning 1.0 !=)))
+(C extendWorldKnowledge (seconds 1.0) (goal ((GameRunning 0.0 =)))
 	(elements
 		(	
-		(findExtension (trigger ((DoneExploringLocal 1.0 !=) (NeedProbeAtNatural 1.0 ==))) ProbeToNatural)	)
+		(findExtension (trigger ((DoneExploringLocal 0.0 =) (NeedProbeAtNatural 1.0 ==))) ProbeToNatural)	)
 		(	
 		(probeExploring (trigger ((ProbeCount 9.0 >=) (DoneExploring 1.0 !=))) probeScouting)	)
 	)
@@ -104,12 +103,6 @@
 		(18NexusOpening (trigger ((FollowStrategy 1.0 =))) 18NexusOpeningBuild)	)
 	)
 )
-(C createUnits (minutes 1.0) (goal ((GameRunning 0.0 ==)))
-	(elements
-		(	
-		(18NexusUnits (trigger ((FollowStrategy 1.0 ==))) build18NexusForce)	)
-	)
-)
 (C research (seconds 1.0) (goal ((DoneResearch 1.0 ==)))
 	(elements
 		(	
@@ -121,7 +114,7 @@
 		(	
 		(attackArmyOne (trigger ((ArmyOneReady) (KnowEnemyBase))) moveArmyOne)	)
 		(	
-		(buildArmyOne (trigger ((HaveDragoonRange) (DragoonCount 24.0 >=) (ArmyOneReady 0.0 ==))) stdDragoonArmy)	)
+		(buildArmyOne (trigger ((HaveDragoonRange) (DragoonCount 24.0 >=) (ArmyOneReady 0.0 =))) stdDragoonArmy)	)
 	)
 )
 (C attackEnemy (minutes 1.0) (goal ((GameRunning 0.0 ==)))
@@ -135,7 +128,7 @@
 		(	
 		(SendArmy (trigger ((ArmyTwoReady))) sendDefendForce)	)
 		(	
-		(ReadyArmyTwo (trigger ((CanCreateUnits) (ArmyTwoReady 1.0 !=))) setDefenceForce)	)
+		(ReadyArmyTwo (trigger ((CanCreateUnits) (ArmyTwoReady 0.0 =))) setDefenceForce)	)
 	)
 )
 (C setDefenceForce (minutes 1.0) (goal ((ArmyTwoReady)))
@@ -157,7 +150,7 @@
 (C probeHarvesting (seconds 1.0) (goal ((ProbesLured)))
 	(elements
 		(	
-		(miningGas (trigger ((AssimilatorCount 1.0 >=) (ProbeAssimilatorRatio 0.25 <=))) AssignToGas)	)
+		(miningGas (trigger ((AssimilatorCount 1.0 >=) (ProbeAssimilatorRatio 1 <=) (IdleProbes))) AssignToGas)	)
 		(	
 		(miningCrystal (trigger ((IdleProbes))) AssignProbes)	)
 	)
@@ -174,32 +167,29 @@
 		(doneResearch (trigger ((Success))) FinishedResearch)	)
 	)
 )
-(C build18NexusForce (minutes 1.0) (goal ((Success 0.0 ==)))
+(C build18NexusForce (minutes 1.0) (goal ((DragoonCount 6.0 >=)))
 	(elements
 		(	
-		(trainDragoons (trigger ((Supply 22.0 >=) (DragoonCount 1.0 <))) dragoon)	)
-		(	
-		(trainCorsais (trigger ((FollowStrategy 1.0 ==) (StargateCount 1.0 >=))) corsair)	)
+		(trainDragoons (trigger ((DragoonCount 6.0 <=))) TrainDragoon)	)
 	)
 )
-(C 18NexusOpeningBuild (minutes 1.0) (goal ((NexusCount 2.0 =) (AssimilatorCount 2.0 =) (GatewayCount 3.0 =) (CyberneticsCoreCount 1.0 =) (ProbeCount 14.0 =)))
+(C 18NexusOpeningBuild (minutes 1.0) (goal ((AssimilatorCount 1.0 >=) (GatewayCount 1.0 >=) (CyberneticsCoreCount 1.0 >=) (ProbeCount 14.0 >=)))
 	(elements
 		(	
-		(buildPylon (trigger ((PylonCount 0.0 <=) (MineralCount 100.0 >=))) buildPylon)	)
+		(buildPylon (trigger ((PylonCount 0.0 =) (Minerals 100.0 >=))) buildPylon)	)
 		(	
-		(buildProbes (trigger ((ProbeCount 12.0 <))) BuildProbe)	)
+		(buildProbes (trigger ((ProbeCount 6.0 <))) BuildProbe)	)
 		(	
-		(buildPylon (trigger ((AvailableSupply 2.0 <=))) buildPylon)	)
+		(buildFirstGateway (trigger ((PylonCount 1.0 =) (GatewayCount 0.0 =))) buildGateway)	)
 		(	
-		(buildFirstGateway (trigger ((Supply 17.0 >=) (GatewayCount 0.0 <=))) buildGateway)	)
+		(buildSecondPylon (trigger ((GatewayCount 1.0 =) (AvailableSupply 2.0 <=) (PylonCount 1.0 =))) buildPylon)	)
 		(	
-		(buildForge (trigger ((Supply 17.0 >=) (ForgeCount 0.0 =))) buildForge)	)
+		(buildMoreProbes (trigger ((PylonCount 1.0 =) (GatewayCount 1.0 =) (ProbeCount 14.0 <))) BuildProbe)	)
 		(	
-		(buildCyberneticsCore (trigger ((Supply 22.0 >=) (CyberneticsCoreCount 0.0 <=))) buildCyberneticsCore)	)
-		(	
-		(buildSecondGateway (trigger ((Supply 22.0 >=) (GatewayCount 3.0 <))) buildGateway)	)
-		(	
-		(buildAssimilator (trigger ((CyberneticsCoreCount 1.0 =) (AssimilatorCount 1.0 <))) buildAssimilator)	)
+		(buildAssimilator (trigger ((GatewayCount 1.0 =) (AssimilatorCount 1.0 <))) buildAssimilator)	)
+		(
+		(buildCyberneticsCore (trigger ((GatewayCount 1.0 <=) (CyberneticsCoreCount 0.0 =))) buildCyberneticsCore)	)
+		
 	)
 )
 (C probeScouting (minutes 1.0) (goal ((DoneExploring)))
@@ -232,10 +222,10 @@
 		(repair (trigger ((BuildingDamaged 1.0 ==))) repairBuildings))
 		(
 
-		(research (trigger ((Success))) research))
+		(research (trigger ((ForgeCount 1.0 =))) research))
 		(
 
-		(createForce (trigger ((GatewayCount 1.0 =))) createUnits))
+		(createForce (trigger ((Success))) build18NexusForce))
 		(
 
 		(explore (trigger ((DoneExploring 0.0 ==))) extendWorldKnowledge))
