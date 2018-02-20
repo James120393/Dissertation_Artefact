@@ -199,6 +199,17 @@ namespace POSH_StarCraftBot.behaviours
             return (Interface().GetProbes(1).Count() > 0) ? Interface().GetProbes(1).ElementAt(0) : null;
         }
 
+        // Get any idle probes
+        protected internal Unit GetMineralProbe()
+        {
+            if (IdleProbes())
+                return Interface().GetIdleProbes().ElementAt(0);
+            //TODO:  here we could possibly take of the fact that we remove a busy probe from its current task which is not a good thing sometimes
+            // this is especially the case if it is the last drone mining
+            IEnumerable<Unit>  probes = Interface().GetProbes(5);
+            probes.First().isGatheringMinerals();
+            return (Interface().GetProbes(1).Count() > 0) ? Interface().GetProbes(1).ElementAt(0) : null;
+        }
 
         // Function to send probes to gather minerals
         public bool ProbesToResource(IEnumerable<Unit> resources, Dictionary<int, List<Unit>> mined, int threshold, bool onlyIdle, int maxUnits)

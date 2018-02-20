@@ -59,7 +59,7 @@
 	PositionCyberneticsCore 
 	BuildCyberneticsCore
 ))
-(AP buildGateway (minutes 1.0) (
+(AP buildGateway (minutes 0.01) (
 	SelectStartBase 
 	PositionGateway 
 	BuildGateway
@@ -176,13 +176,13 @@
 (C 18NexusOpeningBuild (minutes 1.0) (goal ((AssimilatorCount 1.0 >=) (GatewayCount 1.0 >=) (CyberneticsCoreCount 1.0 >=) (ProbeCount 14.0 >=)))
 	(elements
 		(	
-		(buildPylon (trigger ((PylonCount 0.0 =) (Minerals 100.0 >=))) buildPylon)	)
+		(buildPylon (trigger ((PylonCount 0.0 <=))) buildPylon)	)
 		(	
 		(buildProbes (trigger ((ProbeCount 6.0 <))) BuildProbe)	)
 		(	
-		(buildFirstGateway (trigger ((PylonCount 1.0 =) (GatewayCount 0.0 =))) buildGateway)	)
+		(buildFirstGateway (trigger ((TotalSupply 17.0 >=) (GatewayCount 0.0 =))) buildGateway)	)
 		(	
-		(buildSecondPylon (trigger ((GatewayCount 1.0 =) (AvailableSupply 2.0 <=) (PylonCount 1.0 =))) buildPylon)	)
+		(buildSecondPylon (trigger ((AvailableSupply 2.0 <=))) buildPylon)	)
 		(	
 		(buildMoreProbes (trigger ((PylonCount 1.0 =) (GatewayCount 1.0 =) (ProbeCount 14.0 <))) BuildProbe)	)
 		(	
@@ -192,10 +192,10 @@
 		
 	)
 )
-(C probeScouting (minutes 1.0) (goal ((DoneExploring)))
+(C probeScouting (minutes 1.0) (goal ((DoneExploringLocal 1.0 =)))
 	(elements
 		(	
-		(selectProbe (trigger ((ProbeCount 9.0 >=) (ProbeScoutAvailable 1.0 !=))) SelectProbeScout)	)
+		(selectProbe (trigger ((ProbeCount 4.0 >=) (ProbeScoutAvailable 1.0 !=))) SelectProbeScout)	)
 		(	
 		(explore (trigger ((ProbeScoutAvailable 1.0 ==))) ProbeScouting)	)
 	)
@@ -213,10 +213,13 @@
 		(defend (trigger ((BaseUnderAttack 1.0 ==))) defendLocation))
 		(
 
-		(harvest (trigger ((ProbeCount 1.0 >=) (IdleProbes))) probeHarvesting))
+		(harvest (trigger ((ProbeCount 1.0 >=) (IdleProbes))) probeHarvesting (seconds 0.5)))
 		(
 
 		(build (trigger ((NeedBuilding 1.0 =))) buildBase))
+		(
+		
+		(explore (trigger ((DoneExploringLocal 0.0 ==))) extendWorldKnowledge))
 		(
 
 		(repair (trigger ((BuildingDamaged 1.0 ==))) repairBuildings))
@@ -225,10 +228,7 @@
 		(research (trigger ((ForgeCount 1.0 =))) research))
 		(
 
-		(createForce (trigger ((Success))) build18NexusForce))
-		(
-
-		(explore (trigger ((DoneExploring 0.0 ==))) extendWorldKnowledge))
+		(createForce (trigger ((CyberneticsCoreCount 1.0 =))) build18NexusForce))
 		(
 
 		(wait (trigger ((Success))) idle))
