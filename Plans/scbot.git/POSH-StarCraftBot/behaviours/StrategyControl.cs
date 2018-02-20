@@ -170,7 +170,7 @@ namespace POSH_StarCraftBot.behaviours
             TilePosition startLoc = Interface().baseLocations[(int)BuildSite.StartingLocation];
 
             if (scout == null || scout.getHitPoints() == 0)
-                scout = Interface().GetOverlord().Where(ol => !ol.isMoving()).OrderByDescending(ol => ol.getTilePosition().getDistance(startLoc)).First();
+                scout = Interface().GetProbes().Where(ol => !ol.isMoving()).OrderByDescending(ol => ol.getTilePosition().getDistance(startLoc)).First();
             IOrderedEnumerable<BaseLocation> pos = bwta.getBaseLocations()
                 .Where(baseLoc => !baseLoc.getTilePosition().opEquals(startLoc) && bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()) > 0)
                 .OrderBy(baseLoc => bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()));
@@ -292,7 +292,7 @@ namespace POSH_StarCraftBot.behaviours
 
                 foreach (Chokepoint ck in chokes)
                 {
-
+                    
                     if (bwta.getGroundDistance(new TilePosition(ck.getCenter()), targetChoke) < bwta.getGroundDistance(new TilePosition(ck.getCenter()), start))
                     {
                         chokepoint = ck;
