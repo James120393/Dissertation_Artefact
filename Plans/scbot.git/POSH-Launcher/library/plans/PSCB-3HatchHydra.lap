@@ -45,6 +45,7 @@
 	BuildNexus
 ))
 (AP buildPylon (minutes 1.0) (
+	SelectChoke
 	SelectStartBase 
 	PositionPylon 
 	BuildPylon
@@ -212,14 +213,14 @@
 
 		(defend (trigger ((BaseUnderAttack 1.0 ==))) defendLocation))
 		(
+				
+		(explore (trigger ((DoneExploringLocal 0.0 ==))) extendWorldKnowledge))
+		(
 
 		(harvest (trigger ((ProbeCount 1.0 >=) (IdleProbes))) probeHarvesting (seconds 0.5)))
 		(
 
 		(build (trigger ((NeedBuilding 1.0 =))) buildBase))
-		(
-		
-		(explore (trigger ((DoneExploringLocal 0.0 ==))) extendWorldKnowledge))
 		(
 
 		(repair (trigger ((BuildingDamaged 1.0 ==))) repairBuildings))

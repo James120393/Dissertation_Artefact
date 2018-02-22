@@ -30,7 +30,6 @@ namespace POSH_StarCraftBot.behaviours
         private GamePhase phase;
         private bool buildArmy = false;
 
-
         public StrategyControl(AgentBase agent)
             : base(agent, new string[] { }, new string[] { })
         {
@@ -217,6 +216,10 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("ProbeScouting")]
         public bool ProbeScouting()
         {
+            if (probeScout == null)
+            {
+                return false;
+            }
             if (probeScout == null || probeScout.getHitPoints() <= 0 || probeScout.isConstructing())
                 return false;
 
@@ -262,8 +265,9 @@ namespace POSH_StarCraftBot.behaviours
                 Console.Out.WriteLine("Probe is scouting: " + executed); 
             }
 
-            return true;
+            return false;
         }
+
 
         [ExecutableAction("Pursue18NexusOpening")]
         public bool Pursue18NexusOpening()
@@ -314,6 +318,7 @@ namespace POSH_StarCraftBot.behaviours
             //picking the right side of the choke to position forces
             Interface().forcePoints[ForceLocations.NaturalChoke] = (targetChoke.getDistance(new TilePosition(chokepoint.getSides().first)) < targetChoke.getDistance(new TilePosition(chokepoint.getSides().second))) ? new TilePosition(chokepoint.getSides().first) : new TilePosition(chokepoint.getSides().second);
             Interface().currentForcePoint = ForceLocations.NaturalChoke;
+            Interface().buildingChoke = (targetChoke.getDistance(new TilePosition(chokepoint.getSides().first)) < targetChoke.getDistance(new TilePosition(chokepoint.getSides().second))) ? new TilePosition(chokepoint.getSides().first) : new TilePosition(chokepoint.getSides().second);
 
             return true;
 
