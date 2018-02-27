@@ -189,12 +189,11 @@ namespace POSH_StarCraftBot.behaviours
             TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
             builder = Interface().GetBuilder(buildPosition); 
             // Take the input coordinates for the building and set the position to that
-            buildPosition = PossibleBuildLocation(buildPosition, X, Y, Z, builder, type);
+            buildPosition = PossibleBuildLocation(buildPosition, X, Y, 500, builder, type);
             buildLocation = buildPosition;
-
-            if (buildPosition is TilePosition)
+            if (buildLocation is TilePosition)
             {
-                move(new Position(buildPosition), builder);
+                move(new Position(buildLocation), builder);
                 return true;
             }
             return false;
@@ -202,24 +201,23 @@ namespace POSH_StarCraftBot.behaviours
 
         // Function to position buildings taking he unit type for the building size
         // an xSpace Value, ySpace Value and Z for in iterations
-        protected bool ChokePosition(UnitType type, int X, int Y, int Z)
-        {
-            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-                return false;
-            // TODO: this needs to be changed to a better location around the base taking exits and resources into account
-            TilePosition buildPosition = Interface().buildingChoke;
-            builder = Interface().GetBuilder(Interface().baseLocations[(int)Interface().currentBuildSite]);
-            // Take the input coordinates for the building and set the position to that
-            //buildPosition = PossibleBuildLocation(buildPosition, X, Y, Z, builder, type);
-            buildLocation = buildPosition;
-
-            if (buildPosition is TilePosition)
-            {
-                move(new Position(buildPosition), builder);
-                return true;
-            }
-            return false;
-        }
+        //protected bool ChokePosition(UnitType type, int X, int Y, int Z)
+        //{
+        //    if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+        //        return false;
+        //    // TODO: this needs to be changed to a better location around the base taking exits and resources into account
+        //    builder = Interface().GetBuilder(Interface().baseLocations[(int)Interface().currentBuildSite]);
+        //    TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
+        //    // Take the input coordinates for the building and set the position to that
+        //    buildPosition = PossibleBuildLocation(buildPosition, X, Y, 500, builder, type);
+        //    buildLocation = buildPosition;
+        //    if (buildLocation is TilePosition)
+        //    {
+        //        move(new Position(buildPosition), builder);
+        //        return true;
+        //    }
+        //    return false;
+        //}
 
         ////////////////////////////////////////////////////////////////////////James' Code////////////////////////////////////////////////////////////////////////
         //
@@ -299,7 +297,7 @@ namespace POSH_StarCraftBot.behaviours
             if (closest is TilePosition)
             {
                 this.buildLocation = closest;
-                builder = Interface().GetBuilder(buildPosition);
+                builder = Interface().GetBuilder(Interface().baseLocations[(int)Interface().currentBuildSite]);
                 return true;
             }
             return false;
@@ -324,7 +322,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("PositionForge")]
         public bool PositionForge()
         {
-            return Position(bwapi.UnitTypes_Protoss_Forge, 1, 1, 300);
+            return Position(bwapi.UnitTypes_Protoss_Forge, 4, 4, 150);
         }
 
 
@@ -340,7 +338,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("PositionCyberneticsCore")]
         public bool PositionCyberneticsCore()
         {
-            return Position(bwapi.UnitTypes_Protoss_Cybernetics_Core, 5, 5, 300);
+            return Position(bwapi.UnitTypes_Protoss_Cybernetics_Core, 4, 4, 150);
         }
 
 
@@ -356,7 +354,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("PositionNexus")]
         public bool PositionNexus()
         {
-            return Position(bwapi.UnitTypes_Protoss_Nexus, 1, 1, 100);
+            return Position(bwapi.UnitTypes_Protoss_Nexus, 1, 1, 500);
         }
 
 
@@ -371,7 +369,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("PositionPylon")]
         public bool PositionPylon()
         {
-            return ChokePosition(bwapi.UnitTypes_Protoss_Pylon, 5, 5, 250);
+            return Position(bwapi.UnitTypes_Protoss_Pylon, 4, 4, 100);
         }
 
 
@@ -388,7 +386,7 @@ namespace POSH_StarCraftBot.behaviours
         public bool PositionChokePylon()
         {
             //TODO Create function to select the appropriate choke point for the pylon to be built
-            return Position(bwapi.UnitTypes_Protoss_Pylon, 1, 1, 500);
+            return Position(bwapi.UnitTypes_Protoss_Pylon, 4, 4, 500);
         }
 
 
@@ -404,7 +402,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("PositionGateway")]
         public bool PositionGateway()
         {
-            return Position(bwapi.UnitTypes_Protoss_Gateway, 5, 5, 250);
+            return Position(bwapi.UnitTypes_Protoss_Gateway, 4, 4, 150);
         }
 
 
@@ -421,7 +419,7 @@ namespace POSH_StarCraftBot.behaviours
         public bool PositionCannon()
         {
             //TODO Create function to select the appropriate choke point for the cannon to be built
-            return Position(bwapi.UnitTypes_Protoss_Photon_Cannon, 1, 1, 550);
+            return Position(bwapi.UnitTypes_Protoss_Photon_Cannon, 4, 4, 150);
         }
 
         // Action to use the suitable location to build the protoss Photon Cannon

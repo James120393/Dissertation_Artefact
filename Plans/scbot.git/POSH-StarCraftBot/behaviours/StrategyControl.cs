@@ -77,6 +77,18 @@ namespace POSH_StarCraftBot.behaviours
             return SwitchBuildToBase((int)BuildSite.Extension);
         }
 
+        [ExecutableAction("SelectChokeBuild")]
+        public bool SelectChokeBuild()
+        {
+           if (Interface().buildingChoke is TilePosition)
+           {
+                Interface().baseLocations[(int)BuildSite.Choke] = Interface().buildingChoke;
+                return SwitchBuildToBase((int)BuildSite.Choke);
+           }
+            return false;
+            
+        }
+
         [ExecutableAction("Idle")]
         public bool Idle()
         {
@@ -318,7 +330,7 @@ namespace POSH_StarCraftBot.behaviours
             //picking the right side of the choke to position forces
             Interface().forcePoints[ForceLocations.NaturalChoke] = (targetChoke.getDistance(new TilePosition(chokepoint.getSides().first)) < targetChoke.getDistance(new TilePosition(chokepoint.getSides().second))) ? new TilePosition(chokepoint.getSides().first) : new TilePosition(chokepoint.getSides().second);
             Interface().currentForcePoint = ForceLocations.NaturalChoke;
-            Interface().buildingChoke = (targetChoke.getDistance(new TilePosition(chokepoint.getSides().first)) < targetChoke.getDistance(new TilePosition(chokepoint.getSides().second))) ? new TilePosition(chokepoint.getSides().first) : new TilePosition(chokepoint.getSides().second);
+            Interface().buildingChoke = (targetChoke.getDistance(new TilePosition(chokepoint.getSides().second)) < targetChoke.getDistance(new TilePosition(chokepoint.getSides().first))) ? new TilePosition(chokepoint.getSides().second) : new TilePosition(chokepoint.getSides().first);
 
             return true;
 

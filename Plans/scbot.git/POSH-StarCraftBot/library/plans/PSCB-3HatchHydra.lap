@@ -44,11 +44,21 @@
 	PositionNexus 
 	BuildNexus
 ))
-(AP buildPylon (minutes 1.0) (
+(AP buildChokePylon (minutes 1.0) (
 	SelectChoke
+	SelectChokeBuild 
+	PositionPylon 
+	BuildPylon
+))
+(AP buildPylon (minutes 1.0) (
 	SelectStartBase 
 	PositionPylon 
 	BuildPylon
+))
+(AP buildCannon (minutes 1.0) (
+	SelectChokeBuild
+	PositionCannon
+	BuildCannon
 ))
 (AP buildForge (minutes 1.0) (
 	SelectStartBase 
@@ -56,12 +66,12 @@
 	BuildForge
 ))
 (AP buildCyberneticsCore (minutes 1.0) (
-	SelectStartBase 
+	SelectChokeBuild 
 	PositionCyberneticsCore 
 	BuildCyberneticsCore
 ))
 (AP buildGateway (minutes 0.01) (
-	SelectStartBase 
+	SelectChokeBuild 
 	PositionGateway 
 	BuildGateway
 ))
@@ -76,7 +86,7 @@
 	BuildPylon
 ))
 (AP dragoon (minutes 1.0) (
-	SelectChoke 
+	SelectChokeBuild
 	TrainDragoon
 ))
 (AP corsair (minutes 1.0) (
@@ -84,7 +94,7 @@
 	SelectChoke 
 	TrainCorsair
 ))
-(C extendWorldKnowledge (seconds 1.0) (goal ((GameRunning 0.0 =)))
+(C extendWorldKnowledge (minutes 1.0) (goal ((GameRunning 0.0 =)))
 	(elements
 		(	
 		(findExtension (trigger ((DoneExploringLocal 0.0 =) (NeedProbeAtNatural 1.0 ==))) ProbeToNatural)	)
@@ -177,11 +187,13 @@
 (C 18NexusOpeningBuild (minutes 1.0) (goal ((AssimilatorCount 1.0 >=) (GatewayCount 1.0 >=) (CyberneticsCoreCount 1.0 >=) (ProbeCount 14.0 >=)))
 	(elements
 		(	
-		(buildPylon (trigger ((PylonCount 0.0 <=))) buildPylon)	)
+		(buildPylon (trigger ((PylonCount 0.0 <=))) buildChokePylon)	)
 		(	
 		(buildProbes (trigger ((ProbeCount 6.0 <))) BuildProbe)	)
-		(	
+		(
 		(buildFirstGateway (trigger ((TotalSupply 17.0 >=) (GatewayCount 0.0 =))) buildGateway)	)
+		(	
+		(buildDefense (trigger ((TotalSupply 17.0 >=) (CannonCount 2.0 <=))) buildCannon)	)
 		(	
 		(buildSecondPylon (trigger ((AvailableSupply 2.0 <=))) buildPylon)	)
 		(	
@@ -213,11 +225,11 @@
 
 		(defend (trigger ((BaseUnderAttack 1.0 ==))) defendLocation))
 		(
-				
-		(explore (trigger ((DoneExploringLocal 0.0 ==))) extendWorldKnowledge))
+
+		(harvest (trigger ((ProbeCount 1.0 >=) (IdleProbes))) probeHarvesting (seconds 0.1)))
 		(
 
-		(harvest (trigger ((ProbeCount 1.0 >=) (IdleProbes))) probeHarvesting (seconds 0.5)))
+		(explore (trigger ((DoneExploringLocal 0.0 ==))) extendWorldKnowledge ))
 		(
 
 		(build (trigger ((NeedBuilding 1.0 =))) buildBase))
