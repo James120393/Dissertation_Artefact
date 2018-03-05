@@ -66,7 +66,7 @@ namespace POSH_StarCraftBot.behaviours
                 new TilePosition(-xSpace,0),new TilePosition(-xSpace,ySpace),
                 new TilePosition(0,ySpace), new TilePosition(xSpace,ySpace) */
              };
-            if (iterations < 0)
+            if (iterations < 0 || xSpace > 100)
                 return null;
             for (int x = -xSpace; x <= xSpace; x++)
             {
@@ -84,15 +84,15 @@ namespace POSH_StarCraftBot.behaviours
             {
                 if (bwapi.Broodwar.canBuildHere(builder, start.opAdd(new TilePosition(pos)), building))
                 {
-                    
-                   // if (_debug_)
+
+                    // if (_debug_)
                     //    Console.Out.WriteLine(building.getID() + " building here: " + start.opAdd(pos).xConst() + " " + start.opAdd(pos).yConst());
                     return start.opAdd(new TilePosition(pos));
                 }
             }
+
             return PossibleBuildLocation(start, ++xSpace, ++ySpace, --iterations, builder, building);
         }
-
 
         protected int CountUnbuiltBuildings(UnitType type)
         {
@@ -189,7 +189,7 @@ namespace POSH_StarCraftBot.behaviours
             TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
             builder = Interface().GetBuilder(buildPosition); 
             // Take the input coordinates for the building and set the position to that
-            buildPosition = PossibleBuildLocation(buildPosition, X, Y, 500, builder, type);
+            buildPosition = PossibleBuildLocation(buildPosition, 1, 1, 200, builder, type);
             buildLocation = buildPosition;
             if (buildLocation is TilePosition)
             {
@@ -369,7 +369,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("PositionPylon")]
         public bool PositionPylon()
         {
-            return Position(bwapi.UnitTypes_Protoss_Pylon, 4, 4, 100);
+            return Position(bwapi.UnitTypes_Protoss_Pylon, 1, 1, 100);
         }
 
 
@@ -386,7 +386,7 @@ namespace POSH_StarCraftBot.behaviours
         public bool PositionChokePylon()
         {
             //TODO Create function to select the appropriate choke point for the pylon to be built
-            return Position(bwapi.UnitTypes_Protoss_Pylon, 4, 4, 500);
+            return Position(bwapi.UnitTypes_Protoss_Pylon, 1, 1, 500);
         }
 
 
@@ -402,7 +402,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("PositionGateway")]
         public bool PositionGateway()
         {
-            return Position(bwapi.UnitTypes_Protoss_Gateway, 4, 4, 150);
+            return Position(bwapi.UnitTypes_Protoss_Gateway, 1, 1, 150);
         }
 
 
@@ -419,7 +419,7 @@ namespace POSH_StarCraftBot.behaviours
         public bool PositionCannon()
         {
             //TODO Create function to select the appropriate choke point for the cannon to be built
-            return Position(bwapi.UnitTypes_Protoss_Photon_Cannon, 4, 4, 150);
+            return Position(bwapi.UnitTypes_Protoss_Photon_Cannon, 1, 1, 150);
         }
 
         // Action to use the suitable location to build the protoss Photon Cannon

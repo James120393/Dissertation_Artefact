@@ -541,7 +541,7 @@ namespace POSH_StarCraftBot.behaviours
         public bool AssignProbes()
         {
             IEnumerable<Unit> mineralPatches = Interface().GetMineralPatches();
-            return ProbesToResource(mineralPatches, minedPatches, 2, true, 1);
+            return ProbesToResource(mineralPatches, minedPatches, 6, true, 1);
         }
 
 
@@ -551,7 +551,7 @@ namespace POSH_StarCraftBot.behaviours
         {
             IEnumerable<Unit> assimilators = Interface().GetAssimilator();
 
-            return ProbesToResource(assimilators, minedGas, 6, true, 1);
+            return ProbesToResource(assimilators, minedGas, 2, true, 1);
         }
 
         
