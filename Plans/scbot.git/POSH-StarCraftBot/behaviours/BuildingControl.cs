@@ -56,42 +56,40 @@ namespace POSH_StarCraftBot.behaviours
             return baseLoc;
         }
 
+        private TilePosition addToTile(TilePosition pos, int x, int y)
+        {
+            TilePosition output = new TilePosition(x + pos.xConst(), y + pos.yConst());
+
+            return output;
+        }
+
         private TilePosition PossibleBuildLocation(TilePosition start, int xSpace, int ySpace, int iterations, Unit builder, UnitType building)
         {
-            List<Position> directions = new List<Position>()
+            int x = 0;
+            int y = 0;
+            int dx = 0;
+            int dy = -1;
+            int t = (int)Math.Sqrt(iterations);
+            for (int i = 0; i < iterations; i++)
             {
-                new Position(0,0),
-            /*  new TilePosition(xSpace,0), new TilePosition(xSpace,-ySpace),
-                new TilePosition(0,-ySpace),new TilePosition(-xSpace,-ySpace),
-                new TilePosition(-xSpace,0),new TilePosition(-xSpace,ySpace),
-                new TilePosition(0,ySpace), new TilePosition(xSpace,ySpace) */
-             };
-            if (iterations < 0 || xSpace > 100)
-                return null;
-            for (int x = -xSpace; x <= xSpace; x++)
-            {
-                directions.Add(new Position(x, ySpace));
-                directions.Add(new Position(x, -ySpace));
-            }
-            for (int y = -ySpace; y <= ySpace; y++)
-            {
-                directions.Add(new Position(xSpace, y));
-                directions.Add(new Position(-xSpace, y));
-            }
-
-
-            foreach (Position pos in directions)
-            {
-                if (bwapi.Broodwar.canBuildHere(builder, start.opAdd(new TilePosition(pos)), building))
+                if ((-Math.Sqrt(iterations) / 2 < x && x <= Math.Sqrt(iterations) / 2) && (-Math.Sqrt(iterations) / 2 < y && y <= Math.Sqrt(iterations) / 2))
                 {
-
-                    // if (_debug_)
-                    //    Console.Out.WriteLine(building.getID() + " building here: " + start.opAdd(pos).xConst() + " " + start.opAdd(pos).yConst());
-                    return start.opAdd(new TilePosition(pos));
+                    if (bwapi.Broodwar.canBuildHere(builder, addToTile(start, x, y), building))
+                    {
+                        Console.Out.WriteLine("building " + building.getName() + " at:" + addToTile(start, x, y).xConst() + ":" + addToTile(start, x, y).yConst());
+                        return addToTile(start, x, y);
+                    }
                 }
+                if (x == y || (x < 0 && x == -y) || (x > 0 && x == 1 - y))
+                {
+                    t = dx;
+                    dx = -dy;
+                    dy = t;
+                }
+                x += dx;
+                y += dy;
             }
-
-            return PossibleBuildLocation(start, ++xSpace, ++ySpace, --iterations, builder, building);
+            return null;
         }
 
         protected int CountUnbuiltBuildings(UnitType type)
@@ -123,15 +121,15 @@ namespace POSH_StarCraftBot.behaviours
 
         protected int CountBuildingsinProgress(UnitType type)
         {
-            Unit[] units = buildingInProgress.Keys.ToArray();
-                foreach (Unit unit in units)
+            for (int i = buildingInProgress.Keys.Count() - 1; i > 0; i--)
+            {
+                Unit unit = buildingInProgress.Keys.ElementAt(i);
+                if (unit.getHitPoints() == 0 || unit.isCompleted())
                 {
-                    if (unit.getHitPoints() == 0 || unit.isCompleted())
-                    {
-                        buildingInProgress.Remove(unit);
-                    }
-
+                    buildingInProgress.Remove(unit);
                 }
+
+            }
 
             return buildingInProgress.Where(pair => pair.Key.getType().getID() == type.getID()).Count();
         }
@@ -183,18 +181,32 @@ namespace POSH_StarCraftBot.behaviours
         // an xSpace Value, ySpace Value and Z for in iterations
         protected bool Position(UnitType type, int X, int Y, int Z)
         {
-            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+            if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite) && Interface().currentBuildSite != BuildSite.NaturalChoke)
                 return false;
-            // TODO: this needs to be changed to a better location around the base taking exits and resources into account
-            TilePosition buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
-            builder = Interface().GetBuilder(buildPosition); 
-            // Take the input coordinates for the building and set the position to that
-            buildPosition = PossibleBuildLocation(buildPosition, 1, 1, 200, builder, type);
-            buildLocation = buildPosition;
+
+            TilePosition buildPosition;
+            if (Interface().currentBuildSite == BuildSite.NaturalChoke)
+                buildPosition = Interface().buildingChoke;
+            else
+                buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
+            builder = Interface().GetBuilder(buildPosition);
+
+            double dist = Z;
+            if (buildLocation is TilePosition && buildPosition is TilePosition)
+                dist = buildLocation.getDistance(buildPosition);
+            if (buildLocation != null && dist < Z && bwapi.Broodwar.canBuildHere(builder, buildLocation, type)) { }
+            else
+            {
+                Position pos = new Position(buildPosition);
+                Console.Out.WriteLine("Base:" + Interface().currentBuildSite + " loc:" + buildPosition.xConst() + ":" + buildPosition.yConst() + " pos" + pos.xConst() + ":" + pos.yConst());
+                buildPosition = PossibleBuildLocation(buildPosition, X, Y, Z, builder, type);
+                buildLocation = buildPosition;
+            }
             if (buildLocation is TilePosition)
             {
                 move(new Position(buildLocation), builder);
-                return true;
+                if (builder.getDistance(new Position(buildPosition)) < DELTADISTANCE)
+                    return true;
             }
             return false;
         }
@@ -218,6 +230,19 @@ namespace POSH_StarCraftBot.behaviours
         //    }
         //    return false;
         //}
+
+        [ExecutableAction("SelectDefenceBase")]
+        public bool SelectDefenceBase()
+        {
+            if (Interface().GetNexus().Count() < 1)
+                return false;
+            double distanceStart = Interface().baseLocations[(int)ForceLocations.OwnStart].getDistance(buildingToRepair.getTilePosition());
+            double distanceNatural = Interface().baseLocations[(int)ForceLocations.Natural].getDistance(buildingToRepair.getTilePosition());
+
+            ForceLocations defenceBase = (distanceStart < distanceNatural) ? ForceLocations.OwnStart : ForceLocations.Natural;
+            Interface().currentBuildSite = (BuildSite)defenceBase;
+            return true;
+        }
 
         ////////////////////////////////////////////////////////////////////////James' Code////////////////////////////////////////////////////////////////////////
         //

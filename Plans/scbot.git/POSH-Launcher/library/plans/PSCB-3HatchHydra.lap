@@ -20,7 +20,7 @@
 ))
 (AP moveArmyOne (minutes 1.0) (
 	SelectArmyOne 
-	AttackEnemy 
+	AttackEnemyMainBase
 	ForceReady
 ))
 (AP sendDefendForce (minutes 1.0) (
@@ -45,18 +45,18 @@
 	BuildNexus
 ))
 (AP buildChokePylon (minutes 1.0) (
-	SelectChoke
-	SelectChokeBuild 
+	SelectNatural
 	PositionPylon 
 	BuildPylon
 ))
 (AP buildPylon (minutes 1.0) (
-	SelectStartBase 
+	SelectChoke	
+	SelectChokeBuild 
 	PositionPylon 
 	BuildPylon
 ))
 (AP buildCannon (minutes 1.0) (
-	SelectChokeBuild
+	SelectNatural
 	PositionCannon
 	BuildCannon
 ))
@@ -94,12 +94,9 @@
 	SelectChoke 
 	TrainCorsair
 ))
-(C extendWorldKnowledge (minutes 1.0) (goal ((GameRunning 0.0 =)))
+(C extendWorldKnowledge (seconds 1.0) (goal ((GameRunning 0.0 =)))
 	(elements
-		(	
-		(findExtension (trigger ((DoneExploringLocal 0.0 =) (NeedProbeAtNatural 1.0 ==))) ProbeToNatural)	)
-		(	
-		(probeExploring (trigger ((ProbeCount 9.0 >=) (DoneExploring 1.0 !=))) probeScouting)	)
+		(			(probeExploring (trigger ((NeedProbeAtNatural 1.0 ==) (DoneExploringLocal 0.0 ==))) ProbeToNatural)	)
 	)
 )
 (C repairBuildings (seconds 1.0) (goal ((BuildingDamaged 0.0 ==)))
@@ -187,58 +184,36 @@
 (C 18NexusOpeningBuild (minutes 1.0) (goal ((AssimilatorCount 1.0 >=) (GatewayCount 1.0 >=) (CyberneticsCoreCount 1.0 >=) (ProbeCount 14.0 >=)))
 	(elements
 		(	
-		(buildPylon (trigger ((PylonCount 0.0 <=))) buildChokePylon)	)
+		(buildPylon (trigger ((PylonCount 0.0 <=))) buildPylon)	)
 		(	
-		(buildFirstGateway (trigger ((TotalSupply 17.0 >=) (GatewayCount 0.0 =) (PylonCount 1.0 >=))) buildGateway)	)
+		(buildFirstGateway (trigger ((TotalSupply 17.0 >=) (GatewayCount 0.0 ==) (PylonCount 1.0 >=))) buildGateway)	)
 		(
-		(buildAssimilator (trigger ((GatewayCount 1.0 =) (AssimilatorCount 1.0 <))) buildAssimilator)	)
+		(buildAssimilator (trigger ((GatewayCount 1.0 ==) (AssimilatorCount 0.0 ==))) buildAssimilator)	)
 		(
-		(buildCyberneticsCore (trigger ((GatewayCount 1.0 <=) (CyberneticsCoreCount 0.0 =))) buildCyberneticsCore)	)
+		(buildCyberneticsCore (trigger ((GatewayCount 1.0 ==) (CyberneticsCoreCount 0.0 ==))) buildCyberneticsCore)	)
 		(
 		(buildSecondPylon (trigger ((AvailableSupply 2.0 <=))) buildPylon)	)
 		
 	)
 )
-(C probeScouting (minutes 1.0) (goal ((DoneExploringLocal 1.0 =)))
+(C probeScouting (seconds 1.0) (goal ((DoneExploringLocal 1.0 =)))
 	(elements
-		(	
-		(selectProbe (trigger ((ProbeCount 4.0 >=) (ProbeScoutAvailable 1.0 !=))) SelectProbeScout)	)
-		(	
-		(explore (trigger ((ProbeScoutAvailable 1.0 ==))) ProbeScouting)	)
+		(			(selectProbe (trigger ((ProbeCount 4.0 >=) (ProbeScoutAvailable 1.0 !=))) SelectProbeScout))
+		(			(explore (trigger ((ProbeScoutAvailable 1.0 ==))) ProbeScouting))
 	)
 )
 (SDC EighteenNexusOpening (goal ((GameRunning 0.0 =)))
 	(drives
-		(
-		
-		(retreat (trigger ((ForceIsLosing 1.0 =))) flee))
-		(
-
-		(attack (trigger ((ForceReady))) attackEnemy))
-		(
-
-		(defend (trigger ((BaseUnderAttack 1.0 ==))) defendLocation))
-		(
-
-		(harvest (trigger ((IdleProbes))) probeHarvesting))
-		(
-
-		(explore (trigger ((DoneExploringLocal 0.0 ==))) extendWorldKnowledge))
-		(
-
-		(build (trigger ((NeedBuilding 1.0 =))) buildBase))
-		(
-
-		(repair (trigger ((BuildingDamaged 1.0 ==))) repairBuildings))
-		(
-
-		(research (trigger ((ForgeCount 1.0 =))) research))
-		(
-
-		(createForce (trigger ((CyberneticsCoreCount 1.0 =))) build18NexusForce))
-		(
-
-		(wait (trigger ((Success))) idle))
+		(		(retreat (trigger ((ForceIsLosing 1.0 =))) flee(seconds 1.0)))
+		(		(attack (trigger ((ForceReady))) attackEnemy(seconds 0.5)))
+		(		(defend (trigger ((BaseUnderAttack 1.0 ==))) defendLocation(seconds 0.5)))
+		(		(harvest (trigger ((ProbeCount 1.0 >=) (IdleProbes))) probeHarvesting(seconds 0.25)))
+		(		(explore (trigger ((DoneExploringLocal 0.0 ==))) extendWorldKnowledge(seconds 0.25)))
+		(		(build (trigger ((NeedBuilding 1.0 =) (DoneExploringLocal 1.0 ==))) buildBase))
+		(		(research (trigger ((ForgeCount 1.0 =))) research(seconds 0.25)))
+		(		(createForce (trigger ((CyberneticsCoreCount 1.0 =))) build18NexusForce(seconds 0.25)))
+		(		(scout (trigger ((DoneExploringLocal 0.0 ==))) probeScouting(seconds 0.5)))
+		(		(wait (trigger ((Success))) idle))
 
 	)
 )

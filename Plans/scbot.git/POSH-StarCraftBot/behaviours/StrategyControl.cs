@@ -29,6 +29,7 @@ namespace POSH_StarCraftBot.behaviours
         private float alarm = 0.0f;
         private GamePhase phase;
         private bool buildArmy = false;
+        private int maxBaseLocations;
 
         public StrategyControl(AgentBase agent)
             : base(agent, new string[] { }, new string[] { })
@@ -75,18 +76,6 @@ namespace POSH_StarCraftBot.behaviours
         public bool SelectExtension()
         {
             return SwitchBuildToBase((int)BuildSite.Extension);
-        }
-
-        [ExecutableAction("SelectChokeBuild")]
-        public bool SelectChokeBuild()
-        {
-           if (Interface().buildingChoke is TilePosition)
-           {
-                Interface().baseLocations[(int)BuildSite.Choke] = Interface().buildingChoke;
-                return SwitchBuildToBase((int)BuildSite.Choke);
-           }
-            return false;
-            
         }
 
         [ExecutableAction("Idle")]
@@ -181,7 +170,7 @@ namespace POSH_StarCraftBot.behaviours
             TilePosition startLoc = Interface().baseLocations[(int)BuildSite.StartingLocation];
 
             if (scout == null || scout.getHitPoints() == 0)
-                scout = Interface().GetProbes().Where(ol => !ol.isMoving()).OrderByDescending(ol => ol.getTilePosition().getDistance(startLoc)).First();
+                scout = Interface().GetProbes().Where(probe => !probe.isMoving()).OrderByDescending(probe => probe.getTilePosition().getDistance(startLoc)).First();
             IOrderedEnumerable<BaseLocation> pos = bwta.getBaseLocations()
                 .Where(baseLoc => !baseLoc.getTilePosition().opEquals(startLoc) && bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()) > 0)
                 .OrderBy(baseLoc => bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()));
@@ -190,7 +179,7 @@ namespace POSH_StarCraftBot.behaviours
                 return false;
 
             Position target = new Position(pos.First().getTilePosition());
-            while ( (!scout.getTargetPosition().opEquals(target) || !scout.isMoving()) )
+            if ( (!scout.getTargetPosition().opEquals(target) || !scout.isMoving()) )
             {
                 executed = scout.move(target, false);
                 if (_debug_)
@@ -203,14 +192,16 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("SelectProbeScout")]
         public bool SelectProbeScout()
         {
+            if (probeScout != null && probeScout.getHitPoints() > 0 && probeScout.getType().isWorker())
+                return true;
+
             Unit scout = null;
             IEnumerable<Unit> units = Interface().GetProbes().Where(probe =>
-                probe.getHitPoints() > 0 &&
-                !Interface().IsBuilder(probe));
+                probe.getHitPoints() > 0 && !Interface().IsBuilder(probe));
 
             foreach (Unit unit in units)
             {
-                if (!unit.isCarryingGas() && !unit.isCarryingMinerals())
+                if (!unit.isCarryingGas() && !unit.isCarryingMinerals() && !unit.isConstructing())
                 {
                     scout = unit;
                     break;
@@ -225,59 +216,73 @@ namespace POSH_StarCraftBot.behaviours
             return (probeScout is Unit && probeScout.getHitPoints() > 0) ? true : false;
         }
 
+
         [ExecutableAction("ProbeScouting")]
         public bool ProbeScouting()
         {
+            // no scout alive or selected
             if (probeScout == null)
-            {
                 return false;
-            }
-            if (probeScout == null || probeScout.getHitPoints() <= 0 || probeScout.isConstructing())
-                return false;
-
-            if (scoutCounter == bwta.getBaseLocations().Where(loc =>
-                    bwta.getGroundDistance(loc.getTilePosition(), probeScout.getTilePosition()) >= 0).Count() )
-                scoutCounter = 1;
-
-
-            if (probeScout.isUnderAttack())
+            if (probeScout != null)
             {
-                if (Interface().baseLocations.ContainsKey((int)BuildSite.Natural))
-                    probeScout.move(new Position(Interface().baseLocations[(int)BuildSite.Natural]));
+                if (probeScout.getHitPoints() <= 0 || probeScout.isConstructing())
+                {
+                    return false;
+                }
+                IEnumerable<BaseLocation> baseloc = bwta.getBaseLocations().Where(loc =>
+                        bwta.getGroundDistance(loc.getTilePosition(), probeScout.getTilePosition()) >= 0);
+
+                if (baseloc.Count() > maxBaseLocations)
+                    maxBaseLocations = baseloc.Count();
+                if (baseloc.Count() < maxBaseLocations && scoutCounter > baseloc.Count())
+                    return false;
+                // reached the last accessible base location away and turn back to base
+                if (scoutCounter > maxBaseLocations)
+                    scoutCounter = 1;
+
+
+                if (probeScout.isUnderAttack())
+                {
+                    if (Interface().baseLocations.ContainsKey((int)BuildSite.Natural))
+                        probeScout.move(new Position(Interface().baseLocations[(int)BuildSite.Natural]));
+                    else if (Interface().baseLocations.ContainsKey((int)BuildSite.Extension))
+                    {
+                        probeScout.move(new Position(Interface().baseLocations[(int)BuildSite.Extension]));
+                    }
+                    return false;
+                }
+
+
+                // still scouting
+                if (probeScout.isMoving())
+                    return true;
+
+                double distance = probeScout.getPosition().getDistance(
+                    baseloc.OrderBy(loc =>
+                        bwta.getGroundDistance(loc.getTilePosition(), Interface().baseLocations[(int)BuildSite.StartingLocation]))
+                        .ElementAt(scoutCounter)
+                        .getPosition()
+                        );
+                if (distance < DELTADISTANCE)
+                {
+                    // close to another base location
+                    if (!Interface().baseLocations.ContainsKey(scoutCounter))
+                        Interface().baseLocations[scoutCounter] = new TilePosition(probeScout.getTargetPosition());
+                    scoutCounter++;
+                }
                 else
-                    probeScout.move(new Position(Interface().baseLocations[(int)BuildSite.StartingLocation]));
-                return false;
+                {
+                    IEnumerable<BaseLocation> bases = baseloc.Where(loc =>
+                        bwta.getGroundDistance(loc.getTilePosition(), probeScout.getTilePosition()) >= 0).OrderBy(loc =>
+                        bwta.getGroundDistance(loc.getTilePosition(), Interface().baseLocations[(int)BuildSite.StartingLocation]));
+                    bool executed = false;
+                    if (bases.Count() > scoutCounter)
+                        executed = probeScout.move(bases.ElementAt(scoutCounter).getPosition());
+                    // if (_debug_)
+                    Console.Out.WriteLine("Probe is scouting: " + executed);
+                }
             }
-
-            if (probeScout.isMoving())
-                return true;
-
-            if (probeScout.getPosition().getDistance(
-                bwta.getBaseLocations().Where(loc =>
-                    bwta.getGroundDistance(loc.getTilePosition(), probeScout.getTilePosition()) >= 0).OrderBy(loc =>
-                    bwta.getGroundDistance(loc.getTilePosition(),Interface().baseLocations[(int)BuildSite.StartingLocation]))
-                    .ElementAt(scoutCounter-1)
-                    .getPosition()
-                    ) < DELTADISTANCE)
-            {
-                // close to another base location
-                if (!Interface().baseLocations.ContainsKey(scoutCounter))
-                    Interface().baseLocations[scoutCounter] = new TilePosition(probeScout.getTargetPosition());
-                scoutCounter++;
-            }
-            else
-            {
-
-                bool executed = probeScout.move(bwta.getBaseLocations().Where(loc =>
-                    bwta.getGroundDistance(loc.getTilePosition(), probeScout.getTilePosition()) >= 0).OrderBy(loc =>
-                    bwta.getGroundDistance(loc.getTilePosition(),Interface().baseLocations[(int)BuildSite.StartingLocation]))
-                    .ElementAt(scoutCounter-1)
-                    .getPosition());
-                // if (_debug_)
-                Console.Out.WriteLine("Probe is scouting: " + executed); 
-            }
-
-            return false;
+            return true;
         }
 
 
@@ -304,17 +309,20 @@ namespace POSH_StarCraftBot.behaviours
 
                 // find some kind of measure to determine if the the closest choke to natural is not the once between choke and start but after the natural
                 IEnumerable<Chokepoint> chokes = bwta.getChokepoints().Where(ck => bwta.getGroundDistance(new TilePosition(ck.getCenter()), start) > 0).OrderBy(choke => choke.getCenter().getDistance(new Position(targetChoke)));
-
-
+                if (chokes == null)
+                {
+                    return false;
+                }
                 foreach (Chokepoint ck in chokes)
                 {
-                    
+
                     if (bwta.getGroundDistance(new TilePosition(ck.getCenter()), targetChoke) < bwta.getGroundDistance(new TilePosition(ck.getCenter()), start))
                     {
                         chokepoint = ck;
                         break;
                     }
                 }
+
             }
             else
             {
@@ -330,12 +338,20 @@ namespace POSH_StarCraftBot.behaviours
             //picking the right side of the choke to position forces
             Interface().forcePoints[ForceLocations.NaturalChoke] = (targetChoke.getDistance(new TilePosition(chokepoint.getSides().first)) < targetChoke.getDistance(new TilePosition(chokepoint.getSides().second))) ? new TilePosition(chokepoint.getSides().first) : new TilePosition(chokepoint.getSides().second);
             Interface().currentForcePoint = ForceLocations.NaturalChoke;
-            Interface().buildingChoke = (targetChoke.getDistance(new TilePosition(chokepoint.getSides().first)) > targetChoke.getDistance(new TilePosition(chokepoint.getSides().second))) ? new TilePosition(chokepoint.getSides().first) : new TilePosition(chokepoint.getSides().second);
-            if (Interface().buildingChoke == null)
-                Interface().buildingChoke = (targetChoke.getDistance(new TilePosition(chokepoint.getSides().second)) > targetChoke.getDistance(new TilePosition(chokepoint.getSides().first))) ? new TilePosition(chokepoint.getSides().second) : new TilePosition(chokepoint.getSides().first);
-
+            Interface().buildingChoke = Interface().forcePoints[ForceLocations.NaturalChoke];
             return true;
 
+        }
+
+        [ExecutableAction("SelectChokeBuild")]
+        public bool SelectChokeBuild()
+        {
+            if (Interface().buildingChoke is TilePosition)
+            {
+                Interface().currentBuildSite = BuildSite.NaturalChoke;
+                return true;
+            }
+            return false;
         }
 
         //
@@ -416,7 +432,11 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("DoneExploringLocal")]
         public bool DoneExploringLocal()
         {
-            return Interface().baseLocations.ContainsKey((int)BuildSite.Natural);
+            if (Interface().baseLocations.ContainsKey((int)BuildSite.Natural))
+            {
+                return true;
+            }
+            return false;
         }
 
         /// <summary>

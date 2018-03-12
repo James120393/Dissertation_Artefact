@@ -231,15 +231,17 @@ namespace POSH_StarCraftBot.behaviours
                 patch.Value.RemoveAll(probe => (probe.getHitPoints() <= 0 || probe.getOrderTarget() == null || ConvertTilePosition(probe.getOrderTarget().getTilePosition()) != patch.Key));
             }
 
-            foreach (Unit probe in probes)
+            foreach (Unit probe in probes.OrderBy(probe => probe.getResources()))
             {
                 if (maxUnits < 1)
                     break;
 
-                if (resources.Contains(probe.getOrderTarget()) && probe.getTarget().getResources() > 0 &&
+                if (probe.getOrderTarget() is Unit && probe.getTarget() is Unit && resources.Contains(probe.getOrderTarget()) && probe.getTarget().getResources() > 0 &&
                     mined.ContainsKey(ConvertTilePosition(probe.getOrderTarget().getTilePosition())))
                 {
                     Console.Out.WriteLine("test");
+                    Console.Out.WriteLine("drone.getOrderTarget()" + probe.getOrderTarget().getID());
+                    Console.Out.WriteLine("test" + probe.getTarget().getID());
                     continue;
                 }
 
@@ -260,7 +262,7 @@ namespace POSH_StarCraftBot.behaviours
                     }
 
                 }
-                int secCounter = patchPositions.Count() + 1;
+                int secCounter = 10;
                 while (!(probe.getTarget() is Unit && probe.getTarget().getID() == finalPatch.getID()) && !probe.isMoving() && secCounter-- > 0)
                 {
                     executed = probe.gather(finalPatch, false);
@@ -358,6 +360,13 @@ namespace POSH_StarCraftBot.behaviours
         public bool ForceReady()
         {
             return forceReady;
+        }
+        
+        [ExecutableSense("CanAttack")]
+        public bool CanAttack()
+        {
+
+            return Interface().GetAllUnits(false).Where(unit => !unit.isUnderAttack() && !unit.isAttacking()).Count() > 10 || forceReady;
         }
 
         [ExecutableSense("IdleDrones")]
