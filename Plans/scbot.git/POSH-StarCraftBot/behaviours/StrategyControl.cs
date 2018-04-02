@@ -31,11 +31,20 @@ namespace POSH_StarCraftBot.behaviours
         private bool buildArmy = false;
         private int maxBaseLocations;
 
+
+		private bool naturalHasBeenFound = false;
+		public Position naturalLocation;
+
         public StrategyControl(AgentBase agent)
             : base(agent, new string[] { }, new string[] { })
         {
 
         }
+
+		public Unit GetScout()
+		{
+			return scout;
+		}
         //
         // INTERNAL
         //
@@ -63,12 +72,14 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("SelectNatural")]
         public bool SelectNatural()
         {
+			Interface().currentBuildSite = BuildSite.Natural;
             return SwitchBuildToBase((int)BuildSite.Natural);
         }
 
         [ExecutableAction("SelectStartBase")]
         public bool SelectStartBase()
         {
+			Interface().currentBuildSite = BuildSite.StartingLocation;
             return SwitchBuildToBase((int)BuildSite.StartingLocation);
         }
 
@@ -160,39 +171,71 @@ namespace POSH_StarCraftBot.behaviours
         /// Find Path to Natural Extension using Overlord 
         /// </summary>
         /// <returns></returns>
-        [ExecutableAction("ProbeToNatural")]
-        public bool ProbeToNatural()
-        {
-            bool executed = false;
+		[ExecutableAction("ProbeToNatural")]
+		public bool ProbeToNatural()
+		{
+			if (Interface().baseLocations.ContainsKey((int)BuildSite.Natural) || (probeScout is Unit && probeScout.getHitPoints() > 0 && probeScout.isMoving()))
+				return true;
 
-            if ( Interface().baseLocations.ContainsKey((int)BuildSite.Natural)  || (scout is Unit && scout.getHitPoints() > 0 && scout.isMoving()))
-                return executed;
-            TilePosition startLoc = Interface().baseLocations[(int)BuildSite.StartingLocation];
+			TilePosition startLoc = Interface().baseLocations[(int)BuildSite.StartingLocation];
 
-            if (scout == null || scout.getHitPoints() == 0)
-                scout = Interface().GetProbes().Where(probe => !probe.isMoving()).OrderByDescending(probe => probe.getTilePosition().getDistance(startLoc)).First();
-            IOrderedEnumerable<BaseLocation> pos = bwta.getBaseLocations()
-                .Where(baseLoc => !baseLoc.getTilePosition().opEquals(startLoc) && bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()) > 0)
-                .OrderBy(baseLoc => bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()));
+			if (probeScout == null || probeScout.getHitPoints() == 0)
+				probeScout = Interface().GetProbes().First();
 
-            if (pos.Count() < 1)
-                return false;
 
-            Position target = new Position(pos.First().getTilePosition());
-            if ( (!scout.getTargetPosition().opEquals(target) || !scout.isMoving()) )
-            {
-                executed = scout.move(target, false);
-                if (_debug_)
-                    Console.Out.WriteLine("Probe to Natural: " + executed);
-                System.Threading.Thread.Sleep(50);
-            }
-            return executed;
-        }
+			IOrderedEnumerable<BaseLocation> pos = bwta.getBaseLocations()
+				.Where(baseLoc => !baseLoc.getTilePosition().opEquals(startLoc) && bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()) > 0)
+				.OrderBy(baseLoc => bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()));
+
+			if (pos.Count() < 1)
+				return false;
+			
+			Position target = new Position(pos.First().getTilePosition());
+			
+			naturalLocation = target;
+			while (probeScout.getDistance(target) >= DELTADISTANCE)
+			{
+				if (!probeScout.isMoving() || probeScout.isGatheringMinerals())
+				{
+					probeScout.move(target, false);
+					Console.Out.WriteLine("Probe to Natural: true");
+				}
+				if (probeScout.getDistance(target) <= DELTADISTANCE * 2)
+				{
+					naturalHasBeenFound = true;
+					return true;
+				}		
+				System.Threading.Thread.Sleep(1000);
+			}
+			return true;
+
+
+		}
+
+		//[ExecutableAction("FindNatural")]
+		//public bool FindNatural()
+		//{
+		//
+		//	TilePosition startLoc = Interface().baseLocations[(int)BuildSite.StartingLocation];
+		//
+		//	IOrderedEnumerable<BaseLocation> pos = bwta.getBaseLocations()
+		//		.Where(baseLoc => !baseLoc.getTilePosition().opEquals(startLoc) && bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()) > 0)
+		//		.OrderBy(baseLoc => bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()));
+		//	
+		//	if (pos.Count() < 1)
+		//		return false;
+		//
+		//	natural = new Position(pos.First().getTilePosition());
+		//	Console.Out.WriteLine(natural);
+		//
+		//	return true;
+		//}
+
 
         [ExecutableAction("SelectProbeScout")]
         public bool SelectProbeScout()
         {
-            if (probeScout != null && probeScout.getHitPoints() > 0 && probeScout.getType().isWorker())
+            if (probeScout != null && probeScout.getHitPoints() > 0)
                 return true;
 
             Unit scout = null;
@@ -201,7 +244,7 @@ namespace POSH_StarCraftBot.behaviours
 
             foreach (Unit unit in units)
             {
-                if (!unit.isCarryingGas() && !unit.isCarryingMinerals() && !unit.isConstructing())
+                if (!unit.isCarryingGas())
                 {
                     scout = unit;
                     break;
@@ -358,12 +401,32 @@ namespace POSH_StarCraftBot.behaviours
         // SENSES
         //
 
+		//[ExecutableSense("NaturalRegistered")]
+		//public bool NaturalRegistered()
+		//{
+		//	if (natural == null)
+		//	{
+		//		return false;
+		//	}
+		//	return true;
+		//}
+		//
+
+
         [ExecutableSense("NaturalFound")]
         public bool NaturalFound()
         {
-            return (Interface().baseLocations.ContainsKey((int)BuildSite.Natural) && Interface().baseLocations[(int)BuildSite.Natural] is TilePosition);
+			return naturalHasBeenFound;
         }
 
+		[ExecutableSense("HaveScout")]
+		public bool HaveScout()
+		{
+			if (scout == null || scout.getHitPoints() <= 0)
+				return false;
+			else
+				return true;
+		}
 
         [ExecutableSense("CanCreateUnits")]
         public bool CanCreateUnits()
@@ -408,8 +471,8 @@ namespace POSH_StarCraftBot.behaviours
                 .Where(baseLoc => !baseLoc.getTilePosition().opEquals(startLoc) && bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()) > 0)
                 .OrderBy(baseLoc => bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()));
             Console.Out.WriteLine("startLoc: "+startLoc.xConst()+" "+startLoc.yConst());
-            foreach(BaseLocation poi in pos)
-                Console.Out.WriteLine("Loc: " + poi.getTilePosition().xConst() + " " + poi.getTilePosition().yConst() + " dist: " + bwta.getGroundDistance(startLoc, poi.getTilePosition()));
+            //foreach(BaseLocation poi in pos)
+                //Console.Out.WriteLine("Loc: " + poi.getTilePosition().xConst() + " " + poi.getTilePosition().yConst() + " dist: " + bwta.getGroundDistance(startLoc, poi.getTilePosition()));
             if (pos.Count() < 1)
                 return true;
 

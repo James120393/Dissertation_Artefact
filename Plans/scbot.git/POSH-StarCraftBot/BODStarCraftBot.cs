@@ -442,7 +442,7 @@ namespace POSH_StarCraftBot
         //Return any Idle Probes under the AI's control
         public IEnumerable<Unit> GetIdleProbes()
         {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Probe.getID()).Where(probe => probe.isIdle() && !IsBuilder(probe));
+            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Probe.getID()).Where(probe => probe.isIdle() && !IsBuilder(probe) );
         }
 
 

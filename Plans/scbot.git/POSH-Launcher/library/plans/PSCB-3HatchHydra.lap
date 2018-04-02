@@ -44,8 +44,13 @@
 	PositionNexus 
 	BuildNexus
 ))
-(AP buildChokePylon (minutes 1.0) (
-	SelectNatural
+(AP buildBasePylon (minutes 1.0) (
+	SelectStartBase 
+	PositionPylon 
+	BuildPylon
+))
+(AP buildOtherPylon (minutes 1.0) (
+	SelectStartBase
 	PositionPylon 
 	BuildPylon
 ))
@@ -56,12 +61,12 @@
 	BuildPylon
 ))
 (AP buildCannon (minutes 1.0) (
-	SelectNatural
+	SelectChokeBuild
 	PositionCannon
 	BuildCannon
 ))
 (AP buildForge (minutes 1.0) (
-	SelectStartBase 
+	SelectChokeBuild 
 	PositionForge 
 	BuildForge
 ))
@@ -80,11 +85,6 @@
 	SelectAssimilatorLocation 
 	BuildAssimilator
 ))
-(AP buildNaturalPylon (minutes 1.0) (
-	SelectNatural 
-	PositionPylon 
-	BuildPylon
-))
 (AP dragoon (minutes 1.0) (
 	SelectChokeBuild
 	TrainDragoon
@@ -94,11 +94,17 @@
 	SelectChoke 
 	TrainCorsair
 ))
-(C extendWorldKnowledge (seconds 1.0) (goal ((GameRunning 0.0 =)))
+(AP probeScoutToNatural (minutes 1.0) (
+	SelectProbeScout
+	ProbeToNatural
+))
+(C exploreLocal (seconds 1.0) (goal ((NaturalFound 1.0 ==)))
 	(elements
-		(			(probeExploring (trigger ((NeedProbeAtNatural 1.0 ==) (DoneExploringLocal 0.0 ==))) ProbeToNatural)	)
+		(
+		(probeScoutToNatural (trigger ((HaveScout 0.0 ==))) probeScoutToNatural)	)
 	)
 )
+
 (C repairBuildings (seconds 1.0) (goal ((BuildingDamaged 0.0 ==)))
 	(elements
 		(	
@@ -158,7 +164,7 @@
 (C probeHarvesting (seconds 1.0) (goal ((ProbesLured)))
 	(elements
 		(	
-		(miningGas (trigger ((AssimilatorCount 1.0 >=) (ProbeAssimilatorRatio 0.25 <=) (IdleProbes))) AssignToGas)	)
+		(miningGas (trigger ((AssimilatorCount 1.0 >=) (ProbeAssimilatorRatio 0.25 <=))) AssignToGas)	)
 		(	
 		(miningCrystal (trigger ((IdleProbes))) AssignProbes)	)
 	)
@@ -183,17 +189,20 @@
 )
 (C 18NexusOpeningBuild (minutes 1.0) (goal ((AssimilatorCount 1.0 >=) (GatewayCount 1.0 >=) (CyberneticsCoreCount 1.0 >=) (ProbeCount 14.0 >=)))
 	(elements
+		(
+		(buildSecondPylon (trigger ((TotalSupply 17.0 ==) (PylonCount 1.0 ==))) buildBasePylon)	)
 		(	
-		(buildPylon (trigger ((PylonCount 0.0 <=))) buildPylon)	)
-		(	
-		(buildFirstGateway (trigger ((TotalSupply 17.0 >=) (GatewayCount 0.0 ==) (PylonCount 1.0 >=))) buildGateway)	)
+		(buildPylon (trigger ((PylonCount 0.0 ==))) buildPylon)	)
+		(
+		(buildProbes (trigger ((PylonCount 1.0 >=) (ProbeCount 6.0 <=))) BuildProbe) )
+		(
+		(buildFirstGateway (trigger ((TotalSupply 17.0 >=) (GatewayCount 0.0 ==))) buildGateway)	)
+		(
+		(buildProbes (trigger ((PylonCount 2.0 >=) (ProbeCount 9.0 <=))) BuildProbe) )
 		(
 		(buildAssimilator (trigger ((GatewayCount 1.0 ==) (AssimilatorCount 0.0 ==))) buildAssimilator)	)
 		(
 		(buildCyberneticsCore (trigger ((GatewayCount 1.0 ==) (CyberneticsCoreCount 0.0 ==))) buildCyberneticsCore)	)
-		(
-		(buildSecondPylon (trigger ((AvailableSupply 2.0 <=))) buildPylon)	)
-		
 	)
 )
 (C probeScouting (seconds 1.0) (goal ((DoneExploringLocal 1.0 =)))
@@ -207,12 +216,11 @@
 		(		(retreat (trigger ((ForceIsLosing 1.0 =))) flee(seconds 1.0)))
 		(		(attack (trigger ((ForceReady))) attackEnemy(seconds 0.5)))
 		(		(defend (trigger ((BaseUnderAttack 1.0 ==))) defendLocation(seconds 0.5)))
-		(		(harvest (trigger ((ProbeCount 1.0 >=) (IdleProbes))) probeHarvesting(seconds 0.25)))
-		(		(explore (trigger ((DoneExploringLocal 0.0 ==))) extendWorldKnowledge(seconds 0.25)))
-		(		(build (trigger ((NeedBuilding 1.0 =) (DoneExploringLocal 1.0 ==))) buildBase))
+		(		(harvest (trigger ((ProbeCount 1.0 >=) (IdleProbes))) probeHarvesting(seconds 0.01)))
+		(		(explore (trigger ((NaturalFound 0.0 ==))) exploreLocal))
+		(		(createForce (trigger ((CyberneticsCoreCount 1.0 =))) build18NexusForce(seconds 0.05)))
+		(		(build (trigger ((NeedBuilding 1.0 =) (NaturalFound 1.0 ==))) buildBase))
 		(		(research (trigger ((ForgeCount 1.0 =))) research(seconds 0.25)))
-		(		(createForce (trigger ((CyberneticsCoreCount 1.0 =))) build18NexusForce(seconds 0.25)))
-		(		(scout (trigger ((DoneExploringLocal 0.0 ==))) probeScouting(seconds 0.5)))
 		(		(wait (trigger ((Success))) idle))
 
 	)
