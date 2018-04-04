@@ -284,76 +284,98 @@ namespace POSH_StarCraftBot.behaviours
             return true;
         }
 
+		// Function to Train units
+		protected bool TrainProbe(UnitType type)
+		{
+			if (CanTrainUnit(type))
+			{
+				int targetLocation = (int)BuildSite.StartingLocation;
+				if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+					targetLocation = (int)Interface().currentBuildSite;
+				IEnumerable<Unit> nexuss = Interface().GetNexus();
+				if (nexuss.Count() <= 0)
+					return false;
+				Unit nexus = nexuss.First();
+				bool trainWorked = nexus.train(type);
+
+				if (nexus.getTrainingQueue().Count() >= 1)
+				{
+					return false;
+				}
+
+				// create new list to monitor specific type of unit
+				if (!trainingUnits.ContainsKey(type.getID()))
+					trainingUnits[type.getID()] = new List<Unit>();
+
+				// adding the moved unit to the appropriate unit list
+				if (trainWorked)
+					Console.Out.WriteLine("Training Unit: " + type.getName());
+					if (Interface().forcePoints.ContainsKey(Interface().currentForcePoint))
+						nexus.move(new Position(Interface().forcePoints[Interface().currentForcePoint]));
+					else
+						nexus.move(new Position(Interface().baseLocations[targetLocation]));
+				return trainWorked;
+			}
+			return false;
+		}
+
         // Function to Train units
-        protected bool TrainProbe(UnitType type)
+        protected bool TrainUnit(UnitType type, UnitType building)
         {
             if (CanTrainUnit(type))
             {
                 int targetLocation = (int)BuildSite.StartingLocation;
-                if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-                    targetLocation = (int)Interface().currentBuildSite;
-                IEnumerable<Unit> gateways = Interface().GetNexus();
-                if (gateways.Count() <= 0)
-                    return false;
-                Unit gateway = gateways.OrderBy(unit => unit.getDistance(new Position(Interface().baseLocations[targetLocation]))).First();
-                bool trainWorked = gateway.train(type);
 
+				if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+                    targetLocation = (int)Interface().currentBuildSite;
+
+				IEnumerable<Unit> prodBuildings = Interface().GetBuilding(building);
+				if (prodBuildings.Count() <= 0)
+                    return false;
+                Unit productionBuild = prodBuildings.First();
+				bool trainWorked = productionBuild.train(type);
+
+				if (productionBuild.getTrainingQueue().Count() >= 1)
+				{
+					productionBuild = prodBuildings.Last();
+					if (productionBuild.getTrainingQueue().Count() >= 5)
+					{
+						return false;
+					}
+				}
                 // create new list to monitor specific type of unit
                 if (!trainingUnits.ContainsKey(type.getID()))
                     trainingUnits[type.getID()] = new List<Unit>();
 
                 // adding the moved unit to the appropriate unit list
                 if (trainWorked)
-                    if (Interface().forcePoints.ContainsKey(Interface().currentForcePoint))
-                        gateway.move(new Position(Interface().forcePoints[Interface().currentForcePoint]));
-                    else
-                        gateway.move(new Position(Interface().baseLocations[targetLocation]));
+					Console.Out.WriteLine("Training Unit: " + type.getName());
+					if (Interface().forcePoints.ContainsKey(Interface().currentForcePoint))
+						productionBuild.move(new Position(Interface().forcePoints[Interface().currentForcePoint]));
+					else
+						productionBuild.move(new Position(Interface().buildingChoke));
                 return trainWorked;
             }
             return false;
         }
-
-        // Function to Train units
-        protected bool TrainUnit(UnitType type)
-        {
-            if (CanTrainUnit(type))
-            {
-                int targetLocation = (int)BuildSite.StartingLocation;
-                if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-                    targetLocation = (int)Interface().currentBuildSite;
-                IEnumerable<Unit> building = Interface().GetGateway();
-                if (building.Count() <= 0)
-                    return false;
-                Unit gateway = building.OrderBy(unit => unit.getDistance(new Position(Interface().baseLocations[targetLocation]))).First();
-                bool trainWorked = gateway.train(type);
-
-                // create new list to monitor specific type of unit
-                if (!trainingUnits.ContainsKey(type.getID()))
-                    trainingUnits[type.getID()] = new List<Unit>();
-
-                // adding the moved unit to the appropriate unit list
-                if (trainWorked)
-                    if (Interface().forcePoints.ContainsKey(Interface().currentForcePoint))
-                        gateway.move(new Position(Interface().forcePoints[Interface().currentForcePoint]));
-                    else
-                        gateway.move(new Position(Interface().baseLocations[targetLocation]));
-                return trainWorked;
-            }
-            return false;
-        }
-
 
         //
         // SENSES
         //
         // Action to tell the AI that its forces are finished being trained
-        [ExecutableSense("FinishedForce")]
+		[ExecutableAction("FinishedForce")]
         public bool FinishedForce()
         {
             forceReady = true;
-            return forceReady;
+            return true;
         }
 
+		[ExecutableAction("NotFinishedForce")]
+		public bool NotFinishedForce()
+		{
+			forceReady = false;
+			return false;
+		}
 
         // Sense to tell the AI that their forces are ready
         [ExecutableSense("ForceReady")]
@@ -507,7 +529,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("BuildProbe")]
         public bool BuildProbe()
         {
-            return TrainProbe(bwapi.UnitTypes_Protoss_Probe);
+			return TrainProbe(bwapi.UnitTypes_Protoss_Probe);
         }
 
 
@@ -515,7 +537,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("TrainZealot")]
         public bool TrainZealot()
         {
-            return TrainUnit(bwapi.UnitTypes_Protoss_Zealot);
+			return TrainUnit(bwapi.UnitTypes_Protoss_Zealot, bwapi.UnitTypes_Protoss_Gateway);
         }
 
 
@@ -523,7 +545,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("TrainDragoon")]
         public bool TrainDragoon()
         {
-            return TrainUnit(bwapi.UnitTypes_Protoss_Dragoon);
+			return TrainUnit(bwapi.UnitTypes_Protoss_Dragoon, bwapi.UnitTypes_Protoss_Gateway);
         }
 
 
@@ -531,7 +553,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("TrainCorsair")]
         public bool TrainCorsair()
         {
-            return MorphUnit(bwapi.UnitTypes_Protoss_Corsair);
+			return TrainUnit(bwapi.UnitTypes_Protoss_Corsair, bwapi.UnitTypes_Protoss_Stargate);
         }
 
 
@@ -539,7 +561,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("TrainDarkTemplar")]
         public bool TrainDarkTemplar()
         {
-            return MorphUnit(bwapi.UnitTypes_Protoss_Dark_Templar);
+			return TrainUnit(bwapi.UnitTypes_Protoss_Dark_Templar, bwapi.UnitTypes_Protoss_Gateway);
         }
 
         ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////

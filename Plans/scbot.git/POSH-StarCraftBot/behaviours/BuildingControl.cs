@@ -18,6 +18,7 @@ namespace POSH_StarCraftBot.behaviours
         Unit buildingToRepair;
         Unit repairDrone;
         Unit builder;
+		private bool needNewBuilder = false;
 
         private bool needBuilding = true;
 
@@ -168,19 +169,20 @@ namespace POSH_StarCraftBot.behaviours
                 }
                 if (timeout <= 0)
                 {
-                    building = builder.build(builder.getTilePosition(), type);
-                    if (building)
-                    {
-                        buildQueue[type.getID()].Add(buildLocation);
-                        return building;
-                    }
+					building = builder.build(builder.getTilePosition(), type);
+					if (building)
+					{
+						buildQueue[type.getID()].Add(buildLocation);
+						return building;
+					}
                 }
             }
+			needNewBuilder = true;
             return false;
         }
 
         ////////////////////////////////////////////////////////////////////////James' Code////////////////////////////////////////////////////////////////////////
-        // Function to position buildings taking he unit type for the building size
+		// Function to position buildings taking he unit type for the building size
         // an xSpace Value, ySpace Value and Z for in iterations
         protected bool Position(UnitType type, int X, int Y, int itterations)
         {
@@ -193,12 +195,12 @@ namespace POSH_StarCraftBot.behaviours
             else
                 buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
 
-			if (builder == null)
+			if (builder == null || builder.getHitPoints() <= 0)
 			{
 				builder = Interface().GetBuilder(buildPosition);
 			}
 
-            double dist = itterations;
+			double dist = itterations;
             if (buildLocation is TilePosition && buildPosition is TilePosition)
                 dist = buildLocation.getDistance(buildPosition);
             if (buildLocation != null && dist < itterations && bwapi.Broodwar.canBuildHere(builder, buildLocation, type)) 
@@ -209,7 +211,7 @@ namespace POSH_StarCraftBot.behaviours
             else
             {
                 Position pos = new Position(buildPosition);
-                Console.Out.WriteLine("Base:" + Interface().currentBuildSite + " loc:" + buildPosition.xConst() + ":" + buildPosition.yConst() + " pos" + pos.xConst() + ":" + pos.yConst());
+                Console.Out.WriteLine("Base: " + Interface().currentBuildSite + " loc: " + buildPosition.xConst() + ": " + buildPosition.yConst() + " pos " + pos.xConst() + ": " + pos.yConst());
                 buildPosition = PossibleBuildLocation(buildPosition, X, Y, itterations, builder, type);
 				if (buildPosition == null)
 				{
@@ -285,6 +287,17 @@ namespace POSH_StarCraftBot.behaviours
         //
         //Actions
         //
+		[ExecutableAction("SelectNewBuilder")]
+		public bool SelectNewBuilder()
+		{
+			if (needNewBuilder == true)
+			{
+				builder = Interface().GetBuilder(Interface().baseLocations[(int)Interface().currentBuildSite]);
+				return true;
+			}
+			return false;
+		}
+
         [ExecutableAction("RepairBuilding")]
         public bool RepairBuilding()
         {
@@ -504,7 +517,28 @@ namespace POSH_StarCraftBot.behaviours
         //
         // SENSES
         //
+		[ExecutableSense("HasChokePylon")]
+		public bool HasChokePylon()
+		{
+			if (Interface().buildingChoke is TilePosition)
+			{
+				if (Interface().naturalHasBeenFound == true)
+				{
+					foreach (Unit unit in Interface().GetAllBuildings())
+						if (unit.getType().getID() == bwapi.UnitTypes_Protoss_Pylon.getID() &&
+							unit.getDistance(new Position(Interface().buildingChoke)) <= DELTADISTANCE * 2)
+							return true;
+				}
+				return false;
+			}
+			return false;
+		}
 
+		[ExecutableSense("NeedNewBuilder")]
+		public bool NeedNewBuilder()
+		{
+			return needNewBuilder;
+		}
 
         // Sense to return the number of protoss Nexus'
         [ExecutableSense("NexusCount")]

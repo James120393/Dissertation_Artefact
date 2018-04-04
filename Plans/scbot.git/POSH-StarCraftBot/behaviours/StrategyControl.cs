@@ -32,7 +32,7 @@ namespace POSH_StarCraftBot.behaviours
         private int maxBaseLocations;
 
 
-		private bool naturalHasBeenFound = false;
+		//public bool naturalHasBeenFound = false;
 		public Position naturalLocation;
 
         public StrategyControl(AgentBase agent)
@@ -45,7 +45,8 @@ namespace POSH_StarCraftBot.behaviours
 		{
 			return scout;
 		}
-        //
+
+		//
         // INTERNAL
         //
         private bool SwitchBuildToBase(int location)
@@ -202,10 +203,11 @@ namespace POSH_StarCraftBot.behaviours
 				}
 				if (probeScout.getDistance(target) <= DELTADISTANCE * 2)
 				{
-					naturalHasBeenFound = true;
+					Interface().naturalHasBeenFound = true;
+					SelectChoke();
 					return true;
 				}		
-				System.Threading.Thread.Sleep(1000);
+				System.Threading.Thread.Sleep(100);
 			}
 			return true;
 
@@ -416,7 +418,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("NaturalFound")]
         public bool NaturalFound()
         {
-			return naturalHasBeenFound;
+			return Interface().naturalHasBeenFound;
         }
 
 		[ExecutableSense("HaveScout")]
@@ -579,10 +581,10 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("ProbeAssimilatorRatio")]
         public float ProbeAssimilatorRatio()
         {
-            if (Interface().GetAssimilator().Count() < 0 || Interface().GetAssimilator().Where(ex => ex.isCompleted() && ex.getResources() > 0 && ex.getHitPoints() > 0).Count() < 1)
-                return 1;
-            if (Interface().GetProbes().Count() < 1 || Interface().GetProbes().Where(probe => probe.isGatheringMinerals()).Count() < 1)
-                return 1;
+            //if (Interface().GetAssimilator().Count() < 0 || Interface().GetAssimilator().Where(ex => ex.isCompleted() && ex.getResources() > 0 && ex.getHitPoints() > 0).Count() < 1)
+              //  return 1;
+            //if (Interface().GetProbes().Count() < 1 || Interface().GetProbes().Where(probe => probe.isGatheringMinerals()).Count() < 1)
+              //  return 1;
             return Interface().GetProbes().Where(probe => probe.isGatheringGas()).Count() / Interface().GetProbes().Where(probe => !probe.isGatheringMinerals()).Count();
         }
 

@@ -62,6 +62,7 @@ namespace POSH_StarCraftBot
         public BuildSite currentBuildSite;
         public Chokepoint chokepoint;
         public TilePosition buildingChoke;
+		public bool naturalHasBeenFound = false;
 
         private int[] mineralPatchIDs = new int[3] { bwapi.UnitTypes_Resource_Mineral_Field.getID(), 
                 bwapi.UnitTypes_Resource_Mineral_Field_Type_2.getID(), 
@@ -497,7 +498,6 @@ namespace POSH_StarCraftBot
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Nexus.getID());
         }
 
-
         //Return the number of Forges under the AI's control Plus their location
         public IEnumerable<Unit> GetForge()
         {
@@ -552,6 +552,12 @@ namespace POSH_StarCraftBot
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Fleet_Beacon.getID());
         }
+
+		//Return the building ID, used for training units at different buildings
+		public IEnumerable<Unit> GetBuilding(UnitType Building)
+		{
+			return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == Building.getID());
+		}
         
         ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
 
