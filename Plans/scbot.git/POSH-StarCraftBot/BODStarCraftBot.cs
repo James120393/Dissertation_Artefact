@@ -8,6 +8,7 @@ using POSH.sys.strict;
 using SWIG.BWTA;
 using log4net;
 using POSH_StarCraftBot.logic;
+using Random;
 
 namespace POSH_StarCraftBot
 {
@@ -62,6 +63,8 @@ namespace POSH_StarCraftBot
         public BuildSite currentBuildSite;
         public Chokepoint chokepoint;
         public TilePosition buildingChoke;
+		public TilePosition naturalBuild;
+		public bool enemyBaseFound = false;
 		public bool naturalHasBeenFound = false;
 
         private int[] mineralPatchIDs = new int[3] { bwapi.UnitTypes_Resource_Mineral_Field.getID(), 
@@ -382,7 +385,7 @@ namespace POSH_StarCraftBot
             if (forces[ForceLocations.Build].Count > 0)
                 return forces[ForceLocations.Build].OrderBy(unit => unit.SCUnit.getDistance(new Position(location))).First().SCUnit;
 
-            Unit builder = GetProbes().Where(probe => !IsBuilder(probe)).OrderBy(probe => probe.getDistance(new Position(location))).First();
+            Unit builder = GetProbes().Where(probe => !IsBuilder(probe)).OrderBy(probe => probe.getDistance(new Position(location))).;
 
             if (!(builder is Unit))
                 return null;

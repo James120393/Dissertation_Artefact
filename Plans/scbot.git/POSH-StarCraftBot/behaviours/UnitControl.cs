@@ -296,13 +296,13 @@ namespace POSH_StarCraftBot.behaviours
 				if (nexuss.Count() <= 0)
 					return false;
 				Unit nexus = nexuss.First();
-				bool trainWorked = nexus.train(type);
-
+				
 				if (nexus.getTrainingQueue().Count() >= 1)
 				{
 					return false;
 				}
-
+				
+				bool trainWorked = nexus.train(type);
 				// create new list to monitor specific type of unit
 				if (!trainingUnits.ContainsKey(type.getID()))
 					trainingUnits[type.getID()] = new List<Unit>();
@@ -333,16 +333,17 @@ namespace POSH_StarCraftBot.behaviours
 				if (prodBuildings.Count() <= 0)
                     return false;
                 Unit productionBuild = prodBuildings.First();
-				bool trainWorked = productionBuild.train(type);
+				
 
-				if (productionBuild.getTrainingQueue().Count() >= 1)
+				if (productionBuild.getTrainingQueue().Count() >= 2)
 				{
 					productionBuild = prodBuildings.Last();
-					if (productionBuild.getTrainingQueue().Count() >= 5)
+					if (productionBuild.getTrainingQueue().Count() >= 2)
 					{
 						return false;
 					}
 				}
+				bool trainWorked = productionBuild.train(type);
                 // create new list to monitor specific type of unit
                 if (!trainingUnits.ContainsKey(type.getID()))
                     trainingUnits[type.getID()] = new List<Unit>();

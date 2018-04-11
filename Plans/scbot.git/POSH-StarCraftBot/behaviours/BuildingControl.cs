@@ -19,6 +19,7 @@ namespace POSH_StarCraftBot.behaviours
         Unit repairDrone;
         Unit builder;
 		private bool needNewBuilder = false;
+		private int needBuilderCounter = 0;
 
         private bool needBuilding = true;
 
@@ -139,7 +140,7 @@ namespace POSH_StarCraftBot.behaviours
         }
 
         //Function to build a building
-        protected bool Build(UnitType type, int timeout = 50)
+        protected bool Build(UnitType type, int timeout = 10)
         {
             bool building = false;
             if (builder is Unit)
@@ -184,14 +185,20 @@ namespace POSH_StarCraftBot.behaviours
         ////////////////////////////////////////////////////////////////////////James' Code////////////////////////////////////////////////////////////////////////
 		// Function to position buildings taking he unit type for the building size
         // an xSpace Value, ySpace Value and Z for in iterations
-        protected bool Position(UnitType type, int X, int Y, int itterations)
+        protected bool Position(UnitType type, int X, int Y, int itterations, int timeout = 75)
         {
             //if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite) && Interface().currentBuildSite != BuildSite.NaturalChoke)
                // return false;
 
             TilePosition buildPosition;
-            if (Interface().currentBuildSite == BuildSite.NaturalChoke)
+			if (needBuilderCounter >= 5)
+				SelectNewBuilder();
+
+
+			if (Interface().currentBuildSite == BuildSite.NaturalChoke)
                 buildPosition = Interface().buildingChoke;
+			else if (Interface().currentBuildSite == BuildSite.Natural)
+				buildPosition = Interface().naturalBuild;
             else
                 buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
 
@@ -217,6 +224,7 @@ namespace POSH_StarCraftBot.behaviours
 				{
 					if (bwapi.Broodwar.canBuildHere(builder, new TilePosition(builder.getPosition()), type))
 						buildPosition = new TilePosition(builder.getPosition());
+						needBuilderCounter++;
 						return true;
 						
 				}
@@ -225,27 +233,23 @@ namespace POSH_StarCraftBot.behaviours
 			if (buildLocation is TilePosition)
 			{
 				Position target = new Position(buildLocation);
-				while (builder.getDistance(target) >= DELTADISTANCE)
+				builder.move(target, false);
+				while (builder.getDistance(target) >= DELTADISTANCE / 2 && timeout > 0)
 				{
 					if (!builder.isMoving() || builder.isGatheringMinerals())
 					{
-						builder.move(target);
+						builder.move(target, false);
 					}
-					if (builder.getDistance(target) <= DELTADISTANCE)
-					{
-						return true;
-					}
-					System.Threading.Thread.Sleep(1000);
+					timeout--;
+					System.Threading.Thread.Sleep(100);
 				}
-				//else
-				//{
-				//	TilePosition probesPos = new TilePosition(builder.getPosition());
-				//	Console.Out.WriteLine("Distance:" + builder.getDistance(new Position(buildPosition)) + " pos" + probesPos.x() + ":" + probesPos.y());
-				//	if (bwapi.Broodwar.canBuildHere(builder, probesPos, type))
-				//		buildLocation = probesPos;
-				//		return true;
-				//}
-				return true;
+				if (timeout <= 0)
+				{
+					needBuilderCounter++;
+					return false;
+				}
+				needBuilderCounter = 0;
+				return true;	
 			}
             return false;
         }
@@ -293,6 +297,8 @@ namespace POSH_StarCraftBot.behaviours
 			if (needNewBuilder == true)
 			{
 				builder = Interface().GetBuilder(Interface().baseLocations[(int)Interface().currentBuildSite]);
+				needBuilderCounter = 0;
+				needNewBuilder = false;
 				return true;
 			}
 			return false;
@@ -397,7 +403,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("PositionForge")]
         public bool PositionForge()
         {
-			return Position(bwapi.UnitTypes_Protoss_Forge, 1, 1, 100);
+			return Position(bwapi.UnitTypes_Protoss_Forge, 1, 1, 300);
         }
 
 
@@ -413,7 +419,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("PositionCyberneticsCore")]
         public bool PositionCyberneticsCore()
         {
-			return Position(bwapi.UnitTypes_Protoss_Cybernetics_Core, 1, 1, 100);
+			return Position(bwapi.UnitTypes_Protoss_Cybernetics_Core, 1, 1, 300);
         }
 
 
@@ -429,7 +435,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("PositionNexus")]
         public bool PositionNexus()
         {
-            return Position(bwapi.UnitTypes_Protoss_Nexus, 1, 1, 100);
+            return Position(bwapi.UnitTypes_Protoss_Nexus, 1, 1, 300);
         }
 
 
@@ -444,7 +450,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("PositionPylon")]
         public bool PositionPylon()
         {
-            return Position(bwapi.UnitTypes_Protoss_Pylon, 1, 1, 100);
+            return Position(bwapi.UnitTypes_Protoss_Pylon, 1, 1, 300);
         }
 
 
@@ -461,7 +467,7 @@ namespace POSH_StarCraftBot.behaviours
         public bool PositionChokePylon()
         {
             //TODO Create function to select the appropriate choke point for the pylon to be built
-            return Position(bwapi.UnitTypes_Protoss_Pylon, 1, 1, 100);
+            return Position(bwapi.UnitTypes_Protoss_Pylon, 1, 1, 300);
         }
 
 
@@ -477,7 +483,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("PositionGateway")]
         public bool PositionGateway()
         {
-            return Position(bwapi.UnitTypes_Protoss_Gateway, 1, 1, 100);
+            return Position(bwapi.UnitTypes_Protoss_Gateway, 1, 1, 300);
         }
 
 
@@ -494,7 +500,7 @@ namespace POSH_StarCraftBot.behaviours
         public bool PositionCannon()
         {
             //TODO Create function to select the appropriate choke point for the cannon to be built
-            return Position(bwapi.UnitTypes_Protoss_Photon_Cannon, 1, 1, 100);
+            return Position(bwapi.UnitTypes_Protoss_Photon_Cannon, 1, 1, 300);
         }
 
         // Action to use the suitable location to build the protoss Photon Cannon
@@ -527,6 +533,23 @@ namespace POSH_StarCraftBot.behaviours
 					foreach (Unit unit in Interface().GetAllBuildings())
 						if (unit.getType().getID() == bwapi.UnitTypes_Protoss_Pylon.getID() &&
 							unit.getDistance(new Position(Interface().buildingChoke)) <= DELTADISTANCE * 2)
+							return true;
+				}
+				return false;
+			}
+			return false;
+		}
+
+		[ExecutableSense("HasNaturalPylon")]
+		public bool HasNaturalPylon()
+		{
+			if (Interface().naturalBuild is TilePosition)
+			{
+				if (Interface().naturalHasBeenFound == true)
+				{
+					foreach (Unit unit in Interface().GetAllBuildings())
+						if (unit.getType().getID() == bwapi.UnitTypes_Protoss_Pylon.getID() &&
+							unit.getDistance(new Position(Interface().naturalBuild)) <= DELTADISTANCE * 2)
 							return true;
 				}
 				return false;

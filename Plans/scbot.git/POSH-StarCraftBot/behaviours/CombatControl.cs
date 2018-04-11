@@ -317,7 +317,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("FendOffUnits")]
         public bool FendOffUnits()
         {
-            return AttackLocation(this.armyTargets[ForceLocations.ArmyTwo]);
+            return AttackLocation(this.armyTargets[ForceLocations.ArmyOne]);
         }
 
         [ExecutableAction("SelectForceStartingLocation")]
@@ -368,7 +368,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("AssignArmyOne")]
         public bool AssignArmyOne()
         {
-            IEnumerable<Unit> force = Interface().GetAllUnits(false).Where(unit => unit.getDistance(new Position(Interface().forcePoints[currentForce])) < DELTADISTANCE);
+            IEnumerable<Unit> force = Interface().GetAllUnits(false);//.Where(unit => unit.getDistance(new Position(Interface().forcePoints[currentForce])) < DELTADISTANCE);
 
             List<UnitAgent> ag = new List<UnitAgent>();
             foreach (Unit un in force)
@@ -401,14 +401,14 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("SelectForce")]
         public bool SelectForce()
         {
-            IEnumerable<Unit> force = Interface().GetAllUnits(false).Where(unit => unit.getDistance(new Position(Interface().forcePoints[currentForce])) < DELTADISTANCE);
+            IEnumerable<Unit> force = Interface().GetAllUnits(false);//.Where(unit => unit.getDistance(new Position(Interface().forcePoints[currentForce])) < DELTADISTANCE);
 
             List<UnitAgent> ag = new List<UnitAgent>();
             foreach (Unit un in force)
             {
                 if (
                     (!Interface().forces.ContainsKey(ForceLocations.ArmyOne) || !(Interface().forces[ForceLocations.ArmyOne] is List<UnitAgent>) || Interface().forces[ForceLocations.ArmyOne].First(unit => unit.SCUnit.getID() == un.getID()) == null) &&
-                    (!Interface().forces.ContainsKey(ForceLocations.ArmyOne) || !(Interface().forces[ForceLocations.ArmyTwo] is List<UnitAgent>) || Interface().forces[ForceLocations.ArmyTwo].First(unit => unit.SCUnit.getID() == un.getID()) == null)
+                    (!Interface().forces.ContainsKey(ForceLocations.ArmyTwo) || !(Interface().forces[ForceLocations.ArmyTwo] is List<UnitAgent>) || Interface().forces[ForceLocations.ArmyTwo].First(unit => unit.SCUnit.getID() == un.getID()) == null)
                     )
                     ag.Add(new UnitAgent(un, new UnitAgentOptimizedProperties(), this)); //TODO: needs to be altered to be more elegant why not creatre UnitAgents when the unit is created in UnitControl
             }
@@ -535,6 +535,10 @@ namespace POSH_StarCraftBot.behaviours
             {
                 attackCounter += Interface().GetAllUnits(true).Where(unit => unit.isUnderAttack() && unit.getPosition().getDistance(new Position(Interface().baseLocations[(int)BuildSite.Natural])) < randomMult * DELTADISTANCE).Count();
             }
+			if (Interface().baseLocations.ContainsKey((int)BuildSite.NaturalChoke))
+			{
+				attackCounter += Interface().GetAllUnits(true).Where(unit => unit.isUnderAttack() && unit.getPosition().getDistance(new Position(Interface().baseLocations[(int)BuildSite.NaturalChoke])) < randomMult * DELTADISTANCE).Count();
+			}
             return attackCounter > 0;
         }
 

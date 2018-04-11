@@ -72,10 +72,14 @@ namespace POSH_StarCraftBot.behaviours
 
         [ExecutableAction("SelectNatural")]
         public bool SelectNatural()
-        {
-			Interface().currentBuildSite = BuildSite.Natural;
-            return SwitchBuildToBase((int)BuildSite.Natural);
-        }
+		{
+			if (Interface().naturalBuild is TilePosition)
+			{
+				Interface().currentBuildSite = BuildSite.Natural;
+				return true;
+			}
+			return false;
+		}
 
         [ExecutableAction("SelectStartBase")]
         public bool SelectStartBase()
@@ -180,38 +184,33 @@ namespace POSH_StarCraftBot.behaviours
 
 			TilePosition startLoc = Interface().baseLocations[(int)BuildSite.StartingLocation];
 
-			if (probeScout == null || probeScout.getHitPoints() == 0)
-				probeScout = Interface().GetProbes().First();
+			if (probeScout == null || probeScout.getHitPoints() <= 0)
+				probeScout = Interface().GetProbes().Last();
 
 
 			IOrderedEnumerable<BaseLocation> pos = bwta.getBaseLocations()
-				.Where(baseLoc => !baseLoc.getTilePosition().opEquals(startLoc) && bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()) > 0)
-				.OrderBy(baseLoc => bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()));
+				.Where(baseLoc => bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()) > 0).OrderBy(baseLoc => bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()));
 
 			if (pos.Count() < 1)
 				return false;
 			
-			Position target = new Position(pos.First().getTilePosition());
+			Position target = pos.First().getPosition();
 			
 			naturalLocation = target;
-			while (probeScout.getDistance(target) >= DELTADISTANCE)
+			while (probeScout.getDistance(target) >= DELTADISTANCE/5)
 			{
 				if (!probeScout.isMoving() || probeScout.isGatheringMinerals())
 				{
 					probeScout.move(target, false);
-					Console.Out.WriteLine("Probe to Natural: true");
+					Console.Out.WriteLine("Probe to Natural");
 				}
-				if (probeScout.getDistance(target) <= DELTADISTANCE * 2)
-				{
-					Interface().naturalHasBeenFound = true;
-					SelectChoke();
-					return true;
-				}		
-				System.Threading.Thread.Sleep(100);
+				System.Threading.Thread.Sleep(1000);
 			}
+			Interface().naturalHasBeenFound = true;
+			Console.Out.WriteLine("Probe At Natural");					
+			SelectChoke();
+			Interface().naturalBuild = probeScout.getTilePosition();
 			return true;
-
-
 		}
 
 		//[ExecutableAction("FindNatural")]
@@ -254,7 +253,7 @@ namespace POSH_StarCraftBot.behaviours
             }
             if (scout == null && units.Count() > 0)
             {
-                scout = units.First();
+				scout = units.Last();
             }
             probeScout = scout;
 
@@ -266,14 +265,10 @@ namespace POSH_StarCraftBot.behaviours
         public bool ProbeScouting()
         {
             // no scout alive or selected
-            if (probeScout == null)
-                return false;
+			if (probeScout == null || probeScout.getHitPoints() <= 0)
+				SelectProbeScout();
             if (probeScout != null)
             {
-                if (probeScout.getHitPoints() <= 0 || probeScout.isConstructing())
-                {
-                    return false;
-                }
                 IEnumerable<BaseLocation> baseloc = bwta.getBaseLocations().Where(loc =>
                         bwta.getGroundDistance(loc.getTilePosition(), probeScout.getTilePosition()) >= 0);
 
@@ -308,7 +303,7 @@ namespace POSH_StarCraftBot.behaviours
                         .ElementAt(scoutCounter)
                         .getPosition()
                         );
-                if (distance < DELTADISTANCE)
+                if (distance < DELTADISTANCE/2)
                 {
                     // close to another base location
                     if (!Interface().baseLocations.ContainsKey(scoutCounter))
@@ -330,6 +325,57 @@ namespace POSH_StarCraftBot.behaviours
             return true;
         }
 
+		[ExecutableAction("ScoutToEnemyBase")]
+		public bool ScoutToEnemyBase()
+		{
+			if (Interface().baseLocations.ContainsKey((int)BuildSite.Natural) || (probeScout is Unit && probeScout.getHitPoints() > 0 && probeScout.isMoving()))
+				return true;
+
+			TilePosition startLoc = Interface().baseLocations[(int)BuildSite.StartingLocation];
+
+			if (probeScout == null || probeScout.getHitPoints() <= 0)
+				probeScout = Interface().GetProbes().First();
+
+
+			IOrderedEnumerable<BaseLocation> pos = bwta.getBaseLocations()
+				.Where(baseLoc => !baseLoc.getTilePosition().opEquals(startLoc) && bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()) > 0)
+				.OrderBy(baseLoc => bwta.getGroundDistance(startLoc, baseLoc.getTilePosition()));
+
+			if (pos.Count() < 1)
+				return false;
+
+			Position target = pos.Last().getPosition();
+			Position randTarget = pos.Skip(2).First().getPosition();
+
+			naturalLocation = target;
+			while (probeScout.getDistance(target) >= DELTADISTANCE*3)
+			{
+				if (probeScout.isUnderAttack())
+				{
+					if (Interface().baseLocations.ContainsKey((int)BuildSite.Natural))
+						probeScout.move(new Position(Interface().baseLocations[(int)BuildSite.Natural]));
+					else if (Interface().baseLocations.ContainsKey((int)BuildSite.Extension))
+					{
+						probeScout.move(new Position(Interface().baseLocations[(int)BuildSite.Extension]));
+					}
+				}
+				if (probeScout.getHitPoints() <= 0)
+				{
+					Console.Out.WriteLine("Probe scout dead");
+					return false;
+				}
+				if (!probeScout.isMoving() || probeScout.isGatheringMinerals())
+				{
+					probeScout.move(target, false);
+					Console.Out.WriteLine("Probe to Enemy");
+				}
+				System.Threading.Thread.Sleep(100);
+			}
+			probeScout.move(randTarget, false);
+			Interface().enemyBaseFound = true;
+			Console.Out.WriteLine("Probe At Enemy");	
+			return true;
+		}
 
         [ExecutableAction("Pursue18NexusOpening")]
         public bool Pursue18NexusOpening()
@@ -403,16 +449,12 @@ namespace POSH_StarCraftBot.behaviours
         // SENSES
         //
 
-		//[ExecutableSense("NaturalRegistered")]
-		//public bool NaturalRegistered()
-		//{
-		//	if (natural == null)
-		//	{
-		//		return false;
-		//	}
-		//	return true;
-		//}
-		//
+		[ExecutableSense("EnemyBaseFound")]
+		public bool EnemyBaseFound()
+		{
+			return Interface().enemyBaseFound;
+		}
+		
 
 
         [ExecutableSense("NaturalFound")]
