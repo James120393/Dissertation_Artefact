@@ -368,7 +368,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("AssignArmyOne")]
         public bool AssignArmyOne()
         {
-            IEnumerable<Unit> force = Interface().GetAllUnits(false);//.Where(unit => unit.getDistance(new Position(Interface().forcePoints[currentForce])) < DELTADISTANCE);
+            IEnumerable<Unit> force = Interface().GetAllUnits(false).Where(unit => unit.getHitPoints() > 0);//.Where(unit => unit.getDistance(new Position(Interface().forcePoints[currentForce])) < DELTADISTANCE);
 
             List<UnitAgent> ag = new List<UnitAgent>();
             foreach (Unit un in force)
@@ -485,7 +485,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("EnemyDetected")]
         public int EnemyDetected()
         {
-            IEnumerable<Unit> shownUnits = Interface().UnitShow.Where(pair => pair.Key < (Core.Timer.Time() - DELTATIME)).OrderByDescending(pair => pair.Key).Select(pair => pair.Value);
+            IEnumerable<Unit> shownUnits = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0);
             bool detectedNew = false;
 
             foreach (Unit unit in shownUnits)
@@ -552,6 +552,16 @@ namespace POSH_StarCraftBot.behaviours
         {
             return 0;
         }
+
+		[ExecutableSense("EnemyBaseLocationFound")]
+		public bool EnemyBaseLocationFound()
+		{
+			if (Interface().enemyBaseLocation != null)
+			{
+				return true;
+			}
+			return false;
+		}
 
         /// <summary>
         /// Returns the Force which is currently fighting. There are currently only two forces. If zero is return no force is fighting.

@@ -8,12 +8,11 @@ using POSH.sys.strict;
 using SWIG.BWTA;
 using log4net;
 using POSH_StarCraftBot.logic;
-using Random;
 
 namespace POSH_StarCraftBot
 {
-    public enum BuildSite { None = 0, StartingLocation = 1, Natural = 2, Extension = 3, NaturalChoke = 4};
-    public enum ForceLocations { NotAssigned = 0, OwnStart = 1, Natural = 2, Extension = 3, NaturalChoke = 4, EnemyNatural = 5, EnemyStart = 6, ArmyOne = 7, ArmyTwo = 8, Build = 9, Scout = 10 };
+    public enum BuildSite { None = 0, StartingLocation = 1, Natural = 2, Extension = 3, NaturalChoke = 4, EnemyChoke = 5};
+    public enum ForceLocations { NotAssigned = 0, OwnStart = 1, Natural = 2, Extension = 3, NaturalChoke = 4, EnemyNatural = 5, EnemyStart = 6, ArmyOne = 7, ArmyTwo = 8, Build = 9, Scout = 10, EnemyChoke = 11};
     public enum GamePhase { Early, Mid, End }
 
     public class BODStarCraftBot : IStarcraftBot
@@ -36,8 +35,8 @@ namespace POSH_StarCraftBot
         protected log4net.ILog LOG;
 
         protected internal POSH_StarCraftBot.behaviours.AStarCraftBehaviour.Races enemyRace { get; set; }
-
-        /// <summary>
+		
+		/// <summary>
         /// Contains upto 7 forces of different size. The forces are at forcePoints identified by the same force location key.
         /// Forces ArmyOne and ArmyTwo are mobile and have no fixed TilePosition. 
         /// </summary>
@@ -63,9 +62,11 @@ namespace POSH_StarCraftBot
         public BuildSite currentBuildSite;
         public Chokepoint chokepoint;
         public TilePosition buildingChoke;
+		public TilePosition enemyBuildingChoke;
 		public TilePosition naturalBuild;
 		public bool enemyBaseFound = false;
 		public bool naturalHasBeenFound = false;
+		public TilePosition enemyBaseLocation = null;
 
         private int[] mineralPatchIDs = new int[3] { bwapi.UnitTypes_Resource_Mineral_Field.getID(), 
                 bwapi.UnitTypes_Resource_Mineral_Field_Type_2.getID(), 
@@ -370,7 +371,6 @@ namespace POSH_StarCraftBot
         // Protoss Units
         //
         //
-
         //Function to return an available builder
         protected internal Unit GetBuilder(TilePosition location)
         {
@@ -382,13 +382,15 @@ namespace POSH_StarCraftBot
             {
                 forces[ForceLocations.Build].RemoveAll(unit => unit.SCUnit.getBuildType().isBuilding() || unit.SCUnit.getHitPoints() <= 0);
             }
-            if (forces[ForceLocations.Build].Count > 0)
-                return forces[ForceLocations.Build].OrderBy(unit => unit.SCUnit.getDistance(new Position(location))).First().SCUnit;
+            //if (forces[ForceLocations.Build].Count > 0)
+              //  return forces[ForceLocations.Build].OrderBy(unit => unit.SCUnit.getDistance(new Position(location))).First().SCUnit;
 
-            Unit builder = GetProbes().Where(probe => !IsBuilder(probe)).OrderBy(probe => probe.getDistance(new Position(location))).;
+            Unit builder = GetProbes().Where(probe => probe.getHitPoints() > 0).Last();
 
-            if (!(builder is Unit))
-                return null;
+			if (builder == null)
+			{
+				builder = GetProbes().Where(probe => probe.getHitPoints() > 0).First();
+			}
             forces[ForceLocations.Build].Add(new UnitAgent(builder, null, null));
             return builder;
         }

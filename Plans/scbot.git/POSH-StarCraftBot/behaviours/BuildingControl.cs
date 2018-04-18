@@ -140,7 +140,7 @@ namespace POSH_StarCraftBot.behaviours
         }
 
         //Function to build a building
-        protected bool Build(UnitType type, int timeout = 10)
+        protected bool Build(UnitType type, int timeout = 5)
         {
             bool building = false;
             if (builder is Unit)
@@ -185,26 +185,30 @@ namespace POSH_StarCraftBot.behaviours
         ////////////////////////////////////////////////////////////////////////James' Code////////////////////////////////////////////////////////////////////////
 		// Function to position buildings taking he unit type for the building size
         // an xSpace Value, ySpace Value and Z for in iterations
-        protected bool Position(UnitType type, int X, int Y, int itterations, int timeout = 75)
+        protected bool Position(UnitType type, int X, int Y, int itterations, int timeout = 30)
         {
             //if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite) && Interface().currentBuildSite != BuildSite.NaturalChoke)
                // return false;
 
             TilePosition buildPosition;
-			if (needBuilderCounter >= 5)
+			if (needBuilderCounter >= 3)
+				needNewBuilder = true;
 				SelectNewBuilder();
 
 
 			if (Interface().currentBuildSite == BuildSite.NaturalChoke)
                 buildPosition = Interface().buildingChoke;
+			else if (Interface().currentBuildSite == BuildSite.EnemyChoke)
+				buildPosition = Interface().enemyBuildingChoke;
 			else if (Interface().currentBuildSite == BuildSite.Natural)
 				buildPosition = Interface().naturalBuild;
             else
                 buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
 
-			if (builder == null || builder.getHitPoints() <= 0)
+			if (builder == null || builder.getHitPoints() <= 0 || needBuilderCounter >= 3)
 			{
 				builder = Interface().GetBuilder(buildPosition);
+                needBuilderCounter = 0;
 			}
 
 			double dist = itterations;
@@ -248,7 +252,6 @@ namespace POSH_StarCraftBot.behaviours
 					needBuilderCounter++;
 					return false;
 				}
-				needBuilderCounter = 0;
 				return true;	
 			}
             return false;

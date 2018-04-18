@@ -31,7 +31,6 @@ namespace POSH_StarCraftBot.behaviours
         private bool buildArmy = false;
         private int maxBaseLocations;
 
-
 		//public bool naturalHasBeenFound = false;
 		public Position naturalLocation;
 
@@ -199,6 +198,11 @@ namespace POSH_StarCraftBot.behaviours
 			naturalLocation = target;
 			while (probeScout.getDistance(target) >= DELTADISTANCE/5)
 			{
+                if (probeScout.getHitPoints() <= 0)
+                {
+                    Console.Out.WriteLine("Probe scout dead");
+                    return false;
+                }
 				if (!probeScout.isMoving() || probeScout.isGatheringMinerals())
 				{
 					probeScout.move(target, false);
@@ -348,17 +352,9 @@ namespace POSH_StarCraftBot.behaviours
 			Position randTarget = pos.Skip(2).First().getPosition();
 
 			naturalLocation = target;
-			while (probeScout.getDistance(target) >= DELTADISTANCE*3)
+			IEnumerable<Unit> shownUnits = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0);
+			while (probeScout.getDistance(target) >= DELTADISTANCE*4)
 			{
-				if (probeScout.isUnderAttack())
-				{
-					if (Interface().baseLocations.ContainsKey((int)BuildSite.Natural))
-						probeScout.move(new Position(Interface().baseLocations[(int)BuildSite.Natural]));
-					else if (Interface().baseLocations.ContainsKey((int)BuildSite.Extension))
-					{
-						probeScout.move(new Position(Interface().baseLocations[(int)BuildSite.Extension]));
-					}
-				}
 				if (probeScout.getHitPoints() <= 0)
 				{
 					Console.Out.WriteLine("Probe scout dead");
@@ -369,10 +365,26 @@ namespace POSH_StarCraftBot.behaviours
 					probeScout.move(target, false);
 					Console.Out.WriteLine("Probe to Enemy");
 				}
+				if (shownUnits != null)
+				{
+					foreach (Unit unit in shownUnits)
+					{
+						if (unit.getType().isBuilding())
+						{
+							probeScout.move(randTarget, false);
+							Interface().enemyBaseFound = true;
+							Interface().forcePoints[ForceLocations.EnemyStart] = unit.getTilePosition();
+							Console.Out.WriteLine("Probe Found Enemy Building");
+							return true;
+
+						}
+					}
+				}
 				System.Threading.Thread.Sleep(100);
 			}
 			probeScout.move(randTarget, false);
 			Interface().enemyBaseFound = true;
+            Interface().forcePoints[ForceLocations.EnemyStart] = probeScout.getTilePosition();
 			Console.Out.WriteLine("Probe At Enemy");	
 			return true;
 		}
@@ -434,6 +446,56 @@ namespace POSH_StarCraftBot.behaviours
 
         }
 
+		[ExecutableAction("SelectEnemyChoke")]
+		public bool SelectEnemyChoke()
+		{
+			// get the distance between start and natural 
+			BuildSite site = Interface().currentBuildSite;
+			TilePosition enemyStart = Interface().forcePoints[ForceLocations.EnemyStart];
+			TilePosition targetChoke = null;
+			Chokepoint chokepoint = null;
+
+			if (site != BuildSite.StartingLocation && Interface().baseLocations.ContainsKey((int)site))
+			{
+				targetChoke = Interface().baseLocations[(int)site];
+				double distance = enemyStart.getDistance(targetChoke);
+
+				// find some kind of measure to determine if the the closest choke to natural is not the once between choke and start but after the natural
+				IEnumerable<Chokepoint> chokes = bwta.getChokepoints().Where(ck => bwta.getGroundDistance(new TilePosition(ck.getCenter()), enemyStart) > 0).OrderBy(choke => choke.getCenter().getDistance(new Position(targetChoke)));
+				if (chokes == null)
+				{
+					return false;
+				}
+				foreach (Chokepoint ck in chokes)
+				{
+
+					if (bwta.getGroundDistance(new TilePosition(ck.getCenter()), targetChoke) < bwta.getGroundDistance(new TilePosition(ck.getCenter()), enemyStart))
+					{
+						chokepoint = ck;
+						break;
+					}
+				}
+
+			}
+			else
+			{
+				targetChoke = enemyStart;
+				chokepoint = bwta.getChokepoints().Where(ck => bwta.getGroundDistance(new TilePosition(ck.getCenter()), enemyStart) > 0).OrderBy(choke => choke.getCenter().getDistance(new Position(enemyStart))).First();
+			}
+
+
+
+			if (chokepoint == null)
+				return false;
+
+			//picking the right side of the choke to position forces
+			Interface().forcePoints[ForceLocations.EnemyChoke] = (targetChoke.getDistance(new TilePosition(chokepoint.getSides().first)) < targetChoke.getDistance(new TilePosition(chokepoint.getSides().second))) ? new TilePosition(chokepoint.getSides().first) : new TilePosition(chokepoint.getSides().second);
+			//Interface().currentForcePoint = ForceLocations.NaturalChoke;
+			Interface().enemyBuildingChoke = Interface().forcePoints[ForceLocations.EnemyChoke];
+			return true;
+
+		}
+
         [ExecutableAction("SelectChokeBuild")]
         public bool SelectChokeBuild()
         {
@@ -444,6 +506,17 @@ namespace POSH_StarCraftBot.behaviours
             }
             return false;
         }
+
+		[ExecutableAction("SelectEnemyChokeBuild")]
+		public bool SelectEnemyChokeBuild()
+		{
+			if (Interface().enemyBuildingChoke is TilePosition)
+			{
+				Interface().currentBuildSite = BuildSite.EnemyChoke;
+				return true;
+			}
+			return false;
+		}
 
         //
         // SENSES
