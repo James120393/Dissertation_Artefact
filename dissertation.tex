@@ -284,27 +284,56 @@ public bool SelectProbeScout()
 	\label{Fig3}
 \end{figure}
 
-\subsection{Stage 1}
+TALK ABOUT THE LIFECYCLE OF THE ARTEFACT AGILE TEST DRIVEN DEVELOPMENT TTD
+NO USE OF DAILY SCRUMS.
 
-\subsection{Stage 2}
-\subsection{Stage 3}
+During the production of the research artefact an iterative development process was employed. this involved laying out a design for the AI and software required and producing a working prototype by the end of the first sprint. Then adding to that prototype each sprint until the AI was completed to a degree of satisfaction.
+
+\subsection{Sprint 1 : Software Installation}
+CODE RUNS BUT NOT FOR PROTOSS
+\subsection{Sprint 2 : Prototype}
+EXECUTABLE PLAN
+\subsection{Sprint 3 : Alpha}
+REASONABLE PLAN WITH MOST BASIC BEHAVIOURS WORKING
+\subsection{Sprint 4 : Beta}
+MOSTLY COMPLETE PLAN MOST BEHAVIOURS WORKING
+\subsection{Sprint 5 : Polish}
+COMPLETE PLAN AND COMPLETE BEHAVIOURS WITH TUNING
+\subsection{Sprint 6 : Implementation of New Strategies}
+
 The first thing that will be chosen in the creation of this AI is to pick a faction, in StarCraft, there are three, Zerg, Protoss and Terran, each with their own unique play style. Zerg is a rushing faction, with their units being relatively weak and cheap usually focus on overwhelming their enemy with numbers. Protoss are strong but expensive, relying on smaller numbers and taking longer to produce anything means they can be weak at rushing and defending from a rush. Terran is a balance of the two, being able to produce strong and expensive units as well as cheap weak ones, they can effectively rush and defend from a rush.
 
-EXPLAIN PROTOSS FURTHER
-
 In this work Protoss will be chosen, this choice was made as Zerg have been done many times and usually rely on rushes to win, whereas Terran are too complex for the planned AI. Protoss proved a happy middle ground to build upon where rushes are difficult to achieve but they are not too complex that it is too difficult to execute a sound strategy. So the second logical step is to implement an anti-rush strategy as an opening strategy. From there more aggressive strategies will be implemented and executed at the appropriate times. The challenge here is that it is difficult for Protoss to counter a Zerg rush but if successful it will leave the Zerg open for attack.
+
+The ratio that the races are chosen can be seen in fig 4, here the Protoss are clearly chosen less than the other two races. This is most likely due to the tendency to loose more often as can be seen in fig 5. 
 
 At each implementation, a test will be made on the AI to show its effectiveness and influence the next iteration of strategy implementation. These tests will consist of 10 games against the in-game AI until it has a relatively high win rate, at which point it will be tested against one of the competition AI's.
 
 
-EXPLAIN THE POSSIBLE USE OF PARALLEL PLANS
+\subsection{Disadvantage}
+Though once this system is complete with all the behaviours needed are present, makes it quick and easy to create new AI plans, it has one major disadvantage. The AI can only execute one action at a time, for example, when the executes the "ProbeScoutToEnemyBase" action it must wait for the entire action to be executed before moving on to the next. This has a negative effect on the design of the AI as it must be created in such a way that it can be effective while being limited to only one action at a time.
+
+Another issue presented by this software is that it is CPU intensive and slows down the game simulations considerably, this will make testing time increase and unfortunate there is not much that can be done about it, as the c\# is being translated into c++ for the BWAPI to translate into StarCraft commands.
+
+\subsection{Parallel Plans}
+An alternative option to solve this issue is to create another plan to run in parallel to the original. This will allow the AI to execute multiple behaviours at the same time, rather than executing one and having to wait for it to finish before moving on to the next. This would, for example, allow the AI to build up their base, scout and manage their army at the same time. Unfortunately it would involve precision planning as each plan would have to ensure they do not execute the same action at any point. This would cause the time required to create the artefact to rise exponentially, as not only would the plans have to be created, but the framework would have to be modified to allow the use of parallel plans.
+
+CHANGE ALL TIME FRAMES TO FOCUS
+
 \section{Implementation}
 
 \section{Method}
+During testing there will be a total of 10 AI's including the AI that was developed for this research. To choose these AI's three were selected from the top of the board, three from the middle and three from the bottom. They will be selected from the AIIDE 2016 competition, to keep the experiment af fair as possible each AI in each teir will consist of each of the races, where that is not possible, a substitute will be made.
+
+The 10 AI's will be playing on a total of 
+
+MENTION THAT THE TESTING WILL BE WITHIN A COMPETITION ENVIRONMENT.
 
 Empirisism 
 
 INCLUDE SOME PHILOSOPHY ON THIS PAPER (POSITIVIST RESEARCH)
+
+This research will employ a positivist approach in its philosophy, meaning that during the design, implementation and execution of the experiment.....
 
 During the formation of this paper many research questions were reviewed among them were the following:
 \newline
@@ -320,7 +349,7 @@ During the formation of this paper many research questions were reviewed among t
 These questions were rejected due to time limitations on creating an adaptive AI.
 \newline
 
-This work will be focusing on the implementation of an AI with pre-built build orders and their counters taken from Liquipedia \cite{Liquid}, a website dedicated to StarCraft, on the there they have a collection of strategies that are free to use in any capacity. Building upon these build orders the experiment will also include a method for swapping between the orders at any point, to know when to do this, the AI will scout the map in search of the opponent and compare their current building to its stored build orders and find an appropriate counter. The issue with this method is that in late game the AI will struggle to decide which build order to continue. 
+This work will be focusing on the implementation of an AI with pre-built build orders and their counters taken from Liquipedia \cite{Liquid}, a website dedicated to StarCraft, on the there they have a collection of strategies that are free to use in any capacity. Building upon these build orders, the experiment will also include a method for swapping between the orders at any point, to know when to do this, the AI will scout the map in search of the opponent and compare their current building to its stored build orders and find an appropriate counter. The issue with this method is that in late game the AI will struggle to decide which build order to continue. 
 
 
 \subsection{Metrics}
@@ -359,17 +388,29 @@ During this dissertation many challenges had to be overcome, in subsection those
 
 EXPLAIN WHY YOU CHANGED THE STRATEGIES
 
-\section{Results}
+During preliminary testing it became clear that the strategies provided from Liquipidia were not going to work, as they relied on the player (AI) scouting and building immediately as the game started. Unfortunately as the system can not compute its actions instantaneously the AI can not execute the strategies in time before the enemy AI had wither rushed or build a larger force. This proves my null hypothesis in these conditions, being the framework is too slow and needs altering, and within the time-frame of this research is implausible to achieve.
 
-\section{Analysis}
+To counteract this The AI has been modified to include a tactic that is not present in any of the strategies, which is to build several Protoss Photon Cannons at the natural expansion. This means that the base imidiatly next the the AI's starting position will be built up with defensive structures to stop any early game threat, allowing the AI to continue with the original strategy proposed.
+
+Under these conditions the AI may be able to prove on of the hypotheses, but this will fundamentally change the goal of this research.
+
+\section{Results}
+DESCRIBE THE RESULTS DO NOT DISCUSS
 
 \section{Discussion}
+TALK ABOUT THE RESULTS AND THE IMPLICATIONS
+
 
 \section{Professional Considerations}
 
-\section{Conclusion}
 
 \subsection{Future Work}
+Though the null hypothesis was confirmed, this work provided an interesting find, that there is a possible correlation between the win rate and win time. A proposed question for future work would be if there is a correlation between them. This would be an interesting find as it could be used to alter the design of AI's to facilitate fast strategies, and through the Zerg implemented a rush tactic which is inherently fast, it would be interesting to see how and AI using Terran or Protoss would cope with similar strategies.
+Altering the artefact to have executable time set as a priority during development would be an advantage for this as the current software can not keep up with the other AI's in its current state.
+PARALLEL PLANS
+MOVING TO DEEP LEARNING
+\section{Conclusion}
+
 
 
 
@@ -379,6 +420,9 @@ EXPLAIN WHY YOU CHANGED THE STRATEGIES
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
+
+\section{Acknowledgements}
+
 
 % Appendices
 \appendix
