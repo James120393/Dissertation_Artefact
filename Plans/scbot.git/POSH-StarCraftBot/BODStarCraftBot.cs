@@ -46,7 +46,7 @@ namespace POSH_StarCraftBot
         /// The forcePoints identify upto 8 different locations based on the ForceLocation associated with a forcePoint. 
         /// Forces ArmyOne and ArmyTwo are moving forces whereas the others are static at specific locations.
         /// </summary>
-        protected internal Dictionary<ForceLocations, TilePosition> forcePoints;
+        public Dictionary<ForceLocations, TilePosition> forcePoints;
         protected internal ForceLocations currentForcePoint;
 
         /// <summary>
@@ -67,7 +67,8 @@ namespace POSH_StarCraftBot
 		public bool enemyBaseFound = false;
 		public bool naturalHasBeenFound = false;
 		public TilePosition enemyBaseLocation = null;
-
+		protected internal IOrderedEnumerable<BaseLocation> basePositions;
+		
         private int[] mineralPatchIDs = new int[3] { bwapi.UnitTypes_Resource_Mineral_Field.getID(), 
                 bwapi.UnitTypes_Resource_Mineral_Field_Type_2.getID(), 
                 bwapi.UnitTypes_Resource_Mineral_Field_Type_3.getID() };
@@ -114,6 +115,8 @@ namespace POSH_StarCraftBot
 
             }
 
+			basePositions = bwta.getBaseLocations().Where(baseLoc => bwta.getGroundDistance(Self().getStartLocation(), baseLoc.getTilePosition()) > 0).OrderBy(baseLoc => bwta.getGroundDistance(Self().getStartLocation(), baseLoc.getTilePosition()));
+			
             currentForcePoint = ForceLocations.OwnStart;
             currentBuildSite = BuildSite.StartingLocation;
         }
@@ -372,7 +375,7 @@ namespace POSH_StarCraftBot
         //
         //
         //Function to return an available builder
-        protected internal Unit GetBuilder(TilePosition location)
+        protected internal Unit GetBuilder(TilePosition location, bool selectNew)
         {
             if (!forces.ContainsKey(ForceLocations.Build) || !(forces[ForceLocations.Build] is List<UnitAgent>))
             {
@@ -380,18 +383,20 @@ namespace POSH_StarCraftBot
             }
             else
             {
-                forces[ForceLocations.Build].RemoveAll(unit => unit.SCUnit.getBuildType().isBuilding() || unit.SCUnit.getHitPoints() <= 0);
+				forces[ForceLocations.Build].Clear();
             }
             //if (forces[ForceLocations.Build].Count > 0)
               //  return forces[ForceLocations.Build].OrderBy(unit => unit.SCUnit.getDistance(new Position(location))).First().SCUnit;
 
-            Unit builder = GetProbes().Where(probe => probe.getHitPoints() > 0).Last();
+			Unit builder = GetProbes().Where(probe => probe.getHitPoints() > 0).OrderBy(probe => probe.getDistance(new Position(location))).First();
 
-			if (builder == null)
+			if (builder == null || selectNew)
 			{
-				builder = GetProbes().Where(probe => probe.getHitPoints() > 0).First();
+				Unit altBuilder = GetProbes().OrderBy(probe => probe.getDistance(new Position(location))).Where(probe => probe.getHitPoints() > 0).Last();
+				forces[ForceLocations.Build].Add(new UnitAgent(altBuilder, null, null));
+				return altBuilder;
 			}
-            forces[ForceLocations.Build].Add(new UnitAgent(builder, null, null));
+			forces[ForceLocations.Build].Add(new UnitAgent(builder, null, null));
             return builder;
         }
 
@@ -429,6 +434,13 @@ namespace POSH_StarCraftBot
         {
             return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Observer);
         }
+
+		//Return the number of Observers under the AI's control
+		public int CarrierCount()
+		{
+			return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Carrier);
+		}
+
 
 
         //Return the number of Probes under the AI's control Plus their location
@@ -484,6 +496,11 @@ namespace POSH_StarCraftBot
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Corsair.getID()).Take(amount);
         }
 
+		//Return the number of Carriers under the AI's control Plus their location
+		public IEnumerable<Unit> GetCarrier()
+		{
+			return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Carrier.getID());
+		}
 
         //Return the number of Observers under the AI's control Plus their location
         public IEnumerable<Unit> GetObserver(int amount)

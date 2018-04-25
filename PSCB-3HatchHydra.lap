@@ -70,7 +70,7 @@
 	BuildCannon
 ))
 (AP buildBaseCannon (minutes 1.0) (
-	SelectStartBase
+	SelectChokeBuild
 	PositionCannon
 	BuildCannon
 ))
@@ -89,23 +89,8 @@
 	PositionGateway 
 	BuildGateway
 ))
-(AP buildStargate (minutes 0.01) (
-	SelectChokeBuild 
-	PositionStargate 
-	BuildStargate
-))
-(AP buildFleetbeacon (minutes 0.01) (
-	SelectChokeBuild 
-	PositionFleetbeacon 
-	BuildFleetbeacon
-))
 (AP buildAssimilator (minutes 1.0) (
 	SelectStartBase 
-	SelectAssimilatorLocation 
-	BuildAssimilator
-))
-(AP buildNaturalAssimilator (minutes 1.0) (
-	SelectNatural 
 	SelectAssimilatorLocation 
 	BuildAssimilator
 ))
@@ -165,10 +150,10 @@
 		(attackNexusOpening (trigger ((ForceReady 1.0 ==) (EnemyBaseFound 1.0 ==))) AttackEnemyMainBase)	)
 	)
 )
-(C defendLocation (seconds 1.0) (goal ((GameRunning 0.0 ==)))
+(C defendLocation (seconds 1.0) (goal ((BaseUnderAttack 0.0 ==)))
 	(elements
 		(	
-		(SendArmy (trigger ((EnemyDetected 1.0 ==))) DefendBase)	)
+		(SendArmy (trigger ((BaseUnderAttack 1.0 ==))) DefendBase)	)
 		(	
 		(ReadyArmyTwo (trigger ((CanCreateUnits) (ArmyOneReady 0.0 =))) setDefenceForce)	)
 	)
@@ -190,33 +175,33 @@
 (C research18NexusOpening (minutes 1.0) (goal ((GameRunning 0.0 =)))
 	(elements
 		(	
-		(resDragoonRange (trigger ((HaveCarrier 0.0 ==) (FleetbeaconCount 1.0 >=))) CarrierUpgrade)	)
+		(resDragoonRange (trigger ((HaveDragoonRange 0.0 ==) (CyberneticsCoreCount 1.0 >=) (IsCoreResearching 0.0 ==))) DragoonRangeUpgrade)	)
 		(	
 		(resShields (trigger ((HaveShield 0.0 ==) (ForgeCount 1.0 >=) (IsForgeResearching 0.0 ==))) ShieldUpgrade)	)
 		(	
-		(needResearch (trigger ((HaveShield 1.0 ==) (HaveCarrier 1.0 ==))) DoNotNeedResearch)	)
+		(resWeapon (trigger ((HaveAttack 0.0 ==) (ForgeCount 1.0 >=) (IsForgeResearching 0.0 ==))) AttackUpgrade)	)
 	)
 )
 (C build18NexusForce (minutes 1.0) (goal ((GameRunning 0.0 =)))
 	(elements
 		(	
-		(trainCarrier (trigger ((CarrierCount 2.0 <=) (FleetbeaconCount 1.0 >=))) TrainCarrier)	)
+		(trainZealots (trigger ((ZealotCount 4.0 <=))) TrainZealot)	)
 		(	
-		(trainCarrier (trigger ((CarrierCount 4.0 <=) (FleetbeaconCount 1.0 >=) (InterceptorsNeeded 0.0 ==))) TrainCarrier)	)
+		(trainDragoons (trigger ((DragoonCount 6.0 <=) (CyberneticsCoreCount 1.0 =))) TrainDragoon)	)
 	)
 )
 (C 18NexusForceReady (minutes 1.0) (goal ((GameRunning 0.0 =)))
 	(elements
 		(	
-		(finishedForce (trigger ((CarrierCount 2.0 >=) (InterceptorsNeeded 0.0 ==) (ForceReady 0.0 ==))) FinishedForce)	 )
+		(finishedForce (trigger ((ZealotCount 4.0 >=) (DragoonCount 6.0 >=)(ForceReady 0.0 ==))) FinishedForce)	 )
 		(	
-		(notFinishedForce (trigger ((CarrierCount 12.0 <=) (ForceReady 1.0 ==))) NotFinishedForce)	)
+		(notFinishedForce (trigger ((ZealotCount 3.0 <=) (DragoonCount 5.0 <=) (ForceReady 1.0 ==))) NotFinishedForce)	)
 	)
 )
 (C 18NexusOpeningBuild (minutes 1.0) (goal ((AssimilatorCount 1.0 >=) (GatewayCount 1.0 >=) (CyberneticsCoreCount 1.0 >=) (GameRunning 0.0 =)))
 	(elements
 		(
-		(buildProbes (trigger ((ProbeCount 4.0 <=))) BuildProbe) )	
+		(buildProbes (trigger ((ProbeCount 4.0 <))) BuildProbe) )	
 		(
 		(buildSupplyPylon (trigger ((AvailableSupply 2.0 <=))) buildBasePylon)	)
 		(
@@ -226,15 +211,13 @@
 		(
 		(buildForge (trigger ((ForgeCount 0.0 ==) (PylonCount 1.0 >=))) buildForge)	)
 		(
-		(buildBaseCannon (trigger ((ForgeCount 1.0 >=) (CannonCount 2.0 <=))) buildBaseCannon)	)
-		(
 		(buildNaturalPylon (trigger ((NaturalFound 1.0 ==) (HasNaturalPylon 0.0 ==))) buildNaturalPylon)	)
 		(
-		(buildCannon (trigger ((ForgeCount 1.0 >=) (HasNaturalPylon 1.0 ==) (CannonCount 6.0 <=))) buildCannon)	)
+		(buildCannon (trigger ((ForgeCount 1.0 >=) (HasNaturalPylon 1.0 ==) (CannonCount 5.0 <=))) buildCannon)	)
 		(
 		(buildProbes (trigger ((CannonCount 4.0 >=) (ProbeCount 10.0 <=))) BuildProbe) )
 		(
-		(buildCannon (trigger ((ForgeCount 1.0 >=) (HasNaturalPylon 1.0 ==) (CannonCount 12.0 <=))) buildCannon)	)
+		(buildCannon (trigger ((ForgeCount 1.0 >=) (HasNaturalPylon 1.0 ==) (CannonCount 11.0 <=))) buildCannon)	)
 		(
 		(buildAssimilator (trigger ((AssimilatorCount 0.0 ==))) buildAssimilator)	)
 		(
@@ -242,17 +225,11 @@
 		(
 		(naturalNexus (trigger ((NaturalFound 1.0 ==) (NexusCount 1.0 <=))) naturalNexus)	)
 		(
-		(buildAssimilator (trigger ((AssimilatorCount 0.0 ==))) buildNaturalAssimilator)	)
-		(
 		(buildChokePylon (trigger ((NaturalFound 1.0 ==) (HasChokePylon 0.0 ==))) buildChokePylon)	)
 		(
-		(buildFirstGateway (trigger ((NexusCount 2.0 >=) (GatewayCount 0.0 <=) (CannonCount 6.0 >=))) buildGateway)	)
+		(buildFirstGateway (trigger ((NexusCount 2.0 >=) (GatewayCount 1.0 <=) (CannonCount 6.0 >=))) buildGateway)	)
 		(
 		(buildCyberneticsCore (trigger ((GatewayCount 1.0 >=) (CyberneticsCoreCount 0.0 ==))) buildCyberneticsCore)	)
-		(
-		(buildStargate (trigger ((CyberneticsCoreCount 1.0 >=) (StargateCount 1.0 <=))) buildStargate)	)
-		(
-		(buildFleetbeacon (trigger ((FleetbeaconCount 0.0 ==) (StargateCount 1.0 >=))) buildFleetbeacon)	)
 	)
 )
 (C probeScouting (seconds 1.0) (goal ((GameRunning 0.0 =)))
@@ -263,16 +240,15 @@
 (SDC EighteenNexusOpening (goal ((GameRunning 0.0 =)))
 	(drives	
 		(		(retreat (trigger ((ForceIsLosing 1.0 =))) flee(seconds 1.0)))
-		(		(explore (trigger ((NaturalFound 0.0 ==)(CannonCount 2.0 >=))) exploreLocal(seconds 0.0009)))
+		(		(explore (trigger ((NaturalFound 0.0 ==)(PylonCount 1.0 >=))) exploreLocal(seconds 0.0009)))
 		(		(harvest (trigger ((ProbeCount 1.0 >=) (IdleProbes))) probeHarvesting(seconds 0.0008)))
 		(		(attack (trigger ((ForceReady 1.0 ==))) attackEnemy(seconds 0.0007)))
-		(		(defend (trigger ((EnemyDetected 1.0 ==) (CarrierCount 1.0 >=))) defendLocation(seconds 0.0006)))
-		(		(research (trigger ((FleetbeaconCount 1.0 >=) (IsResearching 0.0 ==) (NeedResearch 1.0 ==))) research18NexusOpening(seconds 0.0004)))
-		(		(buildInterceptors (trigger ((InterceptorsNeeded 1.0 ==))) BuildInterceptors(seconds 0.0001)))
-		(		(createForce (trigger ((FleetbeaconCount 1.0 ==))) build18NexusForce(seconds 0.0003)))
-		(		(explore (trigger ((EnemyBaseFound 0.0 ==)(StargateCount 1.0 >=))) ScoutToEnemyBase(seconds 0.0002)))		
+		(		(defend (trigger ((BaseUnderAttack 1.0 ==) (ZealotCount 1.0 >=))) defendLocation(seconds 0.0006)))
+		(		(research (trigger ((CyberneticsCoreCount 1.0 >=) (IsResearching 0.0 ==))) research18NexusOpening(seconds 0.0004)))
+		(		(createForce (trigger ((CyberneticsCoreCount 1.0 ==))) build18NexusForce(seconds 0.0003)))
+		(		(explore (trigger ((EnemyBaseFound 0.0 ==)(GatewayCount 1.0 >=))) ScoutToEnemyBase(seconds 0.0002)))		
 		(		(build (trigger ((NeedBuilding 1.0 =))) buildBase(seconds 0.0001)))
-		(		(forceReady (trigger ((CarrierCount 12.0 >=))) 18NexusForceReady(seconds 0.0001)))
+		(		(forceReady (trigger ((GatewayCount 2.0 >=))) 18NexusForceReady(seconds 0.0001)))
 		(		(wait (trigger ((Success))) idle))
 	)
 )

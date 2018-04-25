@@ -234,6 +234,19 @@ namespace POSH_StarCraftBot.behaviours
             return (distanceFirst < distanceSecond) ? first : second;
         }
 
+		private bool MoveForce(ForceLocations moveLocation)
+		{
+			if (Interface().forcePoints.ContainsKey(moveLocation) && Interface().forcePoints[moveLocation] is TilePosition)
+			{
+				Position location = new Position(Interface().forcePoints[moveLocation]);
+				foreach (UnitAgent unit in selectedForce)
+				{
+					unit.SCUnit.attack(location);
+				}
+				return true;
+			}
+			return false;
+		}
 
         //
         // ACTIONS
@@ -288,6 +301,12 @@ namespace POSH_StarCraftBot.behaviours
         }
         bool stopAttacks = false;
 
+		[ExecutableAction("MoveForceNatural")]
+		public bool MoveForceNatural()
+		{
+			return MoveForce(ForceLocations.NaturalChoke);
+		}
+
         [ExecutableAction("StopAttacks")]
         public bool StopAttack()
         {
@@ -298,7 +317,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("AttackEnemyMainBase")]
         public bool AttackEnemyMainBase()
         {
-            return AttackLocation(ForceLocations.EnemyStart);
+            return MoveForce(ForceLocations.EnemyStart);
 
         }
 
@@ -490,26 +509,9 @@ namespace POSH_StarCraftBot.behaviours
 
             foreach (Unit unit in shownUnits)
             {
-                if (unit.getHitPoints() > 0 && unit.getPlayer() != Interface().Self())
-                    continue;
-                if (unit.getType().isBuilding())
-                {
-                    if (!enemyBuildings.ContainsKey(unit.getID()))
-                    {
-                        enemyBuildings[unit.getID()] = unit;
-                        detectedNew = true;
-                    }
-                }
-                else // the unit is not a building 
-                {
-                    if (!enemyUnits.ContainsKey(unit.getID()))
-                    {
-                        enemyUnits[unit.getID()] = unit;
-                        detectedNew = true;
-                    }
-                }
+                if (unit.getHitPoints() > 0)
+                    detectedNew = true;
             }
-
             return (detectedNew) ? 1 : 0;
         }
 
@@ -542,7 +544,20 @@ namespace POSH_StarCraftBot.behaviours
             return attackCounter > 0;
         }
 
-        /// <summary>
+		[ExecutableAction("DefendBase")]
+		public bool DefendBase()
+		{
+			Unit enemy = bwapi.Broodwar.enemy().getUnits().Where(eunit => eunit.getHitPoints() > 0).OrderBy(eunit => bwta.getGroundDistance(Interface().Self().getStartLocation(), eunit.getTilePosition())).First();
+			foreach (Unit unit in Interface().GetAllUnits(false))
+			{
+				if (enemy.getHitPoints() > 0)
+				{
+					unit.attack(enemy.getPosition());
+				}
+			}
+			return true;
+		}
+		/// <summary>
         /// returns the ForceLocation identifier of the force losing. There are currently 8 forceLocations specified in BODStarraftBot.
         /// Zero means no force is losing.
         /// </summary>

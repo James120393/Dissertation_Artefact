@@ -322,8 +322,8 @@ namespace POSH_StarCraftBot.behaviours
         // Function to Train units
         protected bool TrainUnit(UnitType type, UnitType building)
         {
-            if (CanTrainUnit(type))
-            {
+            //if (CanTrainUnit(type))
+            //{
                 int targetLocation = (int)BuildSite.StartingLocation;
 
 				if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
@@ -335,7 +335,7 @@ namespace POSH_StarCraftBot.behaviours
                 Unit productionBuild = prodBuildings.First();
 				
 
-				if (productionBuild.getTrainingQueue().Count() >= 2)
+				if (productionBuild.getTrainingQueue().Count() >= 1)
 				{
 					productionBuild = prodBuildings.Last();
 					if (productionBuild.getTrainingQueue().Count() >= 2)
@@ -356,8 +356,8 @@ namespace POSH_StarCraftBot.behaviours
 					else
 						productionBuild.move(new Position(Interface().buildingChoke));
                 return trainWorked;
-            }
-            return false;
+            //}
+            //return false;
         }
 
         //
@@ -482,6 +482,21 @@ namespace POSH_StarCraftBot.behaviours
             return Interface().CorsairCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Corsair);
         }
 
+
+		//Sense to tell the AI how many Carriers it has
+		[ExecutableSense("CarrierCount")]
+		public int CarrierCount()
+		{
+			return Interface().CarrierCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Carrier);
+		}
+
+		//Sense to tell the AI how many Carriers it has
+		[ExecutableSense("CarrierCountNotTraining")]
+		public int CarrierCountNotTraining()
+		{
+			return Interface().CorsairCount() - CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Carrier);
+		}
+
         ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
         //
         // ACTIONS
@@ -557,6 +572,12 @@ namespace POSH_StarCraftBot.behaviours
 			return TrainUnit(bwapi.UnitTypes_Protoss_Corsair, bwapi.UnitTypes_Protoss_Stargate);
         }
 
+		//Action to tell the AI to Build a Protoss Corsair
+		[ExecutableAction("TrainCarrier")]
+		public bool TrainCarrier()
+		{
+			return TrainUnit(bwapi.UnitTypes_Protoss_Carrier, bwapi.UnitTypes_Protoss_Stargate);
+		}
 
         //Action to tell the AI to Build a Protoss Dark Templar
         [ExecutableAction("TrainDarkTemplar")]
@@ -583,7 +604,7 @@ namespace POSH_StarCraftBot.behaviours
         {
             IEnumerable<Unit> assimilators = Interface().GetAssimilator();
 
-            return ProbesToResource(assimilators, minedGas, 2, true, 1);
+            return ProbesToResource(assimilators, minedGas, 2, true, 3);
         }
 
         

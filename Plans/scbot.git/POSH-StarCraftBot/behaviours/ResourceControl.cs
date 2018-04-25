@@ -12,6 +12,7 @@ namespace POSH_StarCraftBot.behaviours
     public class ResourceControl : AStarCraftBehaviour
     {
         private bool finishedResearch;
+		private bool needResearch = true;
 
         public ResourceControl(AgentBase agent)
             : base(agent, new string[] {}, new string[] {})
@@ -22,13 +23,50 @@ namespace POSH_StarCraftBot.behaviours
         // INTERNAL
         //
 
+		private bool HaveResearch(UpgradeType research)
+		{
+			return Interface().Self().getUpgradeLevel(research) > 0;
+		}
+
+		private bool DoResearch(UpgradeType research, IEnumerable<Unit> building)
+		{
+			return building.Where(build => !build.isUpgrading() && build.getHitPoints() > 0).First().upgrade(research);
+		}
+
         //
         // ACTIONS
         //
+
+		[ExecutableAction("BuildInterceptors")]
+		public bool BuildInterceptors()
+		{
+			int timeout = 50;
+			foreach (Unit carrier in Interface().GetCarrier())
+			{
+				while (carrier.getInterceptorCount() < 8 && timeout > 0)
+				{
+					carrier.train(bwapi.UnitTypes_Protoss_Interceptor);
+					timeout--;
+				}
+				if (timeout <= 0)
+				{
+					return false;
+				}
+			}		
+			return true;
+		}
+
+		[ExecutableAction("DoNotNeedResearch")]
+		public bool DoNotNeedResearch()
+		{
+			needResearch = false;
+			return true;
+		}
+
         [ExecutableAction("HydraSpeedUpgrade")]
         public bool HydraSpeedUpgrade()
         {
-            return Interface().GetHydraDens().Where(den => !den.isUpgrading() && den.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Muscular_Augments);
+            return DoResearch(bwapi.UpgradeTypes_Muscular_Augments, Interface().GetHydraDens());
         }
 
         [ExecutableAction("HydraRangeUpgrade")]
@@ -51,7 +89,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("AttackUpgrade")]
         public bool AttackUpgrade()
         {
-            return Interface().GetForge().Where(forge => forge.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Protoss_Ground_Weapons);
+            return DoResearch(bwapi.UpgradeTypes_Protoss_Ground_Weapons, Interface().GetForge());
         }
 
 
@@ -59,21 +97,45 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("DragoonRangeUpgrade")]
         public bool DragoonRangeUpgrade()
         {
-            return Interface().GetCyberneticsCore().Where(core => core.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Singularity_Charge);
+            return DoResearch(bwapi.UpgradeTypes_Singularity_Charge, Interface().GetCyberneticsCore());
         }
 
         //Action to tell AI to research the Protoss Shield upgrade
         [ExecutableAction("ShieldUpgrade")]
         public bool ShieldUpgrade()
         {
-            return Interface().GetCyberneticsCore().Where(core => core.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Protoss_Plasma_Shields);
+			return DoResearch(bwapi.UpgradeTypes_Protoss_Plasma_Shields, Interface().GetForge());
         }
+
+		//Action to tell AI to research the Protoss Shield upgrade
+		[ExecutableAction("CarrierUpgrade")]
+		public bool CarrierUpgrade()
+		{
+			return DoResearch(bwapi.UpgradeTypes_Carrier_Capacity, Interface().GetFleetbeacon());
+		}
         ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////////
 
 
         //
         // SENSES
         //
+		[ExecutableSense("InterceptorsNeeded")]
+		public bool InterceptorsNeeded()
+		{
+			foreach (Unit carrier in Interface().GetCarrier())
+			{
+				if (carrier.getInterceptorCount() < 8)
+				{
+					if (carrier.getTrainingQueue().Count() >= 5)
+					{
+						continue;
+					}
+					return true;
+				}
+			}
+			return false;
+		}
+
         [ExecutableSense("StopHydraResearch")]
         public int StopHydraResearch()
         {
@@ -134,23 +196,52 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("HaveAttack")]
         public bool HaveAttack()
         {
-            return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Ground_Weapons) > 0);
+			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Ground_Weapons) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Ground_Weapons));
         }
 
-
+		[ExecutableSense("HaveCarrier")]
+		public bool HaveCarrier()
+		{
+			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Carrier_Capacity) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Carrier_Capacity));
+		}
+		
         //Sense to tell AI if they have the protoss Dragoon range upgreade
         [ExecutableSense("HaveDragoonRange")]
         public bool HaveDragoonRange()
         {
-            return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Singularity_Charge) > 0);
+			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Singularity_Charge) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Singularity_Charge));
         }
 
         //Sense to tell AI if they have the protoss Shield upgreade
         [ExecutableSense("HaveShield")]
         public bool HaveShield()
         {
-            return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Plasma_Shields) > 0);
-        }       
+			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Plasma_Shields) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Plasma_Shields));
+        }
+
+		[ExecutableSense("IsResearching")]
+		public bool IsResearching()
+		{
+			return (Interface().GetForge().Where(forge => forge.getHitPoints() > 0).First().isUpgrading() || Interface().GetCyberneticsCore().Where(core => core.getHitPoints() > 0).First().isUpgrading());
+		}
+
+		[ExecutableSense("IsForgeResearching")]
+		public bool IsForgeResearching()
+		{
+			return (Interface().GetForge().Where(forge => forge.getHitPoints() > 0).First().isUpgrading());
+		}
+
+		[ExecutableSense("IsCoreResearching")]
+		public bool IsCoreResearching()
+		{
+			return (Interface().GetCyberneticsCore().Where(core => core.getHitPoints() > 0).First().isUpgrading());
+		}
+
+		[ExecutableSense("NeedResearch")]
+		public bool NeedResearch()
+		{
+			return needResearch;
+		}    
         ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////////        
     }
 }
