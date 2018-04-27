@@ -86,6 +86,9 @@
     <None Include="library\plans\PSCB-3HatchHydra.lap">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="library\plans\PSCB-Carrier.lap" />
+    <None Include="library\plans\PSCB-James" />
+    <None Include="library\plans\PSCB-ZDragoon.lap" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="O:\StarCraftAI - Project\BWAPI\bwapi-mono-bridge2\Source\bwapi-clr-client\bwapi-clr\bwapi-clr.csproj">

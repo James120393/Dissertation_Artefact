@@ -238,10 +238,35 @@ namespace POSH_StarCraftBot.behaviours
 		{
 			if (Interface().forcePoints.ContainsKey(moveLocation) && Interface().forcePoints[moveLocation] is TilePosition)
 			{
+				IEnumerable<Unit> force = Interface().GetAllUnits(false);
 				Position location = new Position(Interface().forcePoints[moveLocation]);
-				foreach (UnitAgent unit in selectedForce)
+				foreach (Unit unit in force)
 				{
-					unit.SCUnit.attack(location);
+					if (unit.getHitPoints() > 0)
+					{	
+						IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
+						if (enemies != null)
+						{
+							IEnumerable<Unit> enemy = enemies.OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
+							unit.attack(location);
+							if (enemy != null && enemy.Count() > 0)
+							{
+								try
+								{
+									unit.attack(enemy.First().getPosition());
+								}
+								catch
+								{
+									unit.attack(location);
+								}
+							}
+							else
+							{
+								unit.attack(location);
+							}
+						}
+
+					}
 				}
 				return true;
 			}
@@ -547,15 +572,7 @@ namespace POSH_StarCraftBot.behaviours
 		[ExecutableAction("DefendBase")]
 		public bool DefendBase()
 		{
-			Unit enemy = bwapi.Broodwar.enemy().getUnits().Where(eunit => eunit.getHitPoints() > 0).OrderBy(eunit => bwta.getGroundDistance(Interface().Self().getStartLocation(), eunit.getTilePosition())).First();
-			foreach (Unit unit in Interface().GetAllUnits(false))
-			{
-				if (enemy.getHitPoints() > 0)
-				{
-					unit.attack(enemy.getPosition());
-				}
-			}
-			return true;
+			return MoveForce(ForceLocations.NaturalChoke);
 		}
 		/// <summary>
         /// returns the ForceLocation identifier of the force losing. There are currently 8 forceLocations specified in BODStarraftBot.

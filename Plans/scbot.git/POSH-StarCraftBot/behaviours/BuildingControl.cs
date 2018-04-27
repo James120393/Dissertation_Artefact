@@ -20,7 +20,7 @@ namespace POSH_StarCraftBot.behaviours
         Unit builder;
 		private bool needNewBuilder = false;
 		private bool needBuilding = true;
-		private int iterations = 50;
+		private int iterations = 100;
 		private int textCounter = 0;
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace POSH_StarCraftBot.behaviours
                 return count;
             
             IEnumerable<Unit> currentBuilding = Interface().GetAllBuildings().Where(building => building.getType() == type);
-			System.Threading.Thread.Sleep(50);
+			System.Threading.Thread.Sleep(10);
 			foreach (Unit building in currentBuilding)
 			{
 				if (building.isBeingConstructed())
@@ -151,9 +151,9 @@ namespace POSH_StarCraftBot.behaviours
                 Unit currentBuildCommand = null;
 				if (buildings.Count() > 0)
 					currentBuildCommand = buildings.First();
-				
+				builder.build(buildLocation, type);
+				System.Threading.Thread.Sleep(50);
 				building = builder.build(buildLocation, type);				
-				System.Threading.Thread.Sleep(200);
 				while (currentBuildCommand == null && timeout > 0)
 				{
 					//get the building done at that location using its tile position and type
@@ -162,6 +162,7 @@ namespace POSH_StarCraftBot.behaviours
 						buildQueue[type.getID()].Add(buildLocation);
 						Console.Out.WriteLine("Builder Building " + type.getName());
 						textCounter = 0;
+						iterations = 100;
 						return building;
 					}
 					if (!building)
@@ -172,12 +173,14 @@ namespace POSH_StarCraftBot.behaviours
 				}
 				if (timeout <= 0)
 				{
-					building = builder.build(builder.getTilePosition(), type);
+					building = builder.build(buildLocation, type);
+					System.Threading.Thread.Sleep(500);
 					if (building)
 					{
 						buildQueue[type.getID()].Add(buildLocation);
 						Console.Out.WriteLine("Builder Building " + type.getName() + " At its Location");
 						textCounter = 0;
+						iterations = 100;
 						return building;
 					}
 				}
@@ -196,7 +199,7 @@ namespace POSH_StarCraftBot.behaviours
 			{
 				TilePosition buildPosition;
 
-				if (iterations >= 200)
+				if (iterations >= 400)
 					iterations = 5;
 
 				buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
@@ -232,6 +235,19 @@ namespace POSH_StarCraftBot.behaviours
 				{
 					Console.Out.WriteLine("Can't Find Position, Expanding Area");
 					iterations += 10;
+					if (iterations >= 250 && type != bwapi.UnitTypes_Protoss_Photon_Cannon)
+					{
+						buildPosition = PossibleBuildLocation(builder.getTilePosition(), builder, bwapi.UnitTypes_Protoss_Pylon);
+						if (buildPosition != null)
+						{
+							builder.move(new Position(buildPosition), false);
+							builder.build(buildPosition, bwapi.UnitTypes_Protoss_Pylon);
+							return false;
+						}
+						iterations = 100;
+						builder = Interface().GetBuilder(Interface().baseLocations[1], true);
+						return false;
+					}
 					return false;
 				}
 
@@ -242,17 +258,15 @@ namespace POSH_StarCraftBot.behaviours
 				{
 					Position target = new Position(buildPosition);
 					builder.move(target, false);
+					Console.Out.WriteLine("Builder Moving into Position");
 					while (builder.getDistance(target) >= DELTADISTANCE && timeout > 0)
 					{
-						if (!builder.isMoving())
-							builder.move(target, false);
-						Console.Out.WriteLine("Builder Moving into Position");
+						builder.move(target, false);
+						System.Threading.Thread.Sleep(500);
 						timeout--;
-						System.Threading.Thread.Sleep(100);
 					}
 					if (timeout <= 0)
 					{
-						iterations++;
 						Console.Out.WriteLine("Positioning Timed Out Replacing Builder");
 						builder = Interface().GetBuilder(buildPosition, true);
 						return false;
@@ -617,48 +631,66 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("CyberneticsCoreCount")]
         public int CyberneticsCoreCount()
         {
-            return Interface().GetCyberneticsCore().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Cybernetics_Core) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Cybernetics_Core);
+			if (Interface().GetCyberneticsCore().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Cybernetics_Core) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Cybernetics_Core) <= 0)
+				return 0;
+			else
+				return Interface().GetCyberneticsCore().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Cybernetics_Core) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Cybernetics_Core);
         }
 
 
         // Sense to return the number of protoss Gateways
-        [ExecutableSense("GatewayCount")]
-        public int GatewayCount()
-        {
-            return Interface().GetGateway().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Gateway) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Gateway);
-        }
+		[ExecutableSense("GatewayCount")]
+		public int GatewayCount()
+		{
+			if (Interface().GetGateway().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Gateway) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Gateway) <= 0)
+				return 0;
+			else
+				return Interface().GetGateway().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Gateway) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Gateway);
+		}
 
 
         // Sense to return the number of protoss Pylon's
-        [ExecutableSense("PylonCount")]
-        public int PylonCount()
-        {
-            return Interface().GetPylon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Pylon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Pylon);
-        }
+		[ExecutableSense("PylonCount")]
+		public int PylonCount()
+		{
+			if (Interface().GetPylon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Pylon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Pylon) <= 0)
+				return 0;
+			else
+				return Interface().GetPylon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Pylon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Pylon);
+		}
 
 
         // Sense to return the number of protoss Cannon's
-        [ExecutableSense("CannonCount")]
-        public int CannonCount()
-        {
-            return Interface().GetCannon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Photon_Cannon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Photon_Cannon);
-        }
+		[ExecutableSense("CannonCount")]
+		public int CannonCount()
+		{
+			if (Interface().GetCannon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Photon_Cannon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Photon_Cannon) <= 0)
+				return 0;
+			else
+				return Interface().GetCannon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Photon_Cannon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Photon_Cannon);
+		}
 
 
         // Sense to return the number of protoss StarGates
-        [ExecutableSense("StargateCount")]
-        public int StargateCount()
-        {
-            return Interface().GetStargate().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Stargate) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Stargate);
-        }
+		[ExecutableSense("StargateCount")]
+		public int StargateCount()
+		{
+			if (Interface().GetStargate().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Stargate) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Stargate) <= 0)
+				return 0;
+			else
+				return Interface().GetStargate().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Stargate) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Stargate);
+		}
 
 
         // Sense to return the number of protoss Fleet Beacon's
-        [ExecutableSense("FleetbeaconCount")]
-        public int FleetbeaconCount()
-        {
-            return Interface().GetFleetbeacon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Fleet_Beacon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Fleet_Beacon);
-        }
+		[ExecutableSense("FleetbeaconCount")]
+		public int FleetbeaconCount()
+		{
+			if (Interface().GetFleetbeacon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Fleet_Beacon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Fleet_Beacon) <= 0)
+				return 0;
+			else
+				return Interface().GetFleetbeacon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Fleet_Beacon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Fleet_Beacon);
+		}
 
 
         // Select a unit for building a structure

@@ -82,6 +82,7 @@ namespace POSH_StarCraftBot.behaviours
 
 			while (probeScout.getDistance(target) >= DELTADISTANCE)
 			{
+				probeScout.move(target, false);
 				if (probeScout.getHitPoints() <= 0)
 				{
 					Console.Out.WriteLine("Probe scout dead");
@@ -96,7 +97,7 @@ namespace POSH_StarCraftBot.behaviours
 						Console.Out.WriteLine("Probe to Natural");
 				}
 				System.Threading.Thread.Sleep(50);
-				if (enemy)
+				 if (enemy)
 				{
 					IEnumerable<Unit> enemyBuildings = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0).Where(units => units.getType().isBuilding());
 					if (enemyBuildings != null)
@@ -313,17 +314,9 @@ namespace POSH_StarCraftBot.behaviours
 
             Unit scout = null;
             IEnumerable<Unit> units = Interface().GetProbes().Where(probe =>
-                probe.getHitPoints() > 0 && !Interface().IsBuilder(probe));
-
-            foreach (Unit unit in units)
-            {
-                if (!unit.isCarryingGas())
-                {
-                    scout = unit;
-                    break;
-                }
-            }
-            if (scout == null && units.Count() > 0)
+                probe.getHitPoints() > 0).OrderBy(probe => bwta.getGroundDistance(probe.getTilePosition(), Interface().baseLocations[1]));
+			
+            if (units.Count() > 0)
             {
 				scout = units.Last();
             }
@@ -614,7 +607,12 @@ namespace POSH_StarCraftBot.behaviours
               //  return 1;
             //if (Interface().GetProbes().Count() < 1 || Interface().GetProbes().Where(probe => probe.isGatheringMinerals()).Count() < 1)
               //  return 1;
-            return Interface().GetProbes().Where(probe => probe.isGatheringGas()).Count() / Interface().GetProbes().Where(probe => !probe.isGatheringMinerals()).Count();
+			int ratio = Interface().GetProbes().Where(probe => probe.isGatheringMinerals()).Count() / 4;
+			int gatheringGas = ratio - Interface().GetProbes().Where(probe => probe.isGatheringGas()).Count();
+			if (gatheringGas >= 1)
+				return 1;
+			else
+				return 0;
         }
 
 

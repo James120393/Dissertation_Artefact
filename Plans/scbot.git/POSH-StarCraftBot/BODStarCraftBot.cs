@@ -135,7 +135,7 @@ namespace POSH_StarCraftBot
 
         public TilePosition StartLocation()
         {
-            return baseLocations[0];
+            return baseLocations[1];
         }
 
         public int GetMapHeight()
@@ -404,41 +404,59 @@ namespace POSH_StarCraftBot
         //Return the number of Probes under the AI's control
         public int ProbeCount()
         {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Probe);
+			if (bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Probe) <= 0)
+				return 0;
+			else
+				return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Probe);
         }
 
 
         //Return the number of Zealots under the AI's control
         public int ZealotCount()
         {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Zealot);
+			if (bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Zealot) <= 0)
+				return 0;
+			else
+				return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Zealot);
         }
 
 
         //Return the number of Dragoons under the AI's control
         public int DragoonCount()
         {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Dragoon);
+			if (bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Dragoon) <= 0)
+				return 0;
+			else
+				return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Dragoon);
         }
 
 
         //Return the number of Corsairs under the AI's control
         public int CorsairCount()
         {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Corsair);
+			if (bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Corsair) <= 0)
+				return 0;
+			else
+				return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Corsair);
         }
 
 
         //Return the number of Observers under the AI's control
         public int ObserverCount()
         {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Observer);
+			if (bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Observer) <= 0)
+				return 0;
+			else
+				return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Observer);
         }
 
 		//Return the number of Observers under the AI's control
 		public int CarrierCount()
 		{
-			return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Carrier);
+			if (bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Carrier) <= 0)
+				return 0;
+			else
+				return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Carrier);
 		}
 
 

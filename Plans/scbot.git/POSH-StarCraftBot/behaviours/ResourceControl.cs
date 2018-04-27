@@ -40,18 +40,20 @@ namespace POSH_StarCraftBot.behaviours
 		[ExecutableAction("BuildInterceptors")]
 		public bool BuildInterceptors()
 		{
-			int timeout = 50;
 			foreach (Unit carrier in Interface().GetCarrier())
 			{
-				while (carrier.getInterceptorCount() < 8 && timeout > 0)
+				for (int i = 0; i < 5; i++)
 				{
-					carrier.train(bwapi.UnitTypes_Protoss_Interceptor);
-					timeout--;
+					if (carrier.getTrainingQueue().Count() < 5)
+					{
+						carrier.train(bwapi.UnitTypes_Protoss_Interceptor);
+					}
+					else
+					{
+						break;
+					}
 				}
-				if (timeout <= 0)
-				{
-					return false;
-				}
+				continue;
 			}		
 			return true;
 		}
@@ -107,6 +109,13 @@ namespace POSH_StarCraftBot.behaviours
 			return DoResearch(bwapi.UpgradeTypes_Protoss_Plasma_Shields, Interface().GetForge());
         }
 
+		//Action to tell AI to research the Protoss Air Weapon upgrade
+		[ExecutableAction("WepUpgrade")]
+		public bool WepUpgrade()
+		{
+			return DoResearch(bwapi.UpgradeTypes_Protoss_Air_Weapons, Interface().GetCyberneticsCore());
+		}
+
 		//Action to tell AI to research the Protoss Shield upgrade
 		[ExecutableAction("CarrierUpgrade")]
 		public bool CarrierUpgrade()
@@ -122,16 +131,18 @@ namespace POSH_StarCraftBot.behaviours
 		[ExecutableSense("InterceptorsNeeded")]
 		public bool InterceptorsNeeded()
 		{
-			foreach (Unit carrier in Interface().GetCarrier())
+			IEnumerable<Unit> carrier = Interface().GetCarrier();
+			foreach (Unit c in carrier)
 			{
-				if (carrier.getInterceptorCount() < 8)
+				if (c.getInterceptorCount() < 8)
 				{
-					if (carrier.getTrainingQueue().Count() >= 5)
+					if (c.getTrainingQueue().Count() >= 5)
 					{
 						continue;
 					}
 					return true;
 				}
+				continue;
 			}
 			return false;
 		}
@@ -218,6 +229,13 @@ namespace POSH_StarCraftBot.behaviours
         {
 			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Plasma_Shields) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Plasma_Shields));
         }
+
+		//Sense to tell AI if they have the protoss Air Weapon upgreade
+		[ExecutableSense("HaveWep")]
+		public bool HaveWep()
+		{
+			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Air_Weapons) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Air_Weapons));
+		}
 
 		[ExecutableSense("IsResearching")]
 		public bool IsResearching()

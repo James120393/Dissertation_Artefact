@@ -222,7 +222,7 @@ namespace POSH_StarCraftBot.behaviours
             else
                 probes = Interface().GetProbes().Where(probe => !Interface().IsBuilder(probe));
 
-            if (probes.Count() < 1 || resources.Count() < 1)
+            if (probes.Count() < 1 || resources.Count() < 1 || probes == null)
                 return executed;
 
             // Update all minded Patches by removing non harvesting probes or dead ones
@@ -235,7 +235,10 @@ namespace POSH_StarCraftBot.behaviours
             {
                 if (maxUnits < 1)
                     break;
-
+				if (probe == null)
+				{
+					return false;
+				}
                 if (probe.getOrderTarget() is Unit && probe.getTarget() is Unit && resources.Contains(probe.getOrderTarget()) && probe.getTarget().getResources() > 0 &&
                     mined.ContainsKey(ConvertTilePosition(probe.getOrderTarget().getTilePosition())))
                 {
@@ -287,78 +290,89 @@ namespace POSH_StarCraftBot.behaviours
 		// Function to Train units
 		protected bool TrainProbe(UnitType type)
 		{
-			if (CanTrainUnit(type))
-			{
-				int targetLocation = (int)BuildSite.StartingLocation;
-				if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-					targetLocation = (int)Interface().currentBuildSite;
-				IEnumerable<Unit> nexuss = Interface().GetNexus();
-				if (nexuss.Count() <= 0)
-					return false;
-				Unit nexus = nexuss.First();
-				
-				if (nexus.getTrainingQueue().Count() >= 1)
-				{
-					return false;
-				}
-				
-				bool trainWorked = nexus.train(type);
-				// create new list to monitor specific type of unit
-				if (!trainingUnits.ContainsKey(type.getID()))
-					trainingUnits[type.getID()] = new List<Unit>();
+			//if (CanTrainUnit(type))
+			//{
+			int targetLocation = (int)BuildSite.StartingLocation;
 
-				// adding the moved unit to the appropriate unit list
-				if (trainWorked)
+			if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+				targetLocation = (int)Interface().currentBuildSite;
+
+			IEnumerable<Unit> prodBuildings = Interface().GetNexus();
+
+			if (prodBuildings.Count() <= 0)
+				return false;
+
+			foreach (Unit build in prodBuildings)
+			{
+				for (int i = 1; i <= 4; i++)
+				{
+					build.train(type);
 					Console.Out.WriteLine("Training Unit: " + type.getName());
-					if (Interface().forcePoints.ContainsKey(Interface().currentForcePoint))
-						nexus.move(new Position(Interface().forcePoints[Interface().currentForcePoint]));
-					else
-						nexus.move(new Position(Interface().baseLocations[targetLocation]));
-				return trainWorked;
-			}
-			return false;
+					if (build.getTrainingQueue().Count() >= 2)
+					{
+						if (Interface().forcePoints.ContainsKey(Interface().currentForcePoint))
+						{
+							build.move(new Position(Interface().forcePoints[Interface().currentForcePoint]));
+							break;
+						}
+						else
+						{
+							build.move(new Position(Interface().buildingChoke));
+							break;
+						}
+					}
+				}
+				continue;
+			}			
+			return true;
 		}
 
         // Function to Train units
-        protected bool TrainUnit(UnitType type, UnitType building)
-        {
-            //if (CanTrainUnit(type))
-            //{
-                int targetLocation = (int)BuildSite.StartingLocation;
+		protected bool TrainUnit(UnitType type, UnitType building, int timeout = 50)
+		{
+			//if (CanTrainUnit(type))
+			//{
+			int targetLocation = (int)BuildSite.StartingLocation;
 
-				if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-                    targetLocation = (int)Interface().currentBuildSite;
+			if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+				targetLocation = (int)Interface().currentBuildSite;
 
-				IEnumerable<Unit> prodBuildings = Interface().GetBuilding(building);
-				if (prodBuildings.Count() <= 0)
-                    return false;
-                Unit productionBuild = prodBuildings.First();
-				
+			IEnumerable<Unit> prodBuildings = Interface().GetBuilding(building);
+			Console.Out.WriteLine(prodBuildings.Count());
 
-				if (productionBuild.getTrainingQueue().Count() >= 1)
+			if (prodBuildings.Count() <= 0)
+				return false;
+			
+			foreach (Unit build in prodBuildings)
+			{
+				while (build.getTrainingQueue().Count() < 2 &&  timeout > 0)
 				{
-					productionBuild = prodBuildings.Last();
-					if (productionBuild.getTrainingQueue().Count() >= 2)
+					bool trainSuccess = build.train(type);
+					if (trainSuccess)
 					{
-						return false;
+						Console.Out.WriteLine("Training Unit: " + type.getName());
+					}
+					timeout--;
+				}
+				if (build.getTrainingQueue().Count() >= 2)
+				{
+					if (Interface().forcePoints.ContainsKey(Interface().currentForcePoint))
+					{
+						build.move(new Position(Interface().forcePoints[Interface().currentForcePoint]));
+						continue;
+					}
+					else
+					{
+						build.move(new Position(Interface().buildingChoke));
+						continue;
 					}
 				}
-				bool trainWorked = productionBuild.train(type);
-                // create new list to monitor specific type of unit
-                if (!trainingUnits.ContainsKey(type.getID()))
-                    trainingUnits[type.getID()] = new List<Unit>();
+				if (timeout <= 0)
+					return false;
 
-                // adding the moved unit to the appropriate unit list
-                if (trainWorked)
-					Console.Out.WriteLine("Training Unit: " + type.getName());
-					if (Interface().forcePoints.ContainsKey(Interface().currentForcePoint))
-						productionBuild.move(new Position(Interface().forcePoints[Interface().currentForcePoint]));
-					else
-						productionBuild.move(new Position(Interface().buildingChoke));
-                return trainWorked;
-            //}
-            //return false;
-        }
+			}		
+			return true;
+		}
 
         //
         // SENSES
@@ -604,7 +618,7 @@ namespace POSH_StarCraftBot.behaviours
         {
             IEnumerable<Unit> assimilators = Interface().GetAssimilator();
 
-            return ProbesToResource(assimilators, minedGas, 2, true, 3);
+            return ProbesToResource(assimilators, minedGas, 6, true, 1);
         }
 
         
