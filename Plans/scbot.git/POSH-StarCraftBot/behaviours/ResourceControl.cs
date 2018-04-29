@@ -122,6 +122,13 @@ namespace POSH_StarCraftBot.behaviours
 		{
 			return DoResearch(bwapi.UpgradeTypes_Carrier_Capacity, Interface().GetFleetbeacon());
 		}
+
+		//Action to tell AI to research the Protoss Legs
+		[ExecutableAction("LegsUpgrade")]
+		public bool LegsUpgrade()
+		{
+			return DoResearch(bwapi.UpgradeTypes_Leg_Enhancements, Interface().GetCitadel());
+		}
         ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////////
 
 
@@ -235,6 +242,13 @@ namespace POSH_StarCraftBot.behaviours
 		public bool HaveWep()
 		{
 			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Air_Weapons) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Air_Weapons));
+		}
+
+		//Sense to tell AI if they have the protoss Legs upgreade
+		[ExecutableSense("HaveLegs")]
+		public bool HaveLegs()
+		{
+			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Leg_Enhancements) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Leg_Enhancements));
 		}
 
 		[ExecutableSense("IsResearching")]

@@ -97,6 +97,7 @@
   <ItemGroup>
     <None Include="library\init\POSH-StarCraftBot_init" />
     <None Include="library\plans\PSCB-3HatchHydra.lap" />
+    <None Include="library\plans\PSCB-3HatchHydraC.lap" />
     <None Include="library\plans\PSCB-Carrier.lap" />
     <None Include="library\plans\PSCB-James" />
     <None Include="library\plans\PSCB-3HatchHydraD.lap" />

@@ -18,6 +18,7 @@ namespace POSH_StarCraftBot.behaviours
         private Dictionary<int, List<Unit>> minedPatches;
 
         private bool forceReady = false;
+		private bool stopZealotBuild = true;
 
         /// <summary>
         /// The int value key is identifying the location on the map by shifting the x corrdinate three digits to the left and adding the y value. 
@@ -188,6 +189,16 @@ namespace POSH_StarCraftBot.behaviours
             return trainingUnits[type.getID()].Count;
         }
 
+		protected int CheckForDeadUnits(UnitType type)
+		{
+			int removeUnit = 0;
+			foreach (Unit unit in Interface().GetAllUnits(true).Where(unit => unit.getType() == type && unit.getHitPoints() <= 0))
+			{
+				removeUnit--;
+			}
+			return removeUnit;
+		}
+
         // Get any idle probes
         protected internal Unit GetProbe()
         {
@@ -242,9 +253,6 @@ namespace POSH_StarCraftBot.behaviours
                 if (probe.getOrderTarget() is Unit && probe.getTarget() is Unit && resources.Contains(probe.getOrderTarget()) && probe.getTarget().getResources() > 0 &&
                     mined.ContainsKey(ConvertTilePosition(probe.getOrderTarget().getTilePosition())))
                 {
-                    Console.Out.WriteLine("test");
-                    Console.Out.WriteLine("drone.getOrderTarget()" + probe.getOrderTarget().getID());
-                    Console.Out.WriteLine("test" + probe.getTarget().getID());
                     continue;
                 }
 
@@ -290,88 +298,63 @@ namespace POSH_StarCraftBot.behaviours
 		// Function to Train units
 		protected bool TrainProbe(UnitType type)
 		{
-			//if (CanTrainUnit(type))
-			//{
-			int targetLocation = (int)BuildSite.StartingLocation;
-
-			if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-				targetLocation = (int)Interface().currentBuildSite;
-
-			IEnumerable<Unit> prodBuildings = Interface().GetNexus();
-
-			if (prodBuildings.Count() <= 0)
-				return false;
-
-			foreach (Unit build in prodBuildings)
+			if (CanTrainUnit(type))
 			{
-				for (int i = 1; i <= 4; i++)
+				int targetLocation = (int)BuildSite.StartingLocation;
+
+				if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+					targetLocation = (int)Interface().currentBuildSite;
+
+				IEnumerable<Unit> prodBuildings = Interface().GetNexus();
+				if (prodBuildings.Count() <= 0)
+					return false;
+
+				foreach (Unit build in prodBuildings)
 				{
-					build.train(type);
-					Console.Out.WriteLine("Training Unit: " + type.getName());
-					if (build.getTrainingQueue().Count() >= 2)
+					if (build.getTrainingQueue().Count() < 2)
 					{
-						if (Interface().forcePoints.ContainsKey(Interface().currentForcePoint))
+						bool trainSuccess = build.train(type);
+						if (trainSuccess)
 						{
-							build.move(new Position(Interface().forcePoints[Interface().currentForcePoint]));
-							break;
-						}
-						else
-						{
-							build.move(new Position(Interface().buildingChoke));
-							break;
+							Console.Out.WriteLine("Training Unit: " + type.getName());
 						}
 					}
 				}
-				continue;
-			}			
-			return true;
+				return true;
+			}
+			return false;
 		}
 
         // Function to Train units
 		protected bool TrainUnit(UnitType type, UnitType building, int timeout = 50)
 		{
-			//if (CanTrainUnit(type))
-			//{
-			int targetLocation = (int)BuildSite.StartingLocation;
-
-			if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
-				targetLocation = (int)Interface().currentBuildSite;
-
-			IEnumerable<Unit> prodBuildings = Interface().GetBuilding(building);
-			Console.Out.WriteLine(prodBuildings.Count());
-
-			if (prodBuildings.Count() <= 0)
-				return false;
-			
-			foreach (Unit build in prodBuildings)
+			if (CanTrainUnit(type))
 			{
-				while (build.getTrainingQueue().Count() < 2 &&  timeout > 0)
-				{
-					bool trainSuccess = build.train(type);
-					if (trainSuccess)
-					{
-						Console.Out.WriteLine("Training Unit: " + type.getName());
-					}
-					timeout--;
-				}
-				if (build.getTrainingQueue().Count() >= 2)
-				{
-					if (Interface().forcePoints.ContainsKey(Interface().currentForcePoint))
-					{
-						build.move(new Position(Interface().forcePoints[Interface().currentForcePoint]));
-						continue;
-					}
-					else
-					{
-						build.move(new Position(Interface().buildingChoke));
-						continue;
-					}
-				}
-				if (timeout <= 0)
+				int targetLocation = (int)BuildSite.StartingLocation;
+
+				if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
+					targetLocation = (int)Interface().currentBuildSite;
+
+				IEnumerable<Unit> prodBuildings = Interface().GetBuilding(building);
+				if (prodBuildings.Count() <= 0)
 					return false;
 
-			}		
-			return true;
+				foreach (Unit build in prodBuildings)
+				{
+					if (build.getTrainingQueue().Count() < 1 && timeout > 0)
+					{
+						bool trainSuccess = build.train(type);
+						if (trainSuccess)
+						{
+							Console.Out.WriteLine("Training Unit: " + type.getName());
+						}
+						//timeout--;
+					}
+					//if (timeout <= 0)
+						//continue;
+				}
+			}
+			return false;
 		}
 
         //
@@ -477,7 +460,11 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("ZealotCount")]
         public int ZealotCount()
         {
-            return Interface().ZealotCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Zealot);
+			int count = Interface().ZealotCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Zealot) - CheckForDeadUnits(bwapi.UnitTypes_Protoss_Zealot);
+			if (count <= 0)
+				return 0;
+ 			else
+				return count;
         }
 
 
@@ -485,7 +472,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("DarkTemplarCount")]
         public int DarkTemplarCount()
         {
-            return Interface().HydraliskCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Dark_Templar);
+            return Interface().DarkTemplarCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Dark_Templar);
         }
 
 
@@ -570,6 +557,13 @@ namespace POSH_StarCraftBot.behaviours
 			return TrainUnit(bwapi.UnitTypes_Protoss_Zealot, bwapi.UnitTypes_Protoss_Gateway);
         }
 
+		//Action to tell the AI to Never build Zealots
+		[ExecutableAction("StopZealot")]
+		public bool StopZealot()
+		{
+			stopZealotBuild = false;
+			return stopZealotBuild;
+		}
 
         //Action to tell the AI to Build a Protoss Dragoon
         [ExecutableAction("TrainDragoon")]
@@ -602,6 +596,12 @@ namespace POSH_StarCraftBot.behaviours
 
         ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
 
+		//Action to tell the AI to Never build Zealots
+		[ExecutableSense("CanBuildZealot")]
+		public bool CanBuildZealot()
+		{
+			return stopZealotBuild;
+		}
 
         //Action to tell the AI to Assign Probes to gather minerals
         [ExecutableAction("AssignProbes")]

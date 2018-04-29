@@ -20,7 +20,7 @@ namespace POSH_StarCraftBot.behaviours
         Unit builder;
 		private bool needNewBuilder = false;
 		private bool needBuilding = true;
-		private int iterations = 100;
+		private int iterations = 400;
 		private int textCounter = 0;
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace POSH_StarCraftBot.behaviours
         }
 
         //Function to build a building
-        protected bool Build(UnitType type, int timeout = 5)
+        protected bool Build(UnitType type, int timeout = 10)
         {
             bool building = false;
             if (builder is Unit)
@@ -152,7 +152,7 @@ namespace POSH_StarCraftBot.behaviours
 				if (buildings.Count() > 0)
 					currentBuildCommand = buildings.First();
 				builder.build(buildLocation, type);
-				System.Threading.Thread.Sleep(50);
+				System.Threading.Thread.Sleep(100);
 				building = builder.build(buildLocation, type);				
 				while (currentBuildCommand == null && timeout > 0)
 				{
@@ -174,7 +174,7 @@ namespace POSH_StarCraftBot.behaviours
 				if (timeout <= 0)
 				{
 					building = builder.build(buildLocation, type);
-					System.Threading.Thread.Sleep(500);
+					System.Threading.Thread.Sleep(300);
 					if (building)
 					{
 						buildQueue[type.getID()].Add(buildLocation);
@@ -191,16 +191,13 @@ namespace POSH_StarCraftBot.behaviours
         ////////////////////////////////////////////////////////////////////////James' Code////////////////////////////////////////////////////////////////////////
 		// Function to position buildings taking he unit type for the building size
         // an xSpace Value, ySpace Value and Z for in iterations
-		protected bool Position(UnitType type, int timeout = 30)
+		protected bool Position(UnitType type, int timeout = 10)
 		{
 			//if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite) && Interface().currentBuildSite != BuildSite.NaturalChoke)
 			// return false;
 			if (CanBuildBuilding(type))
 			{
 				TilePosition buildPosition;
-
-				if (iterations >= 400)
-					iterations = 5;
 
 				buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
 
@@ -230,29 +227,14 @@ namespace POSH_StarCraftBot.behaviours
 						}
 					}
 				}
-
-				if (buildPosition == null)
+				try
 				{
-					Console.Out.WriteLine("Can't Find Position, Expanding Area");
-					iterations += 10;
-					if (iterations >= 250 && type != bwapi.UnitTypes_Protoss_Photon_Cannon)
-					{
-						buildPosition = PossibleBuildLocation(builder.getTilePosition(), builder, bwapi.UnitTypes_Protoss_Pylon);
-						if (buildPosition != null)
-						{
-							builder.move(new Position(buildPosition), false);
-							builder.build(buildPosition, bwapi.UnitTypes_Protoss_Pylon);
-							return false;
-						}
-						iterations = 100;
-						builder = Interface().GetBuilder(Interface().baseLocations[1], true);
-						return false;
-					}
+					buildLocation = buildPosition;
+				}
+				catch
+				{
 					return false;
 				}
-
-				buildLocation = buildPosition;
-
 
 				if (buildLocation is TilePosition)
 				{
@@ -262,7 +244,7 @@ namespace POSH_StarCraftBot.behaviours
 					while (builder.getDistance(target) >= DELTADISTANCE && timeout > 0)
 					{
 						builder.move(target, false);
-						System.Threading.Thread.Sleep(500);
+						System.Threading.Thread.Sleep(300);
 						timeout--;
 					}
 					if (timeout <= 0)
@@ -543,12 +525,39 @@ namespace POSH_StarCraftBot.behaviours
 			return Position(bwapi.UnitTypes_Protoss_Fleet_Beacon);
 		}
 
-
 		// Action to use the suitable location to build the protoss Fleetbeacon
 		[ExecutableAction("BuildFleetbeacon")]
 		public bool BuildFleetbeacon()
 		{
 			return Build(bwapi.UnitTypes_Protoss_Fleet_Beacon);
+		}
+
+		// Action for finding a suitable loaction for the Protoss Fleetbeacon
+		[ExecutableAction("PositionCitadel")]
+		public bool PositionCitadel()
+		{
+			return Position(bwapi.UnitTypes_Protoss_Citadel_of_Adun);
+		}
+
+		// Action to use the suitable location to build the protoss Fleetbeacon
+		[ExecutableAction("BuildCitadel")]
+		public bool BuildCitadel()
+		{
+			return Build(bwapi.UnitTypes_Protoss_Citadel_of_Adun);
+		}
+
+		// Action for finding a suitable loaction for the Protoss Fleetbeacon
+		[ExecutableAction("PositionArchives")]
+		public bool PositionArchives()
+		{
+			return Position(bwapi.UnitTypes_Protoss_Templar_Archives);
+		}
+
+		// Action to use the suitable location to build the protoss Fleetbeacon
+		[ExecutableAction("BuildArchives")]
+		public bool BuildArchives()
+		{
+			return Build(bwapi.UnitTypes_Protoss_Templar_Archives);
 		}
 
         // Action for finding a suitable loaction for the Protoss Photon Cannon
@@ -659,6 +668,16 @@ namespace POSH_StarCraftBot.behaviours
 				return Interface().GetPylon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Pylon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Pylon);
 		}
 
+		[ExecutableSense("PylonConstructing")]
+		public bool PylonConstructing()
+		{
+			IEnumerable<Unit> building = Interface().GetPylon().Where(build => build.isBeingConstructed());				
+			if (building.Count() > 0)
+				return true;
+			else
+				return false;
+		}
+
 
         // Sense to return the number of protoss Cannon's
 		[ExecutableSense("CannonCount")]
@@ -690,6 +709,26 @@ namespace POSH_StarCraftBot.behaviours
 				return 0;
 			else
 				return Interface().GetFleetbeacon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Fleet_Beacon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Fleet_Beacon);
+		}
+
+		// Sense to return the number of protoss Citadel of Adun
+		[ExecutableSense("CitadelCount")]
+		public int CitadelCount()
+		{
+			if (Interface().GetCitadel().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Citadel_of_Adun) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Citadel_of_Adun) <= 0)
+				return 0;
+			else
+				return Interface().GetCitadel().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Citadel_of_Adun) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Citadel_of_Adun);
+		}
+
+		// Sense to return the number of protoss Templar Archives
+		[ExecutableSense("ArchivesCount")]
+		public int ArchivesCount()
+		{
+			if (Interface().GetTemplarArchives().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Templar_Archives) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Templar_Archives) <= 0)
+				return 0;
+			else
+				return Interface().GetTemplarArchives().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Templar_Archives) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Templar_Archives);
 		}
 
 

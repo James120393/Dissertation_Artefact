@@ -116,6 +116,7 @@ namespace POSH_StarCraftBot
             }
 
 			basePositions = bwta.getBaseLocations().Where(baseLoc => bwta.getGroundDistance(Self().getStartLocation(), baseLoc.getTilePosition()) > 0).OrderBy(baseLoc => bwta.getGroundDistance(Self().getStartLocation(), baseLoc.getTilePosition()));
+			basePositions.Reverse();
 			
             currentForcePoint = ForceLocations.OwnStart;
             currentBuildSite = BuildSite.StartingLocation;
@@ -430,6 +431,15 @@ namespace POSH_StarCraftBot
 				return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Dragoon);
         }
 
+		//Return the number of Dark Templar under the AI's control
+		public int DarkTemplarCount()
+		{
+			if (bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Dark_Templar) <= 0)
+				return 0;
+			else
+				return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Dark_Templar);
+		}
+
 
         //Return the number of Corsairs under the AI's control
         public int CorsairCount()
@@ -592,6 +602,18 @@ namespace POSH_StarCraftBot
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Fleet_Beacon.getID());
         }
+
+		//Return the number of Citadel of Adun under the AI's control Plus their location
+		public IEnumerable<Unit> GetCitadel()
+		{
+			return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Citadel_of_Adun.getID());
+		}
+
+		//Return the number of Templar Archives under the AI's control Plus their location
+		public IEnumerable<Unit> GetTemplarArchives()
+		{
+			return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Templar_Archives.getID());
+		}
 
 		//Return the building ID, used for training units at different buildings
 		public IEnumerable<Unit> GetBuilding(UnitType Building)

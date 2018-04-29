@@ -234,44 +234,43 @@ namespace POSH_StarCraftBot.behaviours
             return (distanceFirst < distanceSecond) ? first : second;
         }
 
-		private bool MoveForce(ForceLocations moveLocation)
+		private bool MoveForce(BaseLocation moveLocation, bool builder)
 		{
-			if (Interface().forcePoints.ContainsKey(moveLocation) && Interface().forcePoints[moveLocation] is TilePosition)
-			{
-				IEnumerable<Unit> force = Interface().GetAllUnits(false);
-				Position location = new Position(Interface().forcePoints[moveLocation]);
-				foreach (Unit unit in force)
-				{
-					if (unit.getHitPoints() > 0)
-					{	
-						IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
-						if (enemies != null)
-						{
-							IEnumerable<Unit> enemy = enemies.OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
-							unit.attack(location);
-							if (enemy != null && enemy.Count() > 0)
-							{
-								try
-								{
-									unit.attack(enemy.First().getPosition());
-								}
-								catch
-								{
-									unit.attack(location);
-								}
-							}
-							else
-							{
-								unit.attack(location);
-							}
-						}
+			IEnumerable<Unit> force = null;
+			if (!builder)
+				force = Interface().GetAllUnits(false);
+			if (builder)
+				force = Interface().GetAllUnits(false).Concat(Interface().GetAllUnits(true));
 
+			Position location = new Position(moveLocation.getTilePosition());
+			foreach (Unit unit in force)
+			{
+				if (unit.getHitPoints() > 0)
+				{
+					IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
+					if (enemies != null)
+					{
+						IEnumerable<Unit> enemy = enemies.OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
+						unit.attack(location);
+						try
+						{
+							IEnumerable<Unit> enemtUnit = enemy.Where(units => units.getHitPoints() > 0).Where(units => !units.getType().isBuilding());
+							unit.attack(enemtUnit.First().getPosition());
+						}
+						catch
+						{
+							unit.attack(location);
+						}
+					}
+					else
+					{
+						unit.attack(location);
 					}
 				}
-				return true;
 			}
-			return false;
+			return true;
 		}
+	
 
         //
         // ACTIONS
@@ -329,7 +328,7 @@ namespace POSH_StarCraftBot.behaviours
 		[ExecutableAction("MoveForceNatural")]
 		public bool MoveForceNatural()
 		{
-			return MoveForce(ForceLocations.NaturalChoke);
+			return MoveForce(Interface().basePositions.First(), false);
 		}
 
         [ExecutableAction("StopAttacks")]
@@ -342,7 +341,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("AttackEnemyMainBase")]
         public bool AttackEnemyMainBase()
         {
-            return MoveForce(ForceLocations.EnemyStart);
+            return MoveForce(Interface().basePositions.Last(), false);
 
         }
 
@@ -526,19 +525,22 @@ namespace POSH_StarCraftBot.behaviours
 
 
 
-        [ExecutableSense("EnemyDetected")]
-        public int EnemyDetected()
-        {
-            IEnumerable<Unit> shownUnits = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0);
-            bool detectedNew = false;
+		[ExecutableSense("EnemyDetected")]
+		public int EnemyDetected()
+		{
+			IEnumerable<Unit> shownUnits = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0).Where(units => !units.getType().isBuilding());
+			bool detectedNew = false;
 
-            foreach (Unit unit in shownUnits)
-            {
-                if (unit.getHitPoints() > 0)
-                    detectedNew = true;
-            }
-            return (detectedNew) ? 1 : 0;
-        }
+			foreach (Unit unit in shownUnits)
+			{
+				if (unit.getHitPoints() > 0)
+				{
+					Console.Out.WriteLine("Enemy Detected");
+					detectedNew = true;
+				}
+			}
+			return (detectedNew) ? 1 : 0;
+		}
 
         [ExecutableSense("BaseUnderAttack")]
         public bool BaseUnderAttack()
@@ -572,7 +574,7 @@ namespace POSH_StarCraftBot.behaviours
 		[ExecutableAction("DefendBase")]
 		public bool DefendBase()
 		{
-			return MoveForce(ForceLocations.NaturalChoke);
+			return MoveForce(Interface().basePositions.First(), false);
 		}
 		/// <summary>
         /// returns the ForceLocation identifier of the force losing. There are currently 8 forceLocations specified in BODStarraftBot.

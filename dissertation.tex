@@ -53,6 +53,7 @@
 \usepackage{color}
 \usepackage{listings}
 \usepackage[table]{xcolor}
+\usepackage{float}
 
 
 % Select what to do with todonotes: 
@@ -263,7 +264,7 @@ In this work Protoss will be chosen, this choice was made as Zerg have been done
 The tools that will be used in this experiment are; The Brood War Application Programming Interface (BWAPI), POSH tools, specifically POSH Sharp which is an interface that uses c\# instead of C++, and the ABODE editing software which uses POSH plans to create Behaviour Oriented Designs for AI's. Other tools include Visual Studio 2010, Chaoslauncher, StarCraft Tournament Manager, and VirtualBox, all of which will be explained next. 
 
 
-\begin{figure}
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.5\textwidth]{POSH}
 	\caption{POSH plan for the Three Hatch Hydra build plan inside the ABODE editor.}
@@ -285,7 +286,7 @@ The tools that will be used in this experiment are; The Brood War Application Pr
 	\item \textbf{Oracle VirtualBox} is a general-purpose full virtualizer for x86 hardware, targeted at server, desktop and embedded use \cite{Virtual}. This allows the user to run multiple instances of an operating system on the same hardware, for this experiment it will be used to run multiple instances of StarCraft on the same PC. 
 \end{itemize}
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.5\textwidth]{TMPic}
 	\caption{StarCraft Tournament Manager Server Running.}
@@ -299,7 +300,7 @@ The challenge was the implementation of these build orders, as the POSH plans ha
 
 This work will be focusing on the implementation of an AI with pre-built build orders and their counters taken from Liquipedia \cite{Liquid}, a website dedicated to StarCraft, on the there they have a collection of strategies that are free to use in any capacity. Building upon these build orders, the experiment will also include a method for swapping between the orders at any point, to know when to do this, the AI will scout the map in search of the opponent and compare their current building to its stored build orders and find an appropriate counter. The issue with this method is that in late game the AI will struggle to decide which build order to continue. 
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\begin{lstlisting}
 [ExecutableAction("SelectProbeScout")]
 public bool SelectProbeScout()
@@ -378,7 +379,7 @@ To counteract this The AI has been modified to include a tactic that is not pres
 
 \subsubsection{Sprint 5 : Polish}
 At the end of this sprint the AI was expected to have all behaviours fully implemented and tested and a completed plan written and tested. This was an opportunity to look back and re-factor any code that needed tuning or any duplicate code that got into the system. Though the point of TDD is to avoid duplicate code, its priority is to get code that works, in the case of this software duplicate code did end up in the system. Unfortunately due to the nature of the "Action", "Sense" system there is bound to be duplicate code, though it can be minimized with internal functions.
-\begin{table*}[h!]
+\begin{table*}[]
 	\centering
 	\includegraphics[width=\textwidth]{STMResults}
 	\caption{The HTML results table produced by the StarCraft Tournament Manager \cite{Tournament}. Blue represents Terran, Purple represents Zerg, and Yellow represents Protoss}
@@ -396,31 +397,31 @@ To prepare for final testing a preliminary test was carried out using the tourna
 
 because the times are only for the games that have that bot in it
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.5\textwidth]{RacePie}
 	\caption{A pie chart representing the average win rate \% for the three races, based on the results obtained from table 1.}
 	\label{Fig4}
 \end{figure}
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.5\textwidth]{AvgTimeBar}
 	\caption{Box and whisker showing the average game length, with the mean, median and outlier based on the results obtained from table 1.}
 	\label{Fig5}
 \end{figure}
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.5\textwidth]{WinBar}
 	\caption{Box and whisker showing Win Rate, with the mean and median based on the results obtained from table 1.}
 	\label{Fig6}
 \end{figure}
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.5\textwidth]{WinTimeLine}
 	\caption{A line graph showing both the win rate and game length for all the bots, starting with the highest win rate on the left, based on the results obtained from table 1.}
 	\label{Fig7}
 \end{figure}
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.5\textwidth]{Scatter}
 	\caption{A scatter plot showing a negative correlation between the win rate and game length, based on the results obtained from the preliminary experiment. Each dot represents an average win rate and average game length for each bot during each round.}
@@ -498,7 +499,7 @@ A further step that could be taken is to allow the AI to construct its own plans
 
 % Appendices
 \appendix
-\begin{table*}[h!]
+\begin{table*}
 	\centering
 	{\rowcolors{3}{green!80!yellow!50}{green!70!yellow!40}}
 	\begin{tabular} { |p{3cm}||p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|  } 

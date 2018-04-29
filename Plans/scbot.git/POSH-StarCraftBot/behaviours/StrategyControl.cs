@@ -67,8 +67,6 @@ namespace POSH_StarCraftBot.behaviours
 			
 			probeScout.stop();
 
-			//IOrderedEnumerable<BaseLocation> pos = Interface().basePositions;
-
 			if (Interface().basePositions.Count() < 1)
 			{
 				return false;
@@ -80,48 +78,66 @@ namespace POSH_StarCraftBot.behaviours
 
 			Position randTarget = Interface().basePositions.Skip(2).First().getPosition();
 
-			while (probeScout.getDistance(target) >= DELTADISTANCE)
+			if (!enemy)
 			{
-				probeScout.move(target, false);
-				if (probeScout.getHitPoints() <= 0)
-				{
-					Console.Out.WriteLine("Probe scout dead");
-					return false;
-				}
-				if (!probeScout.isMoving() && probeScout.getHitPoints() > 0)
+				while (probeScout.getDistance(target) >= DELTADISTANCE)
 				{
 					probeScout.move(target, false);
-					if (enemy)
-						Console.Out.WriteLine("Probe to Enemy");
-					if (!enemy)
-						Console.Out.WriteLine("Probe to Natural");
-				}
-				System.Threading.Thread.Sleep(50);
-				 if (enemy)
-				{
-					IEnumerable<Unit> enemyBuildings = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0).Where(units => units.getType().isBuilding());
-					if (enemyBuildings != null)
+					if (probeScout.getHitPoints() <= 0)
 					{
-						foreach (Unit building in enemyBuildings)
+						Console.Out.WriteLine("Probe scout dead");
+						return false;
+					}
+					if (!probeScout.isMoving() && probeScout.getHitPoints() > 0)
+					{
+						probeScout.move(target, false);
+						Console.Out.WriteLine("Probe to Natural");
+					}
+					System.Threading.Thread.Sleep(50);
+				}				
+				probeScout.move(randTarget, false);
+				//Interface().naturalHasBeenFound = true;
+				Console.Out.WriteLine("Probe at Natural");
+				Interface().baseLocations.Add(2, Interface().basePositions.First().getTilePosition());
+				return true;
+			}
+			if (enemy)
+			{
+				foreach (BaseLocation baseLoc in Interface().basePositions.Reverse())
+				{
+					while (probeScout.getDistance(baseLoc.getPosition()) >= DELTADISTANCE)
+					{
+						IEnumerable<Unit> enemyBuildings = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0).Where(units => units.getType().isBuilding());
+						if (probeScout.getHitPoints() <= 0)
 						{
-							if (building.getType().isBuilding())
+							Console.Out.WriteLine("Probe scout dead");
+							return false;
+						}
+						if (!probeScout.isMoving() && probeScout.getHitPoints() > 0)
+						{
+							probeScout.move(baseLoc.getPosition(), false);
+							Console.Out.WriteLine("Probe Searching for Enemy Base");
+						}
+						if (enemyBuildings != null)
+						{
+							foreach (Unit building in enemyBuildings)
 							{
-								probeScout.move(randTarget, false);
-								Interface().baseLocations.Add(5, Interface().basePositions.Last().getTilePosition());
-								Interface().forcePoints[ForceLocations.EnemyStart] = building.getTilePosition();
-								Console.Out.WriteLine("Probe Found Enemy Building");
-								return true;
+								try
+								{
+									Interface().baseLocations.Add(5, baseLoc.getTilePosition());
+									Interface().forcePoints[ForceLocations.EnemyStart] = baseLoc.getTilePosition();
+									Console.Out.WriteLine("Enemy Building Detected");
+									return true;
+								}
+								catch
+								{
+									return false;
+								}
 							}
 						}
 					}
 				}
-			}
-			if (!enemy)
-			{
-				probeScout.move(randTarget, false);
-				Interface().naturalHasBeenFound = true;
-				Console.Out.WriteLine("Probe at Natural");
-				Interface().baseLocations.Add(2, Interface().basePositions.First().getTilePosition());
+				return true;
 			}
 			return false;
 		}
@@ -440,7 +456,9 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("NaturalFound")]
         public bool NaturalFound()
         {
-			return Interface().naturalHasBeenFound;
+			if (Interface().baseLocations.ContainsKey(2))
+				return true;
+			return false;
         }
 
 		[ExecutableSense("HaveScout")]
