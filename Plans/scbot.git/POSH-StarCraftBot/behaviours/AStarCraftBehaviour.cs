@@ -17,7 +17,7 @@ namespace POSH_StarCraftBot.behaviours
 
         public enum Races { Unknown = 0, Zerg = 1, Protoss = 2, Terran = 3 }
 
-        protected const double DELTADISTANCE = 100L;
+        protected const double DELTADISTANCE = 50L;
 
         protected const double DELTATIME = 100L;
 

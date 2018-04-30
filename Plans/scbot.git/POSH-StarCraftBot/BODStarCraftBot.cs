@@ -121,6 +121,7 @@ namespace POSH_StarCraftBot
             currentForcePoint = ForceLocations.OwnStart;
             currentBuildSite = BuildSite.StartingLocation;
         }
+
         //
         // own Player
         //
@@ -131,7 +132,10 @@ namespace POSH_StarCraftBot
 
         public bool GameRunning()
         {
-            return bwapi.Broodwar.isInGame();
+            if (bwapi.Broodwar.isInGame())
+                return true;
+            else
+                return false;                
         }
 
         public TilePosition StartLocation()

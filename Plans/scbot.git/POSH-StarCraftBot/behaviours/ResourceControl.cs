@@ -113,7 +113,7 @@ namespace POSH_StarCraftBot.behaviours
 		[ExecutableAction("WepUpgrade")]
 		public bool WepUpgrade()
 		{
-			return DoResearch(bwapi.UpgradeTypes_Protoss_Air_Weapons, Interface().GetCyberneticsCore());
+			return DoResearch(bwapi.UpgradeTypes_Protoss_Ground_Weapons, Interface().GetForge());
 		}
 
 		//Action to tell AI to research the Protoss Shield upgrade
@@ -241,7 +241,7 @@ namespace POSH_StarCraftBot.behaviours
 		[ExecutableSense("HaveWep")]
 		public bool HaveWep()
 		{
-			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Air_Weapons) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Air_Weapons));
+			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Ground_Weapons) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Ground_Weapons));
 		}
 
 		//Sense to tell AI if they have the protoss Legs upgreade

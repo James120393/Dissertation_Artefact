@@ -18,6 +18,10 @@ namespace POSH_StarCraftBot.behaviours
         /// </summary>
         public Dictionary<int, Unit> enemyBuildings;
 
+        public Dictionary<int, Position> enemyBuildingsPositions;
+
+        public IEnumerable<Unit> shownEnemyBuildings; 
+
         /// <summary>
         /// the key is the units ID which does not change over the course of a game
         /// </summary>
@@ -259,7 +263,25 @@ namespace POSH_StarCraftBot.behaviours
 						}
 						catch
 						{
-							unit.attack(location);
+                            try
+                            {
+                                IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => eunit.getType().isBuilding());
+                                unit.attack(enemyUnit.First().getPosition());
+                            }
+                            catch
+                            {
+                                try
+                                {
+                                    if (enemyBuildingsPositions.Count() > 0)
+                                    {
+                                        unit.attack(enemyBuildingsPositions.First().Value);
+                                    }
+                                }
+                                catch
+                                {
+                                    unit.attack(location);
+                                }
+                            }
 						}
 					}
 					else
@@ -529,7 +551,23 @@ namespace POSH_StarCraftBot.behaviours
 		public int EnemyDetected()
 		{
 			IEnumerable<Unit> shownUnits = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0).Where(units => !units.getType().isBuilding());
-			bool detectedNew = false;
+            IEnumerable<Unit> enemyBuildingsShown = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0).Where(units => units.getType().isBuilding());
+            bool detectedNew = false;
+
+            foreach (Unit build in enemyBuildingsShown)
+            {
+                try
+                {
+                    if (build.getHitPoints() > 0)
+                        enemyBuildingsPositions.Add(build.getID(), build.getPosition());
+                    else
+                        enemyBuildingsPositions.Remove(build.getID());
+                }
+                catch
+                {
+                    continue;
+                }
+            }
 
 			foreach (Unit unit in shownUnits)
 			{

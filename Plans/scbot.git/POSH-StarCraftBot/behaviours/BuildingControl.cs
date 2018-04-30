@@ -20,7 +20,7 @@ namespace POSH_StarCraftBot.behaviours
         Unit builder;
 		private bool needNewBuilder = false;
 		private bool needBuilding = true;
-		private int iterations = 400;
+		private int iterations = 150;
 		private int textCounter = 0;
 
         /// <summary>
@@ -74,13 +74,14 @@ namespace POSH_StarCraftBot.behaviours
 			int dx = 0;
 			int dy = -1;
 			int t = (int)Math.Sqrt(iterations);
-            for (int i = 0; i < iterations; i++)
+            int i = 0;
+            while( i < iterations)
             {
                 if ((-Math.Sqrt(iterations) / 2 < x && x <= Math.Sqrt(iterations) / 2) && (-Math.Sqrt(iterations) / 2 < y && y <= Math.Sqrt(iterations) / 2))
                 {
                     if (bwapi.Broodwar.canBuildHere(builder, addToTile(start, x, y), building))
                     {
-                        //Console.Out.WriteLine("building " + building.getName() + " at:" + addToTile(start, x, y).xConst() + ":" + addToTile(start, x, y).yConst());
+                        Console.Out.WriteLine("building " + building.getName() + " at:" + addToTile(start, x, y).xConst() + ":" + addToTile(start, x, y).yConst());
                         return addToTile(start, x, y);
                     }
                 }
@@ -92,6 +93,7 @@ namespace POSH_StarCraftBot.behaviours
                 }
                 x += dx;
                 y += dy;
+                i++;
             }
 
 			return null;
@@ -162,7 +164,6 @@ namespace POSH_StarCraftBot.behaviours
 						buildQueue[type.getID()].Add(buildLocation);
 						Console.Out.WriteLine("Builder Building " + type.getName());
 						textCounter = 0;
-						iterations = 100;
 						return building;
 					}
 					if (!building)
@@ -180,8 +181,8 @@ namespace POSH_StarCraftBot.behaviours
 						buildQueue[type.getID()].Add(buildLocation);
 						Console.Out.WriteLine("Builder Building " + type.getName() + " At its Location");
 						textCounter = 0;
-						iterations = 100;
-						return building;
+						
+                        return building;
 					}
 				}
             }			
@@ -206,10 +207,10 @@ namespace POSH_StarCraftBot.behaviours
 					builder = Interface().GetBuilder(buildPosition, false);
 				}
 
-				double dist = iterations;
+				double dist = DELTADISTANCE;
 				if (buildLocation is TilePosition && buildPosition is TilePosition)
 					dist = buildLocation.getDistance(buildPosition);
-				if (buildLocation != null && dist > iterations && bwapi.Broodwar.canBuildHere(builder, buildLocation, type))
+				if (buildLocation != null && dist > iterations )
 				{
 					move(new Position(buildLocation), builder);
 					return true;
@@ -239,12 +240,13 @@ namespace POSH_StarCraftBot.behaviours
 				if (buildLocation is TilePosition)
 				{
 					Position target = new Position(buildPosition);
-					builder.move(target, false);
+					builder.move(target, true);
 					Console.Out.WriteLine("Builder Moving into Position");
 					while (builder.getDistance(target) >= DELTADISTANCE && timeout > 0)
 					{
-						builder.move(target, false);
-						System.Threading.Thread.Sleep(300);
+						if (builder.move(target, true))
+                            break;
+                        System.Threading.Thread.Sleep(100);
 						timeout--;
 					}
 					if (timeout <= 0)
@@ -257,6 +259,7 @@ namespace POSH_StarCraftBot.behaviours
 					return true;
 				}
 				Console.Out.WriteLine("buildLocation is NULL");
+                builder.build(builder.getTilePosition(), bwapi.UnitTypes_Protoss_Pylon);
 				return false;
 			}
 			if (textCounter >= 1)
@@ -715,21 +718,35 @@ namespace POSH_StarCraftBot.behaviours
 		[ExecutableSense("CitadelCount")]
 		public int CitadelCount()
 		{
-			if (Interface().GetCitadel().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Citadel_of_Adun) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Citadel_of_Adun) <= 0)
+            if (Interface().GetCitadel().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Citadel_of_Adun) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Citadel_of_Adun) <= 0)
 				return 0;
-			else
-				return Interface().GetCitadel().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Citadel_of_Adun) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Citadel_of_Adun);
+            try
+            {
+                return Interface().GetCitadel().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Citadel_of_Adun) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Citadel_of_Adun);
+            }
+            catch
+            {
+                return 1;
+            }
+				
 		}
 
 		// Sense to return the number of protoss Templar Archives
-		[ExecutableSense("ArchivesCount")]
-		public int ArchivesCount()
-		{
-			if (Interface().GetTemplarArchives().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Templar_Archives) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Templar_Archives) <= 0)
-				return 0;
-			else
-				return Interface().GetTemplarArchives().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Templar_Archives) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Templar_Archives);
-		}
+        [ExecutableSense("ArchivesCount")]
+        public int ArchivesCount()
+        {
+
+            if (Interface().GetTemplarArchives().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Templar_Archives) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Templar_Archives) <= 0)
+                return 0;
+            try
+            {
+                return Interface().GetTemplarArchives().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Templar_Archives) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Templar_Archives);
+            }
+            catch
+            {
+                return 1;
+            }
+        }
 
 
         // Select a unit for building a structure
