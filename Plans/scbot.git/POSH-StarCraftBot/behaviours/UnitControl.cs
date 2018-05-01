@@ -296,7 +296,7 @@ namespace POSH_StarCraftBot.behaviours
         }
 
 		// Function to Train units
-		protected bool TrainProbe(UnitType type)
+		protected bool TrainProbe(UnitType type, bool naturalBuild)
 		{
 			if (CanTrainUnit(type))
 			{
@@ -309,14 +309,29 @@ namespace POSH_StarCraftBot.behaviours
 				if (prodBuildings.Count() <= 0)
 					return false;
 
-				foreach (Unit build in prodBuildings)
+				if (naturalBuild)
 				{
-					if (build.getTrainingQueue().Count() < 5)
+					if (prodBuildings.Last().getTrainingQueue().Count() < 5)
 					{
-						bool trainSuccess = build.train(type);
+						bool trainSuccess = prodBuildings.Last().train(type);
 						if (trainSuccess)
 						{
-							Console.Out.WriteLine("Training Unit: " + type.getName());
+							Console.Out.WriteLine("Training Unit: " + type.getName() + " At Natural");
+							return true;
+						}
+					}					
+				}
+				else
+				{
+					foreach (Unit build in prodBuildings)
+					{
+						if (build.getTrainingQueue().Count() < 5)
+						{
+							bool trainSuccess = build.train(type);
+							if (trainSuccess)
+							{
+								Console.Out.WriteLine("Training Unit: " + type.getName());
+							}
 						}
 					}
 				}
@@ -553,9 +568,15 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("BuildProbe")]
         public bool BuildProbe()
         {
-			return TrainProbe(bwapi.UnitTypes_Protoss_Probe);
+			return TrainProbe(bwapi.UnitTypes_Protoss_Probe, false);
         }
 
+		//Action to tell the AI to Build a Protoss Probe
+		[ExecutableAction("BuildNaturalProbe")]
+		public bool BuildNaturalProbe()
+		{
+			return TrainProbe(bwapi.UnitTypes_Protoss_Probe, true);
+		}
 
         //Action to tell the AI to Build a Protoss Zealot
         [ExecutableAction("TrainZealot")]

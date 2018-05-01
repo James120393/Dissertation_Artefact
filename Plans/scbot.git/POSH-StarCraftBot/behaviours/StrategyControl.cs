@@ -350,8 +350,7 @@ namespace POSH_StarCraftBot.behaviours
 				SelectProbeScout();
 			if (probeScout != null)
             {
-                IEnumerable<BaseLocation> baseloc = bwta.getBaseLocations().Where(loc =>
-						bwta.getGroundDistance(loc.getTilePosition(), probeScout.getTilePosition()) >= 0);
+				IEnumerable<BaseLocation> baseloc = Interface().basePositions;
 
                 if (baseloc.Count() > maxBaseLocations)
                     maxBaseLocations = baseloc.Count();
@@ -379,28 +378,26 @@ namespace POSH_StarCraftBot.behaviours
                     return true;
 
 				double distance = probeScout.getPosition().getDistance(
-                    baseloc.OrderBy(loc =>
-                        bwta.getGroundDistance(loc.getTilePosition(), Interface().baseLocations[(int)BuildSite.StartingLocation]))
+                    baseloc.OrderBy(loc => bwta.getGroundDistance(loc.getTilePosition(), Interface().baseLocations[(int)BuildSite.StartingLocation]))
                         .ElementAt(scoutCounter)
                         .getPosition()
                         );
-                if (distance < DELTADISTANCE/2)
+                if (distance < DELTADISTANCE)
                 {
                     // close to another base location
                     if (!Interface().baseLocations.ContainsKey(scoutCounter))
 						Interface().baseLocations[scoutCounter] = new TilePosition(probeScout.getTargetPosition());
                     scoutCounter++;
+					return true;
                 }
                 else
                 {
-                    IEnumerable<BaseLocation> bases = baseloc.Where(loc =>
-						bwta.getGroundDistance(loc.getTilePosition(), probeScout.getTilePosition()) >= 0).OrderBy(loc =>
-                        bwta.getGroundDistance(loc.getTilePosition(), Interface().baseLocations[(int)BuildSite.StartingLocation]));
                     bool executed = false;
-                    if (bases.Count() > scoutCounter)
-						executed = probeScout.move(bases.ElementAt(scoutCounter).getPosition());
+					if (baseloc.Count() > scoutCounter)
+						executed = probeScout.move(baseloc.ElementAt(scoutCounter).getPosition());
                     // if (_debug_)
                     Console.Out.WriteLine("Probe is scouting: " + executed);
+					return executed;
                 }
             }
             return true;
