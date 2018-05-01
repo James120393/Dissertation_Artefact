@@ -269,7 +269,7 @@ namespace POSH_StarCraftBot.behaviours
                     if (!mined.ContainsKey(positionValue) || mined[positionValue].Count <= threshold)
                     {
                         finalPatch = position;
-                        break;
+						break;
                     }
 
                 }
@@ -311,7 +311,7 @@ namespace POSH_StarCraftBot.behaviours
 
 				foreach (Unit build in prodBuildings)
 				{
-					if (build.getTrainingQueue().Count() < 2)
+					if (build.getTrainingQueue().Count() < 5)
 					{
 						bool trainSuccess = build.train(type);
 						if (trainSuccess)
@@ -491,6 +491,13 @@ namespace POSH_StarCraftBot.behaviours
 			return Interface().CarrierCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Carrier);
 		}
 
+		//Sense to tell the AI how many Observers it has
+		[ExecutableSense("ObserverCount")]
+		public int ObserverCount()
+		{
+			return Interface().ObserverCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Observer);
+		}
+
 		//Sense to tell the AI how many Carriers it has
 		[ExecutableSense("CarrierCountNotTraining")]
 		public int CarrierCountNotTraining()
@@ -594,11 +601,18 @@ namespace POSH_StarCraftBot.behaviours
 			return TrainUnit(bwapi.UnitTypes_Protoss_Dark_Templar, bwapi.UnitTypes_Protoss_Gateway);
         }
 
+		//Action to tell the AI to Build a Protoss Observer
+		[ExecutableAction("TrainObserver")]
+		public bool TrainObserver()
+		{
+			return TrainUnit(bwapi.UnitTypes_Protoss_Observer, bwapi.UnitTypes_Protoss_Robotics_Facility);
+		}
+
         ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
 
 		//Action to tell the AI to Never build Zealots
-		[ExecutableSense("CanBuildZealot")]
-		public bool CanBuildZealot()
+		[ExecutableSense("CanTrainZealot")]
+		public bool CanTrainZealot()
 		{
 			return stopZealotBuild;
 		}
@@ -616,9 +630,9 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("AssignToGas")]
         public bool AssignToGas()
         {
-            IEnumerable<Unit> assimilators = Interface().GetAssimilator();
+            IEnumerable<Unit> assimilators = Interface().GetBuilding(bwapi.UnitTypes_Protoss_Assimilator);
 
-            return ProbesToResource(assimilators, minedGas, 6, true, 1);
+            return ProbesToResource(assimilators, minedGas, 2, true, 1);
         }
 
         

@@ -473,8 +473,6 @@ namespace POSH_StarCraftBot
 				return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Protoss_Carrier);
 		}
 
-
-
         //Return the number of Probes under the AI's control Plus their location
         public IEnumerable<Unit> GetProbes(int amount)
         {
@@ -557,49 +555,12 @@ namespace POSH_StarCraftBot
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Forge.getID());
         }
-
-
+		
         //Return the number of Cybernetics Cores under the AI's control Plus their location
         public IEnumerable<Unit> GetCyberneticsCore()
         {
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Cybernetics_Core.getID());
         }
-
-
-        //Return the number of Assimilators under the AI's control Plus their location
-        public IEnumerable<Unit> GetAssimilator()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Assimilator.getID());
-        }
-
-
-        //Return the number of Gateways under the AI's control Plus their location
-        public IEnumerable<Unit> GetGateway()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Gateway.getID());
-        }
-
-
-        //Return the number of Stargates under the AI's control Plus their location
-        public IEnumerable<Unit> GetStargate()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Stargate.getID());
-        }
-
-
-        //Return the number of Pylons under the AI's control Plus their location
-        public IEnumerable<Unit> GetPylon()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Pylon.getID());
-        }
-
-
-        //Return the number of Cannons under the AI's control Plus their location
-        public IEnumerable<Unit> GetCannon()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Photon_Cannon.getID());
-        }
-
 
         //Return the number of Fleet Beacons under the AI's control Plus their location
         public IEnumerable<Unit> GetFleetbeacon()

@@ -110,8 +110,15 @@ namespace POSH_StarCraftBot.behaviours
         }
 
 		//Action to tell AI to research the Protoss Air Weapon upgrade
-		[ExecutableAction("WepUpgrade")]
-		public bool WepUpgrade()
+		[ExecutableAction("AirWepUpgrade")]
+		public bool AirWepUpgrade()
+		{
+			return DoResearch(bwapi.UpgradeTypes_Protoss_Air_Weapons, Interface().GetForge());
+		}
+
+		//Action to tell AI to research the Protoss Ground Weapon upgrade
+		[ExecutableAction("GroundWepUpgrade")]
+		public bool GroundWepUpgrade()
 		{
 			return DoResearch(bwapi.UpgradeTypes_Protoss_Ground_Weapons, Interface().GetForge());
 		}
@@ -238,10 +245,17 @@ namespace POSH_StarCraftBot.behaviours
         }
 
 		//Sense to tell AI if they have the protoss Air Weapon upgreade
-		[ExecutableSense("HaveWep")]
-		public bool HaveWep()
+		[ExecutableSense("HaveAirWep")]
+		public bool HaveAirWep()
 		{
 			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Ground_Weapons) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Ground_Weapons));
+		}
+
+		//Sense to tell AI if they have the protoss Ground Weapon upgreade
+		[ExecutableSense("HaveGroundWep")]
+		public bool HaveGroundWep()
+		{
+			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Air_Weapons) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Air_Weapons));
 		}
 
 		//Sense to tell AI if they have the protoss Legs upgreade

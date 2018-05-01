@@ -48,6 +48,19 @@ namespace POSH_StarCraftBot.behaviours
         //
         // INTERNAL
         //
+		//Count the building input into this function
+		private int countBuilding(UnitType building)
+		{
+			try
+			{
+				return Interface().GetBuilding(building).Count() + CountBuildingsinProgress(building) + CountUnbuiltBuildings(building);
+			}
+			catch
+			{
+				return 0;
+			}
+		}
+
         private TilePosition GetBaseLocation()
         {
             TilePosition baseLoc = Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite) ? Interface().baseLocations[(int)Interface().currentBuildSite] : null;
@@ -563,6 +576,34 @@ namespace POSH_StarCraftBot.behaviours
 			return Build(bwapi.UnitTypes_Protoss_Templar_Archives);
 		}
 
+		// Action for finding a suitable loaction for the Protoss Robotics Facility
+		[ExecutableAction("PositionRoboticsFacility")]
+		public bool PositionRoboticsFacility()
+		{
+			return Position(bwapi.UnitTypes_Protoss_Robotics_Facility);
+		}
+
+		// Action to use the suitable location to build the protoss Robotics Facility
+		[ExecutableAction("BuildRoboticsFacility")]
+		public bool BuildRoboticsFacility()
+		{
+			return Build(bwapi.UnitTypes_Protoss_Robotics_Facility);
+		}
+
+		// Action for finding a suitable loaction for the Protoss Robotics Facility
+		[ExecutableAction("PositionObservatory")]
+		public bool PositionObservatory()
+		{
+			return Position(bwapi.UnitTypes_Protoss_Observatory);
+		}
+
+		// Action to use the suitable location to build the protoss Robotics Facility
+		[ExecutableAction("BuildObservatory")]
+		public bool BuildObservatory()
+		{
+			return Build(bwapi.UnitTypes_Protoss_Observatory);
+		}
+
         // Action for finding a suitable loaction for the Protoss Photon Cannon
         [ExecutableAction("PositionCannon")]
         public bool PositionCannon()
@@ -586,7 +627,6 @@ namespace POSH_StarCraftBot.behaviours
 
             return needBuilding;
         }
-
 
         //
         // SENSES
@@ -615,11 +655,22 @@ namespace POSH_StarCraftBot.behaviours
 			return needNewBuilder;
 		}
 
+		//Returns if a pylon is being constructed
+		[ExecutableSense("PylonConstructing")]
+		public bool PylonConstructing()
+		{
+			IEnumerable<Unit> building = Interface().GetBuilding(bwapi.UnitTypes_Protoss_Pylon).Where(build => build.isBeingConstructed());
+			if (building.Count() > 0)
+				return true;
+			else
+				return false;
+		}
+
         // Sense to return the number of protoss Nexus'
         [ExecutableSense("NexusCount")]
         public int NexusCount()
         {
-            return Interface().GetNexus().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Nexus) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Nexus);
+			return countBuilding(bwapi.UnitTypes_Protoss_Nexus);
         }
 
 
@@ -627,7 +678,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("ForgeCount")]
         public int ForgeCount()
         {
-            return Interface().GetForge().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Forge) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Forge);
+			return countBuilding(bwapi.UnitTypes_Protoss_Forge);
         }
 
 
@@ -635,7 +686,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("AssimilatorCount")]
         public int AssimilatorCount()
         {
-            return Interface().GetAssimilator().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Assimilator) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Assimilator);
+			return countBuilding(bwapi.UnitTypes_Protoss_Assimilator);
         }
 
 
@@ -643,10 +694,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableSense("CyberneticsCoreCount")]
         public int CyberneticsCoreCount()
         {
-			if (Interface().GetCyberneticsCore().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Cybernetics_Core) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Cybernetics_Core) <= 0)
-				return 0;
-			else
-				return Interface().GetCyberneticsCore().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Cybernetics_Core) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Cybernetics_Core);
+			return countBuilding(bwapi.UnitTypes_Protoss_Cybernetics_Core);
         }
 
 
@@ -654,10 +702,7 @@ namespace POSH_StarCraftBot.behaviours
 		[ExecutableSense("GatewayCount")]
 		public int GatewayCount()
 		{
-			if (Interface().GetGateway().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Gateway) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Gateway) <= 0)
-				return 0;
-			else
-				return Interface().GetGateway().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Gateway) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Gateway);
+			return countBuilding(bwapi.UnitTypes_Protoss_Gateway);
 		}
 
 
@@ -665,89 +710,57 @@ namespace POSH_StarCraftBot.behaviours
 		[ExecutableSense("PylonCount")]
 		public int PylonCount()
 		{
-			if (Interface().GetPylon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Pylon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Pylon) <= 0)
-				return 0;
-			else
-				return Interface().GetPylon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Pylon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Pylon);
+			return countBuilding(bwapi.UnitTypes_Protoss_Pylon);
 		}
-
-		[ExecutableSense("PylonConstructing")]
-		public bool PylonConstructing()
-		{
-			IEnumerable<Unit> building = Interface().GetPylon().Where(build => build.isBeingConstructed());				
-			if (building.Count() > 0)
-				return true;
-			else
-				return false;
-		}
-
-
+		
         // Sense to return the number of protoss Cannon's
 		[ExecutableSense("CannonCount")]
 		public int CannonCount()
 		{
-			if (Interface().GetCannon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Photon_Cannon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Photon_Cannon) <= 0)
-				return 0;
-			else
-				return Interface().GetCannon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Photon_Cannon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Photon_Cannon);
+			return countBuilding(bwapi.UnitTypes_Protoss_Photon_Cannon);
 		}
-
-
+		
         // Sense to return the number of protoss StarGates
 		[ExecutableSense("StargateCount")]
 		public int StargateCount()
 		{
-			if (Interface().GetStargate().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Stargate) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Stargate) <= 0)
-				return 0;
-			else
-				return Interface().GetStargate().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Stargate) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Stargate);
+			return countBuilding(bwapi.UnitTypes_Protoss_Stargate);
 		}
-
-
+		
         // Sense to return the number of protoss Fleet Beacon's
 		[ExecutableSense("FleetbeaconCount")]
 		public int FleetbeaconCount()
 		{
-			if (Interface().GetFleetbeacon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Fleet_Beacon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Fleet_Beacon) <= 0)
-				return 0;
-			else
-				return Interface().GetFleetbeacon().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Fleet_Beacon) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Fleet_Beacon);
+			return countBuilding(bwapi.UnitTypes_Protoss_Fleet_Beacon);
 		}
 
 		// Sense to return the number of protoss Citadel of Adun
 		[ExecutableSense("CitadelCount")]
 		public int CitadelCount()
 		{
-            if (Interface().GetCitadel().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Citadel_of_Adun) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Citadel_of_Adun) <= 0)
-				return 0;
-            try
-            {
-                return Interface().GetCitadel().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Citadel_of_Adun) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Citadel_of_Adun);
-            }
-            catch
-            {
-                return 1;
-            }
-				
+			return countBuilding(bwapi.UnitTypes_Protoss_Citadel_of_Adun);
 		}
 
 		// Sense to return the number of protoss Templar Archives
         [ExecutableSense("ArchivesCount")]
         public int ArchivesCount()
         {
-
-            if (Interface().GetTemplarArchives().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Templar_Archives) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Templar_Archives) <= 0)
-                return 0;
-            try
-            {
-                return Interface().GetTemplarArchives().Count() + CountBuildingsinProgress(bwapi.UnitTypes_Protoss_Templar_Archives) + CountUnbuiltBuildings(bwapi.UnitTypes_Protoss_Templar_Archives);
-            }
-            catch
-            {
-                return 1;
-            }
+			return countBuilding(bwapi.UnitTypes_Protoss_Templar_Archives);
         }
 
+		// Sense to return the number of protoss Robotics Facilities
+		[ExecutableSense("RoboticsFacilityCount")]
+		public int RoboticsFacilityCount()
+		{
+			return countBuilding(bwapi.UnitTypes_Protoss_Robotics_Facility);
+		}
+
+		// Sense to return the number of protoss Robotics Facilities
+		[ExecutableSense("ObservatoryCount")]
+		public int ObservatoryCount()
+		{
+			return countBuilding(bwapi.UnitTypes_Protoss_Observatory);
+		}
 
         // Select a unit for building a structure
         [ExecutableSense("HaveBuilder")]

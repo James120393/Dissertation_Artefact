@@ -10,29 +10,13 @@
 (AP idle (minutes 1.0) (
 	Idle
 ))
-(AP counterLure (minutes 1.0) (
-	RespondToLure 
-	AssignProbes
-))
-(AP luredDefence (minutes 1.0) (
-	SelectLuredBase 
-	CounterWithForce
-))
-(AP AttackEnemy (minutes 1.0) (
+(AP attackZerg (minutes 1.0) (
 	SelectAllUnits 
-	AttackEnemyMainBase
+	AttackZerg
 ))
-(AP sendDefendForce (minutes 1.0) (
-	AssignArmyOne
-	SelectArmyOne 
-	FendOffUnits
-))
-(AP ReadyUnits (minutes 1.0) (
-	AssignArmyTwo
-))
-(AP stdDragoonArmy (minutes 1.0) (
-	SelectForceStartingLocation 
-	AssignArmyOne
+(AP attackTerran (minutes 1.0) (
+	SelectAllUnits 
+	AttackTerran
 ))
 (AP Defense (minutes 1.0) (
 	SelectAllUnits 
@@ -55,11 +39,6 @@
 ))
 (AP buildChokePylon (minutes 1.0) (
 	SelectChokeBuild
-	PositionPylon 
-	BuildPylon
-))
-(AP buildPylon (minutes 1.0) (
-	SelectChokeBuild 
 	PositionPylon 
 	BuildPylon
 ))
@@ -88,6 +67,11 @@
 	PositionGateway 
 	BuildGateway
 ))
+(AP buildChokeGateway (minutes 0.01) (
+	SelectChokeBuild 
+	PositionGateway 
+	BuildGateway
+))
 (AP buildArchives (minutes 0.01) (
 	SelectStartBase 
 	PositionArchives 
@@ -107,6 +91,16 @@
 	SelectNatural 
 	SelectAssimilatorLocation 
 	BuildAssimilator
+))
+(AP buildRoboticsFacility (minutes 1.0) (
+	SelectStartBase 
+	PositionRoboticsFacility 
+	BuildRoboticsFacility
+))
+(AP buildObservatory (minutes 1.0) (
+	SelectStartBase 
+	PositionObservatory 
+	BuildObservatory
 ))
 (AP dragoon (minutes 1.0) (
 	SelectStartBase
@@ -129,35 +123,30 @@
 	SelectAllUnits
 	MoveForceNatural
 ))
+(AP buildStargate (minutes 0.01) (
+	SelectChokeBuild 
+	PositionStargate 
+	BuildStargate
+))
+(AP buildFleetbeacon (minutes 0.01) (
+	SelectChokeBuild 
+	PositionFleetbeacon 
+	BuildFleetbeacon
+))
 (C exploreLocal (seconds 1.0) (goal ((NaturalFound 1.0 ==)))
 	(elements
 		(
 		(probeScoutToNatural (trigger ((HaveScout 0.0 ==))) probeScoutToNatural)	)
 	)
 )
-
-(C repairBuildings (seconds 1.0) (goal ((BuildingDamaged 0.0 ==)))
-	(elements
-		(	
-		(repairBuilding (trigger ((FindDamagedBuilding))) RepairBuilding)	)
-	)
-)
-(C buildBase (seconds 1.0) (goal ((NeedBuilding 0.0 =)))
-	(elements
-		(	
-		(18NexusOpening (trigger ((FollowStrategy 1.0 =))) 18NexusOpeningBuild)	)
-	)
-)
-(C research (seconds 1.0) (goal ((DoneResearch 1.0 ==)))
-	(elements
-		(	
-		(18Nexus (trigger ((FollowStrategy 1.0 ==))) research18NexusOpening)	)
-	)
-)
 (C attackEnemy (minutes 1.0) (goal ((GameRunning 0.0 ==)))
 	(elements
 		(	
-		(attackNexusOpening (trigger ((ForceReady 1.0 ==))) AttackEnemy)	)
+		(attackNexusOpening (trigger ((EnemyRace 0.0 ==))) attackZerg)	)
+		(	
+		(attackNexusOpening (trigger ((EnemyRace 1.0 ==))) attackTerran)	)
+		(	
+		(stopTrainingZealots(trigger ((ZealotCount 6.0 <=))) StopZealot)	)
 	)
 )
 (C defendLocation (seconds 1.0) (goal ((GameRunning 0.0 ==)))
@@ -166,13 +155,7 @@
 		(SendArmy (trigger ((EnemyDetected 1.0 ==))) Defense)	)
 	)
 )
-(C setDefenceForce (minutes 1.0) (goal ((ArmyOneReady)))
-	(elements
-		(	
-		(CreateDragoons (trigger ((ZealotCount 1.0 >=))) Defense)	)
-	)
-)
-(C probeHarvesting (seconds 1.0) (goal ((ProbesLured)))
+(C probeHarvesting (seconds 1.0) (goal ((GameRunning 0.0 =)))
 	(elements
 		(	
 		(miningGas (trigger ((AssimilatorCount 1.0 >=) (ProbeAssimilatorRatio 1.0 ==))) AssignToGas)	)
@@ -180,19 +163,19 @@
 		(miningCrystal (trigger ((IdleProbes))) AssignProbes)	)
 	)
 )
-(C research18NexusOpening (minutes 1.0) (goal ((GameRunning 0.0 =)))
+(C OneBaseSpeedZealotResearch (minutes 1.0) (goal ((GameRunning 0.0 =)))
 	(elements
 		(
 		(researchLegs (trigger ((HaveLegs 0.0 ==))) LegsUpgrade)	)
 		(
-		(researchWep (trigger ((HaveWep 0.0 ==))) WepUpgrade)	)
+		(researchGroundWep (trigger ((HaveGroundWep 0.0 ==))) GroundWepUpgrade)	)
 		(
 		(researchRange (trigger ((HaveDragoonRange 0.0 ==))) DragoonRangeUpgrade)	)
 		(	
-		(needResearch (trigger ((HaveLegs 1.0 ==) (HaveDragoonRange 1.0 ==) (HaveWep 1.0 ==))) DoNotNeedResearch)	)
+		(needResearch (trigger ((HaveLegs 1.0 ==) (HaveDragoonRange 1.0 ==) (HaveGroundWep 1.0 ==))) DoNotNeedResearch)	)
 	)
 )
-(C build18NexusForce (minutes 1.0) (goal ((GameRunning 0.0 =)))
+(C OneBaseSpeedZealotForce (minutes 1.0) (goal ((GameRunning 0.0 =)))
 	(elements
 		(	
 		(trainZealot (trigger ((ZealotCount 1.0 <) (ArchivesCount 1.0 <))) TrainZealot)	)
@@ -209,12 +192,14 @@
 		(	
 		(trainZealot (trigger ((ZealotCount 6.0 <) (ArchivesCount 1.0 <))) trainZealot)	)
 		(	
-		(trainDark (trigger ((DarkTemplarCount 9.0 <) (ArchivesCount 1.0 >=))) TrainDarkTemplar)	)
+		(trainDark (trigger ((DarkTemplarCount 12.0 <) (ArchivesCount 1.0 >=) (RoboticsFacilityCount 1.0 >=))) TrainDarkTemplar)	)
+		(	
+		(trainObserver (trigger ((ObserverCount 2.0 <) (ObservatoryCount 1.0 >=))) TrainObserver)	)
 		(	
 		(trainDragoon (trigger ((DragoonCount 3.0 <) (CyberneticsCoreCount 1.0 >=))) TrainDragoon)	)
 	)
 )
-(C 18NexusOpeningBuild (minutes 1.0) (goal ((AssimilatorCount 1.0 >=) (GatewayCount 1.0 >=) (CyberneticsCoreCount 1.0 >=) (GameRunning 0.0 =)))
+(C OneBaseSpeedZealotBuild (minutes 1.0) (goal ((AssimilatorCount 1.0 >=) (GatewayCount 1.0 >=) (CyberneticsCoreCount 1.0 >=) (GameRunning 0.0 =)))
 	(elements
 		(
 		(buildSupplyPylon (trigger ((PylonConstructing 0.0 ==) (AvailableSupply 3.0 <=))) buildBasePylon)	)
@@ -243,9 +228,65 @@
 		(
 		(buildArchives (trigger ((HaveLegs 1.0 >=) (ArchivesCount 0.0 ==))) buildArchives)	)
 		(
+		(buildRoboticsFacility (trigger ((ArchivesCount 1.0 >=) (RoboticsFacilityCount 0.0 ==))) buildRoboticsFacility)	)
+		(
+		(buildObservatory (trigger ((RoboticsFacilityCount 1.0 >=) (ObservatoryCount 0.0 ==))) buildObservatory)	)
+		(
 		(buildNaturalNexus (trigger ((NexusCount 1.0 <=) (NaturalFound 1.0 ==))) naturalNexus)	)
 		(
 		(buildAssimilator (trigger ((NexusCount 2.0 ==) (AssimilatorCount 1.0 <=))) buildAssimilator)	)
+	)
+)
+(C DarkTemplarFastExpandResearch (minutes 1.0) (goal ((GameRunning 0.0 =)))
+	(elements
+		(
+		(researchWep (trigger ((HaveAirWep 0.0 ==))) AirWepUpgrade)	)
+		(	
+		(needResearch (trigger ((HaveAirWep 1.0 ==))) DoNotNeedResearch)	)
+	)
+)
+(C DarkTemplarFastExpandForce (minutes 1.0) (goal ((GameRunning 0.0 =)))
+	(elements
+		(	
+		(trainZealot (trigger ((ZealotCount 9.0 <) (StargateCount 1.0 >=) (CyberneticsCoreCount 1.0 <) (CanTrainZealot 1.0 ==))) TrainZealot)	)
+		(	
+		(trainDragoon (trigger ((DragoonCount 1.0 <) (CitadelCount 1.0 >=) (StargateCount 1.0 >=))) TrainDragoon)	)
+		(	
+		(trainDark (trigger ((DarkTemplarCount 12.0 <) (ArchivesCount 1.0 >=))) TrainDarkTemplar)	)
+		(	
+		(trainObserver (trigger ((ObserverCount 2.0 <) (ObservatoryCount 1.0 >=))) TrainObserver)	)
+	)
+)
+(C DarkTemplarFastExpandBuild (minutes 1.0) (goal ((AssimilatorCount 1.0 >=) (GatewayCount 1.0 >=) (CyberneticsCoreCount 1.0 >=) (GameRunning 0.0 =)))
+	(elements
+		(
+		(buildSupplyPylon (trigger ((PylonConstructing 0.0 ==) (AvailableSupply 3.0 <=))) buildBasePylon)	)
+		(
+		(buildProbes (trigger ((ProbeCount 8.0 <))) BuildProbe) )
+		(
+		(buildFirstGateway (trigger ((GatewayCount 0.0 <=) (PylonCount 1.0 >=))) buildGateway)	)
+		(
+		(buildProbes (trigger ((ProbeCount 10.0 <))) BuildProbe) )
+		(
+		(buildAssimilator (trigger ((AssimilatorCount 0.0 <=) (GatewayCount 1.0 >=))) buildAssimilator)	)
+		(
+		(buildProbes (trigger ((ProbeCount 12.0 <))) BuildProbe) )
+		(
+		(buildCyberneticsCore (trigger ((CyberneticsCoreCount 0.0 ==)(AssimilatorCount 1.0 >=))) buildCyberneticsCore)	)
+		(
+		(buildProbes (trigger ((ProbeCount 14.0 <))) BuildProbe) )
+		(
+		(buildSupplyPylon (trigger ((PylonConstructing 0.0 ==) (PylonCount 1.0 <=))) buildBasePylon)	)
+		(
+		(buildProbes (trigger ((ProbeCount 15.0 <))) BuildProbe) )
+		(
+		(buildCitadel (trigger ((CyberneticsCoreCount 1.0 >=) (CitadelCount 0.0 ==))) buildCitadel)	)
+		(
+		(buildSecondGateway (trigger ((CitadelCount 1.0 >=) (GatewayCount 1.0 <=))) buildGateway)	)
+		(
+		(buildArchives (trigger ((ArchivesCount 0.0 ==))) buildArchives)	)
+		(
+		(buildSupplyPylon (trigger ((PylonConstructing 0.0 ==) (PylonCount 2.0 <=))) buildBasePylon)	)
 	)
 )
 (C probeScouting (seconds 1.0) (goal ((GameRunning 0.0 =)))
@@ -259,15 +300,19 @@
 		(		(scout (trigger ((ArchivesCount 1.0 >=) (NaturalFound 0.0 ==))) exploreLocal (seconds 0.0004)))
 		(		(harvest (trigger ((IdleProbes))) probeHarvesting(seconds 0.0003)))
 		(		(retreat (trigger ((ForceIsLosing 1.0 =))) flee(seconds 1.0)))
-		(		(attack (trigger ((DarkTemplarCount 4.0 >=)(ZealotCount 5.0 >=))) AttackEnemy(seconds 0.0002)))
-		(		(attack (trigger ((DarkTemplarCount 8.0 >=))) AttackEnemy(seconds 0.0002)))
-		(		(research (trigger ((CitadelCount 1.0 >=) (NeedResearch 1.0 ==))) research18NexusOpening(seconds 0.0007)))
-		(		(createForce (trigger ((GatewayCount 1.0 >=) (AvailableSupply 3.0 >))) build18NexusForce(seconds 0.0010)))	
-		(		(build (trigger ((NeedBuilding 1.0 =))) buildBase(seconds 0.0001)))
+
+		(		(attack (trigger ((DarkTemplarCount 4.0 >=)(ZealotCount 5.0 >=)(ObserverCount 1.0 >=)(EnemyRace 0.0 ==))) attackEnemy(seconds 0.0002)))
+		(		(attack (trigger ((DarkTemplarCount 10.0 >=)(ObserverCount 2.0 >=)(EnemyRace 0.0 ==))) attackEnemy(seconds 0.0002)))
+		(		(researchZerg (trigger ((CitadelCount 1.0 >=)(NeedResearch 1.0 ==)(EnemyRace 0.0 ==))) OneBaseSpeedZealotResearch(seconds 0.0007)))
+		(		(createForceZerg (trigger ((GatewayCount 1.0 >=) (AvailableSupply 3.0 >)(EnemyRace 0.0 ==))) OneBaseSpeedZealotForce(seconds 0.0010)))	
+		(		(buildZerg (trigger ((NeedBuilding 1.0 =)(EnemyRace 0.0 ==))) OneBaseSpeedZealotBuild(seconds 0.0001)))
+
+		(		(attack (trigger ((DarkTemplarCount 3.0 >=)(EnemyRace 1.0 ==))) attackEnemy(seconds 0.001)))
+		(		(researchTerran (trigger ((StargateCount 1.0 >=)(NeedResearch 1.0 ==)(EnemyRace 1.0 ==))) DarkTemplarFastExpandResearch(seconds 0.001)))
+		(		(createForceTerran (trigger ((ArchivesCount 1.0 >=)(AvailableSupply 3.0 >)(EnemyRace 1.0 ==))) DarkTemplarFastExpandForce(seconds 0.001)))	
+		(		(buildTerran (trigger ((NeedBuilding 1.0 =)(EnemyRace 1.0 ==))) DarkTemplarFastExpandBuild(seconds 0.0001)))
+
 		(		(wait (trigger ((Success))) idle))
-
-
-
 	)
 )
 )

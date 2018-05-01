@@ -477,7 +477,7 @@ namespace POSH_StarCraftBot.behaviours
                 return false;
             switch (currentStrategy){
                 case Strategy.EighteenNexusOpening:
-                    return (Interface().GetCyberneticsCore().Count() > 0) ? true : false;
+                    return (Interface().GetBuilding(bwapi.UnitTypes_Protoss_Gateway).Count() > 0) ? true : false;
                 case Strategy.TwoHatchMuta:
                     return (Interface().GetLairs().Count() > 0 && Interface().GetSpire().Count() > 0) ? true : false;
                 case Strategy.Zergling:
@@ -545,7 +545,7 @@ namespace POSH_StarCraftBot.behaviours
         }
 
         /// <summary>
-        /// Returns the enemy race once it is known. The options are: -1 for unknown, 0 for Zerg, 1 for Protoss, 2 for Human
+        /// Returns the enemy race once it is known. The options are: -1 for unknown, 0 for Zerg, 1 for Terran, 2 for Protoss
         /// </summary>
         /// <returns></returns>
         [ExecutableSense("EnemyRace")]
@@ -562,18 +562,19 @@ namespace POSH_StarCraftBot.behaviours
             if (enemyRace == bwapi.Races_Zerg.getID())
             {
                 Interface().enemyRace = Races.Zerg;
-                return (int)Races.Zerg;
+                return 0;
+            } 
+			if (enemyRace == bwapi.Races_Terran.getID())
+            {
+                Interface().enemyRace = Races.Terran;
+                return 1;
             }
             if (enemyRace == bwapi.Races_Protoss.getID())
             {
                 Interface().enemyRace = Races.Protoss;
-                return (int)Races.Protoss;
+                return 2;
             }
-            if (enemyRace == bwapi.Races_Terran.getID())
-            {
-                Interface().enemyRace = Races.Terran;
-                return (int)Races.Terran;
-            }
+
 
             return -1;
         }
@@ -625,7 +626,7 @@ namespace POSH_StarCraftBot.behaviours
               //  return 1;
             //if (Interface().GetProbes().Count() < 1 || Interface().GetProbes().Where(probe => probe.isGatheringMinerals()).Count() < 1)
               //  return 1;
-			int ratio = Interface().GetProbes().Where(probe => probe.isGatheringMinerals()).Count() / 4;
+			int ratio = Interface().GetProbes().Where(probe => probe.isGatheringMinerals()).Count() / 3;
 			int gatheringGas = ratio - Interface().GetProbes().Where(probe => probe.isGatheringGas()).Count();
 			if (gatheringGas >= 1)
 				return 1;
