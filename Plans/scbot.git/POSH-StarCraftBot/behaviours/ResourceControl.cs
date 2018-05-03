@@ -28,6 +28,7 @@ namespace POSH_StarCraftBot.behaviours
 			return Interface().Self().getUpgradeLevel(research) > 0;
 		}
 
+        // Attempt to do research at the desired building
 		private bool DoResearch(UpgradeType research, IEnumerable<Unit> building)
 		{
 			try
@@ -44,6 +45,7 @@ namespace POSH_StarCraftBot.behaviours
         // ACTIONS
         //
 
+        // Build interceptors for each carrier, until its queue is full
 		[ExecutableAction("BuildInterceptors")]
 		public bool BuildInterceptors()
 		{
@@ -65,19 +67,13 @@ namespace POSH_StarCraftBot.behaviours
 			return true;
 		}
 
+        // Set the need research to false
 		[ExecutableAction("DoNotNeedResearch")]
 		public bool DoNotNeedResearch()
 		{
 			needResearch = false;
 			return true;
 		}
-
-        [ExecutableAction("FinishedResearch")]
-        public bool FinishedResearch()
-        {
-            finishedResearch = true;
-            return finishedResearch;
-        }
 
         //Action to tell AI to research the Protoss Dragoon Range upgrade
         [ExecutableAction("DragoonRangeUpgrade")]
@@ -100,7 +96,7 @@ namespace POSH_StarCraftBot.behaviours
 			return DoResearch(bwapi.UpgradeTypes_Protoss_Air_Weapons, Interface().GetCyberneticsCore());
 		}
 
-		//Action to tell AI to research the Protoss Air Weapon upgrade
+		//Action to tell AI to research the Protoss Observer Range upgrade
 		[ExecutableAction("ObserverUpgrade")]
 		public bool ObserverUpgrade()
 		{
@@ -114,14 +110,14 @@ namespace POSH_StarCraftBot.behaviours
 			return DoResearch(bwapi.UpgradeTypes_Protoss_Ground_Weapons, Interface().GetForge());
 		}
 
-		//Action to tell AI to research the Protoss Shield upgrade
+		//Action to tell AI to research the Protoss Carrier capacity upgrade
 		[ExecutableAction("CarrierUpgrade")]
 		public bool CarrierUpgrade()
 		{
 			return DoResearch(bwapi.UpgradeTypes_Carrier_Capacity, Interface().GetFleetbeacon());
 		}
 
-		//Action to tell AI to research the Protoss Legs
+		//Action to tell AI to research the Protoss Legs "Makes Zealots Faster"
 		[ExecutableAction("LegsUpgrade")]
 		public bool LegsUpgrade()
 		{
@@ -131,6 +127,8 @@ namespace POSH_StarCraftBot.behaviours
         //
         // SENSES
         //
+
+        // Check to see if any interceptors are needed within the Carrier
 		[ExecutableSense("InterceptorsNeeded")]
 		public bool InterceptorsNeeded()
 		{
@@ -150,114 +148,142 @@ namespace POSH_StarCraftBot.behaviours
 			return false;
 		}
 
+        // Check if all research needed is done
         [ExecutableSense("DoneResearch")]
         public bool DoneResearch()
         {
             return finishedResearch;
         }
 
+        // Return the total supply
         [ExecutableSense("TotalSupply")]
         public int TotalSupply()
         {
             return Interface().TotalSupply();
         }
 
+        // Return the current usage of supply
         [ExecutableSense("Supply")]
         public int SupplyCount()
         {
             return Interface().SupplyCount();
         }
 
+        // Return the Available supply
         [ExecutableSense("AvailableSupply")]
         public int AvailableSupply()
         {
             return Interface().AvailableSupply();
         }
 
+        // Return the amount of gas available
         [ExecutableSense("Gas")]
         public int Gas()
         {
             return Interface().GasCount();
         }
 
+        // Return the amount of minerals available
         [ExecutableSense("Minerals")]
         public int Minerals()
         {
             return Interface().MineralCount();
         }
 
+        //Sense to tell AI if they have the protoss Carrier capacity upgrade
 		[ExecutableSense("HaveCarrier")]
 		public bool HaveCarrier()
 		{
 			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Carrier_Capacity) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Carrier_Capacity));
 		}
 		
-        //Sense to tell AI if they have the protoss Dragoon range upgreade
+        //Sense to tell AI if they have the protoss Dragoon range upgrade
         [ExecutableSense("HaveDragoonRange")]
         public bool HaveDragoonRange()
         {
 			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Singularity_Charge) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Singularity_Charge));
         }
 
-        //Sense to tell AI if they have the protoss Shield upgreade
+        //Sense to tell AI if they have the protoss Shield upgrade
         [ExecutableSense("HaveShield")]
         public bool HaveShield()
         {
 			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Plasma_Shields) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Plasma_Shields));
         }
 
-		//Sense to tell AI if they have the protoss Air Weapon upgreade
+		//Sense to tell AI if they have the protoss Ground Weapon upgrade
 		[ExecutableSense("HaveGroundWep")]
 		public bool HaveGroundWep()
 		{
 			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Ground_Weapons) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Ground_Weapons));
 		}
 
-		//Sense to tell AI if they have the protoss Air Weapon upgreade
+		//Sense to tell AI if they have the protoss Observer Range upgrade
 		[ExecutableSense("HaveOberverUpgrade")]
 		public bool HaveOberverUpgrade()
 		{
 			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Sensor_Array) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Sensor_Array));
 		}
 
-		//Sense to tell AI if they have the protoss Ground Weapon upgreade
+		//Sense to tell AI if they have the protoss Air Weapon upgrade
 		[ExecutableSense("HaveAirWep")]
 		public bool HaveAirWep()
 		{
 			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Air_Weapons) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Air_Weapons));
 		}
 
-		//Sense to tell AI if they have the protoss Legs upgreade
+		//Sense to tell AI if they have the protoss Legs upgrade
 		[ExecutableSense("HaveLegs")]
 		public bool HaveLegs()
 		{
 			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Leg_Enhancements) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Leg_Enhancements));
 		}
 
+        // Are any of the buildings researching
 		[ExecutableSense("IsResearching")]
 		public bool IsResearching()
 		{
-			return (Interface().GetForge().Where(forge => forge.getHitPoints() > 0).First().isUpgrading() || Interface().GetCyberneticsCore().Where(core => core.getHitPoints() > 0).First().isUpgrading());
+			return (Interface().GetForge().Where(forge => forge.getHitPoints() > 0).First().isUpgrading() || Interface().GetCyberneticsCore().Where(core => core.getHitPoints() > 0).First().isUpgrading()
+                || Interface().GetCitadel().Where(citadel => citadel.getHitPoints() > 0).First().isUpgrading() || Interface().GetObservatory().Where(obs => obs.getHitPoints() > 0).First().isUpgrading()
+                || Interface().GetFleetbeacon().Where(fleet => fleet.getHitPoints() > 0).First().isUpgrading());
 		}
 
+        // Are any forges researching
 		[ExecutableSense("IsForgeResearching")]
 		public bool IsForgeResearching()
 		{
 			return (Interface().GetForge().Where(forge => forge.getHitPoints() > 0).First().isUpgrading());
 		}
 
+        // Are any Observatories researching
 		[ExecutableSense("IsObservatoryResearching")]
 		public bool IsObservatoryResearching()
 		{
 			return (Interface().GetObservatory().Where(observatory => observatory.getHitPoints() > 0).First().isUpgrading());
 		}
 
+        // Are any Cybernetics Core's researching
 		[ExecutableSense("IsCoreResearching")]
 		public bool IsCoreResearching()
 		{
 			return (Interface().GetCyberneticsCore().Where(core => core.getHitPoints() > 0).First().isUpgrading());
 		}
 
+        // Are any Fleet Beacons researching
+        [ExecutableSense("IsFleetResearching")]
+        public bool IsFleetResearching()
+        {
+            return (Interface().GetFleetbeacon().Where(core => core.getHitPoints() > 0).First().isUpgrading());
+        }
+
+        // Are any Citadel of Adun researching
+        [ExecutableSense("IsCitadelResearching")]
+        public bool IsCitadelResearching()
+        {
+            return (Interface().GetCitadel().Where(core => core.getHitPoints() > 0).First().isUpgrading());
+        }
+
+        // Deas the AI need any research
 		[ExecutableSense("NeedResearch")]
 		public bool NeedResearch()
 		{

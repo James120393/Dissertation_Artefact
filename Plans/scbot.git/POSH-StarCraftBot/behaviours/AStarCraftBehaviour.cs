@@ -17,8 +17,8 @@ namespace POSH_StarCraftBot.behaviours
 
         public enum Races { Unknown = 0, Zerg = 1, Protoss = 2, Terran = 3 }
 
+        // Arbitrary numbers for use when calculating distance/time on screen
         protected const double DELTADISTANCE = 50L;
-
         protected const double DELTATIME = 100L;
 
         public AStarCraftBehaviour(AgentBase agent)
@@ -39,6 +39,7 @@ namespace POSH_StarCraftBot.behaviours
             return ((BODStarCraftBot)IBWAPI);
         }
 
+        // Move a unit to a location
         protected internal bool move(Position target, Unit unit, int timeout = 10)
         {
             bool executed = false;

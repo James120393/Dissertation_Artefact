@@ -71,17 +71,18 @@ namespace POSH_StarCraftBot.behaviours
             return baseLoc;
         }
 
+        //////////////////////////////////////////////This function came with the source code of the base project//////////////////////////////////////////////
 		private TilePosition addToTile(TilePosition pos, int x, int y)
         {
-			//int intX = (int) x;
-			//int intY = (int)y;
 			TilePosition output = new TilePosition(pos.xConst() + x, pos.yConst() + y);
 
 			return output;
         }
 
+        // Returns a build location, there is a small chance that this will fail
         private TilePosition PossibleBuildLocation(TilePosition start, Unit builder, UnitType building)
         {
+            // This function uses the Fibonacci spiral for optimisation purposes
 			int x = 0;
 			int y = 0;
 			int dx = 0;
@@ -111,6 +112,7 @@ namespace POSH_StarCraftBot.behaviours
 
 			return null;
         }
+        //////////////////////////////////////////////This function came with the source code of the base project//////////////////////////////////////////////
 
         protected int CountUnbuiltBuildings(UnitType type)
         {
@@ -118,6 +120,7 @@ namespace POSH_StarCraftBot.behaviours
             if (!buildQueue.ContainsKey(type.getID()) || !(buildQueue[type.getID()] is List<TilePosition>))
                 return count;
             
+            // Get all buildings of the input type
             IEnumerable<Unit> currentBuilding = Interface().GetAllBuildings().Where(building => building.getType() == type);
 			System.Threading.Thread.Sleep(10);
 			foreach (Unit building in currentBuilding)
@@ -158,23 +161,30 @@ namespace POSH_StarCraftBot.behaviours
 				bool building = false;
 				if (builder is Unit)
 				{
+                    // Add to build queue
 					if (!buildQueue.ContainsKey(type.getID()) || !(buildQueue[type.getID()] is List<TilePosition>))
 						buildQueue[type.getID()] = new List<TilePosition>();
 
-					//This is a list
+					//This is a list of buildings
 					IEnumerable<Unit> buildings = Interface().GetAllBuildings().Where(currentBuilding => currentBuilding.getType()
 						== type && currentBuilding.getTilePosition().opEquals(buildLocation));
 
 					Unit currentBuildCommand = null;
+
+                    // 
 					if (buildings.Count() > 0)
 						currentBuildCommand = buildings.First();
+
+                    // build at the location
 					builder.build(buildLocation, type);
+
+                    // allow the sytem to catch up
 					System.Threading.Thread.Sleep(100);
 					building = builder.build(buildLocation, type);
+
 					while (currentBuildCommand == null && timeout > 0)
 					{
-						//get the building done at that location using its tile position and type
-						if (building)
+					    if (building)
 						{
 							buildQueue[type.getID()].Add(buildLocation);
 							Console.Out.WriteLine("Builder Building " + type.getName());
@@ -210,24 +220,25 @@ namespace POSH_StarCraftBot.behaviours
         }
 
 		// Function to position buildings taking he unit type for the building size
-        // an xSpace Value, ySpace Value and Z for in iterations
 		protected bool Position(UnitType type, int timeout = 10)
 		{
 			try
 			{
-				//if (!Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite) && Interface().currentBuildSite != BuildSite.NaturalChoke)
-				// return false;
+                // can the AI afford the building
 				if (CanBuildBuilding(type))
 				{
 					TilePosition buildPosition;
 
+                    // get eh base location for building
 					buildPosition = Interface().baseLocations[(int)Interface().currentBuildSite];
 
+                    // if no builder selected then select one
 					if (builder == null || builder.getHitPoints() <= 0)
 					{
 						builder = Interface().GetBuilder(buildPosition, false);
 					}
 
+                    // if the build location is further than dist and itterations, then move the builder
 					double dist = DELTADISTANCE;
 					if (buildLocation is TilePosition && buildPosition is TilePosition)
 						dist = buildLocation.getDistance(buildPosition);
@@ -238,14 +249,13 @@ namespace POSH_StarCraftBot.behaviours
 					}
 					else
 					{
-						//Position pos = new Position(buildPosition);
 						buildPosition = PossibleBuildLocation(buildPosition, builder, type);
+                        // if build location is NULL then build at builders location
 						if (buildPosition == null)
 						{
 							if (bwapi.Broodwar.canBuildHere(builder, new TilePosition(builder.getPosition()), type))
 							{
 								buildPosition = new TilePosition(builder.getPosition());
-								//return true;
 							}
 						}
 					}
@@ -260,9 +270,12 @@ namespace POSH_StarCraftBot.behaviours
 
 					if (buildLocation is TilePosition)
 					{
+                        // set target to becom a new Position from the TilePosition"buildPosition"
 						Position target = new Position(buildPosition);
+                        // Move the builder into place
 						builder.move(target, true);
 						Console.Out.WriteLine("Builder Moving into Position");
+                        // While the builder is to far from the build location move to location
 						while (builder.getDistance(target) >= DELTADISTANCE && timeout > 0)
 						{
 							if (builder.move(target, true))
@@ -270,6 +283,7 @@ namespace POSH_StarCraftBot.behaviours
 							System.Threading.Thread.Sleep(100);
 							timeout--;
 						}
+                        // If the buildder takes too long to get into position a new builder is selected
 						if (timeout <= 0)
 						{
 							Console.Out.WriteLine("Positioning Timed Out Replacing Builder");
@@ -279,10 +293,12 @@ namespace POSH_StarCraftBot.behaviours
 						Console.Out.WriteLine("Builder in Position");
 						return true;
 					}
+                    // If the builder cant get inot position and the position is NULL then attempt to build a pylon at the location
 					Console.Out.WriteLine("buildLocation is NULL");
 					builder.build(builder.getTilePosition(), bwapi.UnitTypes_Protoss_Pylon);
 					return false;
 				}
+                // Stop the output box from filling up too much
 				if (textCounter >= 1)
 				{
 					return false;
@@ -300,9 +316,12 @@ namespace POSH_StarCraftBot.behaviours
 		// Check if there is a pylon at the desirerd location
 		private bool HasPylonAtLocation(int buildLocation)
 		{
+            // Check is buildLocation is valid
 			if (Interface().baseLocations.ContainsKey(buildLocation) && Interface().baseLocations[buildLocation] is TilePosition)
 			{
 				Position location = new Position(Interface().baseLocations[buildLocation]);
+                // go through all the buildings and select all the Pylons, then check their distance from the desired location
+                // and if its within the given distance return true
 				foreach (Unit unit in Interface().GetAllBuildings())
 					if (unit.getType().getID() == bwapi.UnitTypes_Protoss_Pylon.getID() &&
 						unit.getDistance(location) <= DELTADISTANCE)
@@ -311,19 +330,6 @@ namespace POSH_StarCraftBot.behaviours
 			}
 			return false;
 		}
-
-        [ExecutableAction("SelectDefenceBase")]
-        public bool SelectDefenceBase()
-        {
-            if (Interface().GetNexus().Count() < 1)
-                return false;
-            double distanceStart = Interface().baseLocations[(int)ForceLocations.OwnStart].getDistance(buildingToRepair.getTilePosition());
-            double distanceNatural = Interface().baseLocations[(int)ForceLocations.Natural].getDistance(buildingToRepair.getTilePosition());
-
-            ForceLocations defenceBase = (distanceStart < distanceNatural) ? ForceLocations.OwnStart : ForceLocations.Natural;
-            Interface().currentBuildSite = (BuildSite)defenceBase;
-            return true;
-        }
 
         //
         //Actions
@@ -339,34 +345,6 @@ namespace POSH_StarCraftBot.behaviours
 			}
 			return false;
 		}
-
-        [ExecutableAction("RepairBuilding")]
-        public bool RepairBuilding()
-        {
-            if (repairDrone == null || repairDrone.getHitPoints() <= 0 || buildingToRepair == null || buildingToRepair.getHitPoints() <= 0)
-                return false;
-            move(buildingToRepair.getPosition(), repairDrone);
-            return repairDrone.repair(buildingToRepair, true);
-        }
-        
-        //
-        // SENSES
-        //
-        [ExecutableSense("NeedBuilding")]
-        public bool NeedBuilding()
-        {
-            return needBuilding;
-        }
-
- 
-        [ExecutableSense("BuildingDamaged")]
-        public bool BuildingDamaged()
-        {
-
-            IEnumerable<Unit> buildings = Interface().GetAllBuildings().Where(building => building.isCompleted() && building.getHitPoints() < building.getType().maxHitPoints()).Where(building => building.getHitPoints() > 0);
-
-            return (buildings.Count() > 0);
-        }
 
         // Action for finding a suitable loaction for the Protoss Assimiltor to harvest Vespin Gas
         [ExecutableAction("SelectAssimilatorLocation")]
@@ -479,7 +457,6 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("PositionChokePylon")]
         public bool PositionChokePylon()
         {
-            //TODO Create function to select the appropriate choke point for the pylon to be built
             return Position(bwapi.UnitTypes_Protoss_Pylon);
         }
 
@@ -537,28 +514,28 @@ namespace POSH_StarCraftBot.behaviours
 			return Build(bwapi.UnitTypes_Protoss_Fleet_Beacon);
 		}
 
-		// Action for finding a suitable loaction for the Protoss Fleetbeacon
+        // Action for finding a suitable loaction for the protoss Citadel of Adun
 		[ExecutableAction("PositionCitadel")]
 		public bool PositionCitadel()
 		{
 			return Position(bwapi.UnitTypes_Protoss_Citadel_of_Adun);
 		}
 
-		// Action to use the suitable location to build the protoss Fleetbeacon
+        // Action to use the suitable location to build the protoss Citadel of Adun
 		[ExecutableAction("BuildCitadel")]
 		public bool BuildCitadel()
 		{
 			return Build(bwapi.UnitTypes_Protoss_Citadel_of_Adun);
 		}
 
-		// Action for finding a suitable loaction for the Protoss Fleetbeacon
+		// Action for finding a suitable loaction for the Protoss Templar Archives
 		[ExecutableAction("PositionArchives")]
 		public bool PositionArchives()
 		{
 			return Position(bwapi.UnitTypes_Protoss_Templar_Archives);
 		}
 
-		// Action to use the suitable location to build the protoss Fleetbeacon
+        // Action to use the suitable location to build the Protoss Templar Archives
 		[ExecutableAction("BuildArchives")]
 		public bool BuildArchives()
 		{
@@ -579,14 +556,14 @@ namespace POSH_StarCraftBot.behaviours
 			return Build(bwapi.UnitTypes_Protoss_Robotics_Facility);
 		}
 
-		// Action for finding a suitable loaction for the Protoss Robotics Facility
+        // Action for finding a suitable loaction for the Protoss Observatory
 		[ExecutableAction("PositionObservatory")]
 		public bool PositionObservatory()
 		{
 			return Position(bwapi.UnitTypes_Protoss_Observatory);
 		}
 
-		// Action to use the suitable location to build the protoss Robotics Facility
+        // Action to use the suitable location to build the protoss Observatory
 		[ExecutableAction("BuildObservatory")]
 		public bool BuildObservatory()
 		{
@@ -597,7 +574,6 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("PositionCannon")]
         public bool PositionCannon()
         {
-            //TODO Create function to select the appropriate choke point for the cannon to be built
             return Position(bwapi.UnitTypes_Protoss_Photon_Cannon);
         }
 
@@ -620,30 +596,50 @@ namespace POSH_StarCraftBot.behaviours
         //
         // SENSES
         //
+        [ExecutableSense("NeedBuilding")]
+        public bool NeedBuilding()
+        {
+            return needBuilding;
+        }
+
+        [ExecutableSense("BuildingDamaged")]
+        public bool BuildingDamaged()
+        {
+
+            IEnumerable<Unit> buildings = Interface().GetAllBuildings().Where(building => building.isCompleted() && building.getHitPoints() < building.getType().maxHitPoints()).Where(building => building.getHitPoints() > 0);
+
+            return (buildings.Count() > 0);
+        }
+
+        // Check for pylons at the choke
 		[ExecutableSense("HasChokePylon")]
 		public bool HasChokePylon()
 		{
 			return HasPylonAtLocation(4);
 		}
 
+        // Check for pylons at the naturals choke
 		[ExecutableSense("HasNaturalChokePylon")]
 		public bool HasNaturalChokePylon()
 		{
 			return HasPylonAtLocation(5);
 		}
 
+        // Check for pylons at the natural
 		[ExecutableSense("HasNaturalPylon")]
 		public bool HasNaturalPylon()
 		{
 			return HasPylonAtLocation(2);
 		}
 
+        // check for pylons at the enemy base
 		[ExecutableSense("HasEnemyPylon")]
 		public bool HasEnemyPylon()
 		{
 			return HasPylonAtLocation(5);
 		}
 
+        // Get a new builder
 		[ExecutableSense("NeedNewBuilder")]
 		public bool NeedNewBuilder()
 		{
@@ -750,7 +746,7 @@ namespace POSH_StarCraftBot.behaviours
 			return countBuilding(bwapi.UnitTypes_Protoss_Robotics_Facility);
 		}
 
-		// Sense to return the number of protoss Robotics Facilities
+        // Sense to return the number of protoss Observatories
 		[ExecutableSense("ObservatoryCount")]
 		public int ObservatoryCount()
 		{
