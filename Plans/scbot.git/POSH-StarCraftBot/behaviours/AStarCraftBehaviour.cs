@@ -59,21 +59,6 @@ namespace POSH_StarCraftBot.behaviours
             return (UnitControl)agent.getBehaviour("UnitControl");
         }
 
-        protected bool CanMorphUnit(UnitType unit)
-        {
-            if (unit.gasPrice() <= Interface().GasCount() &&
-                unit.mineralPrice() <= Interface().MineralCount() &&
-                unit.supplyRequired() <= Interface().AvailableSupply()
-                )
-                if (unit.isBuilding())
-                    return true;
-                else if (Interface().LarvaeCount() > 0 )
-                    return true;
-
-            return false;
-        }
-        ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
-
         // Function to see if the AI can afford to build a building
         protected bool CanBuildBuilding(UnitType unit)
         {
@@ -98,6 +83,5 @@ namespace POSH_StarCraftBot.behaviours
                 return true;
             return false;
         }
-        ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////
     }
 }

@@ -11,7 +11,7 @@ using POSH_StarCraftBot.logic;
 
 namespace POSH_StarCraftBot
 {
-    public enum BuildSite { None = 0, StartingLocation = 1, Natural = 2, Extension = 3, NaturalChoke = 4, EnemyChoke = 5};
+    public enum BuildSite { None = 0, StartingLocation = 1, Natural = 2, Extension = 3, Choke = 4, NaturalChoke = 5, EnemyChoke = 6};
     public enum ForceLocations { NotAssigned = 0, OwnStart = 1, Natural = 2, Extension = 3, NaturalChoke = 4, EnemyNatural = 5, EnemyStart = 6, ArmyOne = 7, ArmyTwo = 8, Build = 9, Scout = 10, EnemyChoke = 11};
     public enum GamePhase { Early, Mid, End }
 
@@ -132,10 +132,7 @@ namespace POSH_StarCraftBot
 
         public bool GameRunning()
         {
-            if (bwapi.Broodwar.isInGame())
-                return true;
-            else
-                return false;                
+			return bwapi.Broodwar.isInGame();  
         }
 
         public TilePosition StartLocation()
@@ -194,165 +191,12 @@ namespace POSH_StarCraftBot
             return bwapi.Broodwar.self().supplyTotal() / 2;
         }
 
-        //
-        //
-        // Zerg Units
-        //
-        //
-
-        public int LarvaeCount()
-        {
-            int total = bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Zerg_Larva);
-            return (total > 0) ? bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Zerg_Larva) - GetLarvae().Where(larvae => larvae.isMorphing()).Count() : 0;
-        }
-
-        public int DroneCount()
-        {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Zerg_Drone);
-        }
-
-        public int ZerglingCount()
-        {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Zerg_Zergling);
-        }
-
-        public int OverlordCount()
-        {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Zerg_Overlord);
-        }
-
-        public int HydraliskCount()
-        {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Zerg_Hydralisk);
-        }
-
-        public int MutaliskCount()
-        {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Zerg_Mutalisk);
-        }
-
-        public int LurkerCount()
-        {
-            return bwapi.Broodwar.self().allUnitCount(bwapi.UnitTypes_Zerg_Lurker);
-        }
-
-        public IEnumerable<Unit> GetLarvae()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Larva.getID());
-        }
-
-        public IEnumerable<Unit> GetLarvae(int amount)
-        {
-            return GetLarvae().Take(amount);
-        }
-
-        public IEnumerable<Unit> GetDrones(int amount)
-        {
-            return GetDrones().Take(amount);
-        }
-        public IEnumerable<Unit> GetDrones()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Drone.getID());
-        }
-
-        public IEnumerable<Unit> GetIdleDrones()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Drone.getID()).Where(drone => drone.isIdle() && !IsBuilder(drone));
-        }
-
-        public IEnumerable<Unit> GetZerglings(int amount)
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Zergling.getID()).Take(amount);
-        }
-
-        public IEnumerable<Unit> GetOverlord(int amount)
-        {
-            return GetOverlord().Take(amount);
-        }
-
-        public IEnumerable<Unit> GetOverlord()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Overlord.getID());
-        }
-
-        public IEnumerable<Unit> GetHydralisk(int amount)
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Hydralisk.getID()).Take(amount);
-        }
-
-        public IEnumerable<Unit> GetMutalisk(int amount)
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Mutalisk.getID()).Take(amount);
-        }
-
-        public IEnumerable<Unit> GetLurker(int amount)
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Lurker.getID()).Take(amount);
-        }
-
-        public IEnumerable<Unit> GetAllUnits(bool worker)
+		public IEnumerable<Unit> GetAllUnits(bool worker)
         {
             return bwapi.Broodwar.self().getUnits().Where(unit =>
                 !unit.getType().isBuilding() &&
                 (worker) ? unit.getType().isWorker() : !unit.getType().isWorker()
                 );
-        }
-
-
-        //
-        //
-        // Zerg Buildings
-        //
-        //
-
-        public IEnumerable<Unit> GetHatcheries()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Hatchery.getID());
-        }
-
-        public IEnumerable<Unit> GetSpawningPools()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Spawning_Pool.getID());
-        }
-
-        public IEnumerable<Unit> GetLairs()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Lair.getID());
-        }
-
-        public IEnumerable<Unit> GetExtractors()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Extractor.getID());
-        }
-
-        public IEnumerable<Unit> GetHydraDens()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Hydralisk_Den.getID());
-        }
-
-        public IEnumerable<Unit> GetSunkenColonies()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Sunken_Colony.getID());
-        }
-
-        public IEnumerable<Unit> GetCreepColonies()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Creep_Colony.getID());
-        }
-
-        public IEnumerable<Unit> GetSporeColonies()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Spore_Colony.getID());
-        }
-
-        public IEnumerable<Unit> GetSpire()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Spire.getID());
-        }
-
-        public IEnumerable<Unit> GetGreaterSpire()
-        {
-            return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Zerg_Greater_Spire.getID());
         }
 
         public IEnumerable<Unit> GetAllBuildings()
@@ -372,13 +216,6 @@ namespace POSH_StarCraftBot
             return bwapi.Broodwar.getMinerals().Where(patch => patch.getResources() > 0);
         }
 
-
-        ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
-        //
-        //
-        // Protoss Units
-        //
-        //
         //Function to return an available builder
         protected internal Unit GetBuilder(TilePosition location, bool selectNew)
         {
@@ -405,6 +242,11 @@ namespace POSH_StarCraftBot
             return builder;
         }
 
+        //
+        //
+        // Protoss Units
+        //
+        //
 
         //Return the number of Probes under the AI's control
         public int ProbeCount()
@@ -562,6 +404,12 @@ namespace POSH_StarCraftBot
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Cybernetics_Core.getID());
         }
 
+		//Return the number of Cybernetics Cores under the AI's control Plus their location
+		public IEnumerable<Unit> GetObservatory()
+		{
+			return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Observatory.getID());
+		}
+
         //Return the number of Fleet Beacons under the AI's control Plus their location
         public IEnumerable<Unit> GetFleetbeacon()
         {
@@ -620,12 +468,12 @@ namespace POSH_StarCraftBot
         void IStarcraftBot.onEnd(bool isWinner)
         {
             //throw new NotImplementedException();
+			Environment.Exit(-1);
         }
 
         void IStarcraftBot.onFrame()
         {
             //UnitPtrSet set =  bwapi.Broodwar.getMinerals();
-
         }
 
         void IStarcraftBot.onSendText(string text)
@@ -693,7 +541,5 @@ namespace POSH_StarCraftBot
         {
             //throw new NotImplementedException();
         }
-
-
     }
 }

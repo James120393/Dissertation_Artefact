@@ -242,189 +242,195 @@ namespace POSH_StarCraftBot.behaviours
 
 		private bool MoveForceTerran(BaseLocation moveLocation, bool builder, bool harras)
 		{
-			IEnumerable<Unit> force = null;
-			if (!builder)
-				force = Interface().GetAllUnits(false);
-			if (builder)
-				force = Interface().GetAllUnits(false).Concat(Interface().GetAllUnits(true));
-			if (harras)
-				force = Interface().GetAllUnits(false).Where(unit => unit.getType() == bwapi.UnitTypes_Protoss_Dark_Templar);
-
-			Position location = new Position(moveLocation.getTilePosition());
-			foreach (Unit unit in force)
+			try
 			{
-				if (unit.getHitPoints() > 0)
+				IEnumerable<Unit> force = null;
+				if (!builder)
+					force = Interface().GetAllUnits(false);
+				if (builder)
+					force = Interface().GetAllUnits(false).Concat(Interface().GetAllUnits(true));
+				if (harras)
+					force = Interface().GetAllUnits(false).Where(unit => unit.getType() == bwapi.UnitTypes_Protoss_Dark_Templar);
+
+				Position location = new Position(moveLocation.getTilePosition());
+				foreach (Unit unit in force)
 				{
-					if (unit.getType() == bwapi.UnitTypes_Protoss_Observer)
+					if (unit.getHitPoints() > 0)
 					{
-						unit.move(force.Where(thisUnit => thisUnit.getType() != bwapi.UnitTypes_Protoss_Observer).First().getPosition());
-						continue;
-					}
-					IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
-					if (enemies != null)
-					{
-						IEnumerable<Unit> enemy = enemies.Where(eunit => !eunit.getType().isFlyer()).OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
-						unit.attack(location);
-						try
+						IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
+						if (enemies != null)
 						{
-							IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => eunit.getType().isBuilding()).Where(eunit => eunit.getType().isDetector());
-							unit.attack(enemyUnit.First().getPosition());
-						}
-						catch
-						{
+							IEnumerable<Unit> enemy = enemies.Where(eunit => !eunit.getType().isFlyer()).OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
+							unit.attack(location);
 							try
 							{
-								IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => !eunit.getType().isBuilding());
+								IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => eunit.getType().isBuilding()).Where(eunit => eunit.getType().isDetector());
 								unit.attack(enemyUnit.First().getPosition());
 							}
 							catch
 							{
 								try
 								{
-									if (enemyBuildingsPositions.Count() > 0)
-									{
-										unit.attack(enemyBuildingsPositions.First().Value);
-									}
+									IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => !eunit.getType().isBuilding() && !eunit.getType().isFlyer());
+									unit.attack(enemyUnit.First().getPosition());
 								}
 								catch
 								{
-									unit.attack(location);
+									try
+									{
+										if (enemyBuildingsPositions.Count() > 0)
+										{
+											unit.attack(enemyBuildingsPositions.First().Value);
+										}
+									}
+									catch
+									{
+										unit.attack(location);
+									}
 								}
 							}
 						}
-					}
-					else
-					{
-						unit.attack(location);
+						else
+						{
+							unit.attack(location);
+						}
 					}
 				}
+				return true;
 			}
-			return true;
+			catch
+			{
+				return false;
+			}
 		}
 
 		private bool MoveForce(BaseLocation moveLocation, bool builder, bool harras)
 		{
-			IEnumerable<Unit> force = null;
-			if (!builder)
-				force = Interface().GetAllUnits(false);
-			if (builder)
-				force = Interface().GetAllUnits(false).Concat(Interface().GetAllUnits(true));
-			if (harras)
-				force = Interface().GetAllUnits(false).Where(unit => unit.getType() == bwapi.UnitTypes_Protoss_Dark_Templar);
-
-			Position location = new Position(moveLocation.getTilePosition());
-			
-			foreach (Unit unit in force)
+			try
 			{
-				if (unit.getHitPoints() > 0)
+				IEnumerable<Unit> force = null;
+				if (!builder)
+					force = Interface().GetAllUnits(false);
+				if (builder)
+					force = Interface().GetAllUnits(false).Concat(Interface().GetAllUnits(true));
+				if (harras)
+					force = Interface().GetAllUnits(false).Where(unit => unit.getType() == bwapi.UnitTypes_Protoss_Dark_Templar);
+
+				Position location = new Position(moveLocation.getTilePosition());
+
+				foreach (Unit unit in force)
 				{
-					if (unit.getType() == bwapi.UnitTypes_Protoss_Observer)
+					if (unit.getHitPoints() > 0)
 					{
-						unit.move(force.Where(thisUnit => thisUnit.getType() != bwapi.UnitTypes_Protoss_Observer).First().getPosition());
-						continue;
-					}
-					IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
-					if (enemies != null)
-					{
-						IEnumerable<Unit> enemy = enemies.OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
-						unit.attack(location);
-						try
+						IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
+						if (enemies != null)
 						{
-							IEnumerable<Unit> enemtUnit = enemy.Where(units => units.getHitPoints() > 0).Where(units => !units.getType().isBuilding());
-							unit.attack(enemtUnit.First().getPosition());
-						}
-						catch
-						{
+							IEnumerable<Unit> enemy = enemies.OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
+							unit.attack(location);
 							try
 							{
-								IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => eunit.getType().isBuilding());
-								unit.attack(enemyUnit.First().getPosition());
+								IEnumerable<Unit> enemtUnit = enemy.Where(units => units.getHitPoints() > 0).Where(units => !units.getType().isBuilding());
+								unit.attack(enemtUnit.First().getPosition());
 							}
 							catch
 							{
 								try
 								{
-									if (enemyBuildingsPositions.Count() > 0)
-									{
-										unit.attack(enemyBuildingsPositions.First().Value);
-									}
+									IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => eunit.getType().isBuilding());
+									unit.attack(enemyUnit.First().getPosition());
 								}
 								catch
 								{
-									unit.attack(location);
+									try
+									{
+										if (enemyBuildingsPositions.Count() > 0)
+										{
+											unit.attack(enemyBuildingsPositions.First().Value);
+										}
+									}
+									catch
+									{
+										unit.attack(location);
+									}
 								}
 							}
 						}
-					}
-					else
-					{
-						unit.attack(location);
+						else
+						{
+							unit.attack(location);
+						}
 					}
 				}
+				return true;
 			}
-			return true;
+			catch
+			{
+				return false;
+			}
 		}
 
 		private bool MoveForceProtoss(BaseLocation moveLocation, bool builder, bool harras)
 		{
-			IEnumerable<Unit> force = null;
-			if (!builder)
-				force = Interface().GetAllUnits(false);
-			if (builder)
-				force = Interface().GetAllUnits(false).Concat(Interface().GetAllUnits(true));
-			if (harras)
-				force = Interface().GetAllUnits(false).Where(unit => unit.getType() == bwapi.UnitTypes_Protoss_Dark_Templar);
-
-			Position location = new Position(moveLocation.getTilePosition());
-			foreach (Unit unit in force)
+			try
 			{
-				if (unit.getHitPoints() > 0)
+				IEnumerable<Unit> force = null;
+				if (!builder)
+					force = Interface().GetAllUnits(false);
+				if (builder)
+					force = Interface().GetAllUnits(false).Concat(Interface().GetAllUnits(true));
+				if (harras)
+					force = Interface().GetAllUnits(false).Where(unit => unit.getType() == bwapi.UnitTypes_Protoss_Dark_Templar);
+
+				Position location = new Position(moveLocation.getTilePosition());
+				foreach (Unit unit in force)
 				{
-					if (unit.getType() == bwapi.UnitTypes_Protoss_Observer)
+					if (unit.getHitPoints() > 0)
 					{
-						unit.move(force.Where(thisUnit => thisUnit.getType() != bwapi.UnitTypes_Protoss_Observer).First().getPosition());
-						continue;
-					}
-					IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
-					if (enemies != null)
-					{
-						IEnumerable<Unit> enemy = enemies.Where(eunit => !eunit.getType().isFlyer()).OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
-						unit.attack(location);
-						try
+						IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
+						if (enemies != null)
 						{
-							IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => eunit.getType().isBuilding()).Where(eunit => eunit.getType() == bwapi.UnitTypes_Protoss_Pylon);
-							unit.attack(enemyUnit.First().getPosition());
-						}
-						catch
-						{
+							IEnumerable<Unit> enemy = enemies.Where(eunit => !eunit.getType().isFlyer()).OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
+							unit.attack(location);
 							try
 							{
-								IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => !eunit.getType().isBuilding());
+								IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => eunit.getType().isBuilding()).Where(eunit => eunit.getType() == bwapi.UnitTypes_Protoss_Pylon);
 								unit.attack(enemyUnit.First().getPosition());
 							}
 							catch
 							{
 								try
 								{
-									if (enemyBuildingsPositions.Count() > 0)
-									{
-										unit.attack(enemyBuildingsPositions.First().Value);
-									}
+									IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => !eunit.getType().isBuilding());
+									unit.attack(enemyUnit.First().getPosition());
 								}
 								catch
 								{
-									unit.attack(location);
+									try
+									{
+										if (enemyBuildingsPositions.Count() > 0)
+										{
+											unit.attack(enemyBuildingsPositions.First().Value);
+										}
+									}
+									catch
+									{
+										unit.attack(location);
+									}
 								}
 							}
 						}
-					}
-					else
-					{
-						unit.attack(location);
+						else
+						{
+							unit.attack(location);
+						}
 					}
 				}
+				return true;
 			}
-			return true;
+			catch
+			{
+				return false;
+			}
 		}
 	
 
@@ -458,7 +464,7 @@ namespace POSH_StarCraftBot.behaviours
         [ExecutableAction("SelectAttackedBase")]
         public bool SelectAttackedBase()
         {
-            if (Interface().GetHatcheries().Count() < 1)
+            if (Interface().GetNexus().Count() < 1)
                 return false;
 
             double damageStart = 0;
@@ -494,36 +500,70 @@ namespace POSH_StarCraftBot.behaviours
             return stopAttacks;
         }
 
-        [ExecutableAction("AttackZerg")]
+		[ExecutableAction("AttackZerg")]
 		public bool AttackZerg()
-        {
-            return MoveForce(Interface().basePositions.Last(), false, false);
-        }
-
+		{
+			try
+			{
+				return MoveForce(Interface().basePositions.Last(), false, false);
+			}
+			catch
+			{
+				return false;
+			}
+		}
 		[ExecutableAction("AttackTerran")]
 		public bool AttackTerran()
 		{
-			return MoveForceTerran(Interface().basePositions.Last(), false, false);
+			try
+			{
+				return MoveForceTerran(Interface().basePositions.Last(), false, false);
+			}
+			catch
+			{
+				return false;
+			}
 		}
 
 		[ExecutableAction("AttackProtoss")]
 		public bool AttackProtoss()
 		{
-			return MoveForceProtoss(Interface().basePositions.Last(), false, false);
+			try
+			{
+				return MoveForceProtoss(Interface().basePositions.Last(), false, false);
+			}
+			catch
+			{
+				return false;
+			}
 		}
 
 		[ExecutableAction("HarrasEnemy")]
 		public bool HarrasEnemy()
 		{
 			Interface().basePositions.Reverse();
-			return MoveForceTerran(Interface().basePositions.Skip(1).First(), false, true);
+			try
+			{
+				return MoveForceTerran(Interface().basePositions.Last(), false, false);
+			}
+			catch
+			{
+				return false;
+			}
 
 		}
 
         [ExecutableAction("AttackEnemyNatural")]
         public bool AttackEnemyNatural()
         {
-            return AttackLocation(ForceLocations.EnemyNatural);
+			try
+			{
+				return AttackLocation(ForceLocations.EnemyNatural);
+			}
+			catch
+			{
+				return false;
+			}
         }
 
         [ExecutableAction("AttackEnemyUnDirected")]
@@ -697,9 +737,7 @@ namespace POSH_StarCraftBot.behaviours
         //
         // SENSES
         //
-
-
-
+		
 		[ExecutableSense("EnemyDetected")]
 		public int EnemyDetected()
 		{
@@ -710,15 +748,15 @@ namespace POSH_StarCraftBot.behaviours
             foreach (Unit build in enemyBuildingsShown)
             {
                 try
-                {
-					if (build.getHitPoints() > 0)
-					{
-						Console.Out.WriteLine("Enemy Building Detected");
-                        enemyBuildingsPositions.Add(build.getID(), build.getPosition());
-					}
+                {	
 					if (enemyBuildingsPositions.ContainsKey(build.getID()) && build.getHitPoints() <= 0)
 					{
                         enemyBuildingsPositions.Remove(build.getID());
+					}
+					if (!enemyBuildingsPositions.ContainsKey(build.getID()) && build.getHitPoints() > 0)
+					{
+						Console.Out.WriteLine("Enemy Building Detected");
+                        enemyBuildingsPositions.Add(build.getID(), build.getPosition());
 					}
                 }
                 catch
@@ -773,10 +811,43 @@ namespace POSH_StarCraftBot.behaviours
             return attackCounter > 0;
         }
 
-		[ExecutableAction("DefendBase")]
-		public bool DefendBase()
+		[ExecutableAction("DefendZerg")]
+		public bool DefendZerg()
 		{
-			return MoveForce(Interface().basePositions.First(), false, false);
+			try
+			{
+				return MoveForce(Interface().basePositions.First(), false, false);
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		[ExecutableAction("DefendTerran")]
+		public bool DefendTerran()
+		{
+			try
+			{
+				return MoveForceTerran(Interface().basePositions.First(), false, false);
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		[ExecutableAction("DefendProtoss")]
+		public bool DefendProtoss()
+		{
+			try
+			{
+				return MoveForceProtoss(Interface().basePositions.First(), false, false);
+			}
+			catch
+			{
+				return false;
+			}
 		}
 		/// <summary>
         /// returns the ForceLocation identifier of the force losing. There are currently 8 forceLocations specified in BODStarraftBot.
@@ -890,9 +961,5 @@ namespace POSH_StarCraftBot.behaviours
 
             return false;
         }
-
-
-
-
     }
 }

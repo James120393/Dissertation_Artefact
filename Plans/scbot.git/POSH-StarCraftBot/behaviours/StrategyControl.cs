@@ -64,7 +64,7 @@ namespace POSH_StarCraftBot.behaviours
 			System.Threading.Thread.Sleep(500);
 			if (probeScout == null || probeScout.getHitPoints() <= 0)
 				probeScout = Interface().GetProbes().First();
-			
+
 			probeScout.stop();
 
 			if (Interface().basePositions.Count() < 1)
@@ -94,7 +94,7 @@ namespace POSH_StarCraftBot.behaviours
 						Console.Out.WriteLine("Probe to Natural");
 					}
 					System.Threading.Thread.Sleep(50);
-				}				
+				}
 				probeScout.move(randTarget, false);
 				//Interface().naturalHasBeenFound = true;
 				Console.Out.WriteLine("Probe at Natural");
@@ -103,21 +103,22 @@ namespace POSH_StarCraftBot.behaviours
 			}
 			if (enemy)
 			{
+				if (probeScout.getHitPoints() <= 0)
+				{
+					Console.Out.WriteLine("Probe scout dead");
+					return false;
+				}
 				foreach (BaseLocation baseLoc in Interface().basePositions.Reverse())
 				{
-					while (probeScout.getDistance(baseLoc.getPosition()) >= DELTADISTANCE)
+					if (!probeScout.isMoving() && probeScout.getHitPoints() > 0)
+					{
+						probeScout.move(baseLoc.getPosition(), true);
+						Console.Out.WriteLine("Probe Searching for Enemy Base");
+					}
+					if (probeScout.getDistance(baseLoc.getPosition()) <= DELTADISTANCE *2)
 					{
 						IEnumerable<Unit> enemyBuildings = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0).Where(units => units.getType().isBuilding());
-						if (probeScout.getHitPoints() <= 0)
-						{
-							Console.Out.WriteLine("Probe scout dead");
-							return false;
-						}
-						if (!probeScout.isMoving() && probeScout.getHitPoints() > 0)
-						{
-							probeScout.move(baseLoc.getPosition(), false);
-							Console.Out.WriteLine("Probe Searching for Enemy Base");
-						}
+						
 						if (enemyBuildings != null)
 						{
 							foreach (Unit building in enemyBuildings)
@@ -150,9 +151,9 @@ namespace POSH_StarCraftBot.behaviours
 			TilePosition targetChoke = null;
 			Chokepoint chokepoint = null;
 
-			if (site != BuildSite.StartingLocation && Interface().baseLocations.ContainsKey((int)site) && !startChoke)
+			if (!startChoke)
 			{
-				targetChoke = Interface().baseLocations[(int)site];
+				targetChoke = Interface().baseLocations[2];
 				double distance = start.getDistance(targetChoke);
 
 				// find some kind of measure to determine if the the closest choke to natural is not the once between choke and start but after the natural
@@ -187,7 +188,7 @@ namespace POSH_StarCraftBot.behaviours
 			Interface().forcePoints[ForceLocations.NaturalChoke] = (targetChoke.getDistance(new TilePosition(chokepoint.getSides().first)) < targetChoke.getDistance(new TilePosition(chokepoint.getSides().second))) ? new TilePosition(chokepoint.getSides().first) : new TilePosition(chokepoint.getSides().second);
 			Interface().currentForcePoint = ForceLocations.NaturalChoke;
 
-			if (!Interface().baseLocations.ContainsKey((int)BuildSite.NaturalChoke))
+			if (!Interface().baseLocations.ContainsKey((int)BuildSite.Choke))
 				Interface().baseLocations.Add(4, Interface().forcePoints[ForceLocations.NaturalChoke]);
 
 			return true;
@@ -254,7 +255,7 @@ namespace POSH_StarCraftBot.behaviours
             {
                 if (probe.isCarryingMinerals())
                 {
-                    probe.gather(Interface().GetExtractors().OrderBy(extr => extr.getDistance(probe)).First());
+                    probe.gather(Interface().GetBuilding(bwapi.UnitTypes_Protoss_Assimilator).OrderBy(extr => extr.getDistance(probe)).First());
                 }
                 else if (probe.isCarryingGas())
                 {
@@ -382,12 +383,30 @@ namespace POSH_StarCraftBot.behaviours
                         .ElementAt(scoutCounter)
                         .getPosition()
                         );
-                if (distance < DELTADISTANCE)
+                if (distance < DELTADISTANCE*2)
                 {
                     // close to another base location
                     if (!Interface().baseLocations.ContainsKey(scoutCounter))
 						Interface().baseLocations[scoutCounter] = new TilePosition(probeScout.getTargetPosition());
                     scoutCounter++;
+					IEnumerable<Unit> enemyBuildings = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0).Where(units => units.getType().isBuilding());
+					if (enemyBuildings != null)
+					{
+						foreach (Unit building in enemyBuildings)
+						{
+							try
+							{
+								Interface().baseLocations.Add(5, baseloc.ElementAt(scoutCounter).getTilePosition());
+								Interface().forcePoints[ForceLocations.EnemyStart] = baseloc.ElementAt(scoutCounter).getTilePosition();
+								Console.Out.WriteLine("Enemy Building Detected");
+								return true;
+							}
+							catch
+							{
+								return false;
+							}
+						}
+					}
 					return true;
                 }
                 else
@@ -414,6 +433,14 @@ namespace POSH_StarCraftBot.behaviours
 		public bool SelectChokeBuild()
 		{
 			SelectChoke(true);
+			Interface().currentBuildSite = BuildSite.Choke;
+			return SwitchBuildToBase((int)BuildSite.Choke);
+		}
+
+		[ExecutableAction("SelectNaturalChokeBuild")]
+		public bool SelectNaturalChokeBuild()
+		{
+			SelectChoke(false);
 			Interface().currentBuildSite = BuildSite.NaturalChoke;
 			return SwitchBuildToBase((int)BuildSite.NaturalChoke);
 		}
@@ -467,24 +494,6 @@ namespace POSH_StarCraftBot.behaviours
 				return true;
 		}
 
-        [ExecutableSense("CanCreateUnits")]
-        public bool CanCreateUnits()
-        {
-            if (Interface().GetLarvae().Count() == 0)
-                return false;
-            switch (currentStrategy){
-                case Strategy.EighteenNexusOpening:
-                    return (Interface().GetBuilding(bwapi.UnitTypes_Protoss_Gateway).Count() > 0) ? true : false;
-                case Strategy.TwoHatchMuta:
-                    return (Interface().GetLairs().Count() > 0 && Interface().GetSpire().Count() > 0) ? true : false;
-                case Strategy.Zergling:
-                    return (Interface().GetHatcheries().Count() > 0 || Interface().GetLairs().Count() > 0 ) ? true : false;
-                default:
-                    break;
-            }
-            return false;
-        }
-        
 
         [ExecutableSense("DoneExploring")]
         public bool DoneExploring()

@@ -1,0 +1,1 @@
+START /d POSH-Launcher.exe -a=POSH-SCBot.dll POSH-SCBot

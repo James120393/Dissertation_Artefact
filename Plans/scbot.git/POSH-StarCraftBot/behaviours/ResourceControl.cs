@@ -30,7 +30,14 @@ namespace POSH_StarCraftBot.behaviours
 
 		private bool DoResearch(UpgradeType research, IEnumerable<Unit> building)
 		{
-			return building.Where(build => !build.isUpgrading() && build.getHitPoints() > 0).First().upgrade(research);
+			try
+			{
+				return building.Where(build => !build.isUpgrading() && build.getHitPoints() > 0).First().upgrade(research);
+			}
+			catch
+			{
+				return false;
+			}
 		}
 
         //
@@ -65,35 +72,12 @@ namespace POSH_StarCraftBot.behaviours
 			return true;
 		}
 
-        [ExecutableAction("HydraSpeedUpgrade")]
-        public bool HydraSpeedUpgrade()
-        {
-            return DoResearch(bwapi.UpgradeTypes_Muscular_Augments, Interface().GetHydraDens());
-        }
-
-        [ExecutableAction("HydraRangeUpgrade")]
-        public bool HydraRangeUpgrade()
-        {
-            return Interface().GetHydraDens().Where(den => !den.isUpgrading() && den.getHitPoints() > 0).First().upgrade(bwapi.UpgradeTypes_Grooved_Spines);
-        }
-
-
         [ExecutableAction("FinishedResearch")]
         public bool FinishedResearch()
         {
             finishedResearch = true;
             return finishedResearch;
         }
-
-        ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
-
-        //Action to tell AI to research the Protoss attack upgrade 1
-        [ExecutableAction("AttackUpgrade")]
-        public bool AttackUpgrade()
-        {
-            return DoResearch(bwapi.UpgradeTypes_Protoss_Ground_Weapons, Interface().GetForge());
-        }
-
 
         //Action to tell AI to research the Protoss Dragoon Range upgrade
         [ExecutableAction("DragoonRangeUpgrade")]
@@ -113,7 +97,14 @@ namespace POSH_StarCraftBot.behaviours
 		[ExecutableAction("AirWepUpgrade")]
 		public bool AirWepUpgrade()
 		{
-			return DoResearch(bwapi.UpgradeTypes_Protoss_Air_Weapons, Interface().GetForge());
+			return DoResearch(bwapi.UpgradeTypes_Protoss_Air_Weapons, Interface().GetCyberneticsCore());
+		}
+
+		//Action to tell AI to research the Protoss Air Weapon upgrade
+		[ExecutableAction("ObserverUpgrade")]
+		public bool ObserverUpgrade()
+		{
+			return DoResearch(bwapi.UpgradeTypes_Sensor_Array, Interface().GetObservatory());
 		}
 
 		//Action to tell AI to research the Protoss Ground Weapon upgrade
@@ -136,8 +127,6 @@ namespace POSH_StarCraftBot.behaviours
 		{
 			return DoResearch(bwapi.UpgradeTypes_Leg_Enhancements, Interface().GetCitadel());
 		}
-        ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////////
-
 
         //
         // SENSES
@@ -160,12 +149,6 @@ namespace POSH_StarCraftBot.behaviours
 			}
 			return false;
 		}
-
-        [ExecutableSense("StopHydraResearch")]
-        public int StopHydraResearch()
-        {
-            return Interface().TotalSupply();
-        }
 
         [ExecutableSense("DoneResearch")]
         public bool DoneResearch()
@@ -203,27 +186,6 @@ namespace POSH_StarCraftBot.behaviours
             return Interface().MineralCount();
         }
 
-        [ExecutableSense("HaveHydraSpeed")]
-        public bool HaveHydraSpeed()
-        {
-            return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Muscular_Augments) > 0);
-        }
-
-        [ExecutableSense("HaveHydraRange")]
-        public bool HaveHydraRange()
-        {
-            return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Grooved_Spines) > 0);
-        }
-
-        ////////////////////////////////////////////////////////////////////////Begining of James' Code////////////////////////////////////////////////////////////////////////
-
-        //Sense to tell AI if they have the protoss attack upgreade 1
-        [ExecutableSense("HaveAttack")]
-        public bool HaveAttack()
-        {
-			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Ground_Weapons) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Ground_Weapons));
-        }
-
 		[ExecutableSense("HaveCarrier")]
 		public bool HaveCarrier()
 		{
@@ -245,15 +207,22 @@ namespace POSH_StarCraftBot.behaviours
         }
 
 		//Sense to tell AI if they have the protoss Air Weapon upgreade
-		[ExecutableSense("HaveAirWep")]
-		public bool HaveAirWep()
+		[ExecutableSense("HaveGroundWep")]
+		public bool HaveGroundWep()
 		{
 			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Ground_Weapons) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Ground_Weapons));
 		}
 
+		//Sense to tell AI if they have the protoss Air Weapon upgreade
+		[ExecutableSense("HaveOberverUpgrade")]
+		public bool HaveOberverUpgrade()
+		{
+			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Sensor_Array) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Sensor_Array));
+		}
+
 		//Sense to tell AI if they have the protoss Ground Weapon upgreade
-		[ExecutableSense("HaveGroundWep")]
-		public bool HaveGroundWep()
+		[ExecutableSense("HaveAirWep")]
+		public bool HaveAirWep()
 		{
 			return (Interface().Self().getUpgradeLevel(bwapi.UpgradeTypes_Protoss_Air_Weapons) > 0 || Interface().Self().isUpgrading(bwapi.UpgradeTypes_Protoss_Air_Weapons));
 		}
@@ -277,6 +246,12 @@ namespace POSH_StarCraftBot.behaviours
 			return (Interface().GetForge().Where(forge => forge.getHitPoints() > 0).First().isUpgrading());
 		}
 
+		[ExecutableSense("IsObservatoryResearching")]
+		public bool IsObservatoryResearching()
+		{
+			return (Interface().GetObservatory().Where(observatory => observatory.getHitPoints() > 0).First().isUpgrading());
+		}
+
 		[ExecutableSense("IsCoreResearching")]
 		public bool IsCoreResearching()
 		{
@@ -287,7 +262,6 @@ namespace POSH_StarCraftBot.behaviours
 		public bool NeedResearch()
 		{
 			return needResearch;
-		}    
-        ////////////////////////////////////////////////////////////////////////End of James' Code////////////////////////////////////////////////////////////////////////////        
+		}        
     }
 }
