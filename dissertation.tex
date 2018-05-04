@@ -231,10 +231,10 @@ Each of these bots employ different strategies, these strategies a
 
 \subsubsection{Hypothesis}
 \begin{itemize}
-	\item \textbf{Hypothesis 1} The AI will survive no more than 13 minutes in a match with the inbuilt AI.
-	\item \textbf{Hypothesis 2} The AI will survive no more than 13 minutes in a match with the competition AI.
-	\item \textbf{Hypothesis 3} The AI will defeat the inbuilt AI
-	\item \textbf{Hypothesis 4} The AI will defeat the competition AI.
+	\item \textbf{Hypothesis 1} The AI will survive longer more than 13 minutes and Win.
+	\item \textbf{Hypothesis 2} The AI will survive no more than 13 minutes and Win.
+	\item \textbf{Hypothesis 3} The AI will have a Win rate greater than 0\%.
+	\item \textbf{Hypothesis 4} The AI will have a Win rate of 50\% or greater.	
 	\item \textbf{Hypothesis 5} The AI will counter the Rush tactic.
 \end{itemize}
 
@@ -275,99 +275,108 @@ The tools that will be used in this experiment are; The Brood War Application Pr
 \begin{itemize}
 	\item \textbf{Brood War Application Programming Interface} \cite{BWAPI} is an open source software that creates an interface to allow a custom AI to communicate with the game. BWAPI only give limited information to the AI, which inhibits the bots to have the ability to know what its opponent is doing, this means that the fog of war(the unexplored parts of the map) are is kept\cite{POSH}, this mean that the AI is just a limited in its knowledge as a player would be. The information that is provided is the size of the map and base locations, this allows the AI to have the ability to scout effectively. This limited information prevents custom AI's from cheating and ensures a fair game, though for the developers of the AI this could be considered an advantage for the development stage of the AI as there is no need to be concerned with accidentally allowing their AI to access illegal information. This does however provide a challenge in design as the AI is dealing with imperfect information, it must be designed in such a way that it almost replicated human responses, i.e. scouting, and checking areas already scouted for enemy presence.
 	\item[]
-	\item \textbf{POSH} plans can be created in the ABODE Environment as seen in Figure 1, these are visual planning tools that allow for a hierarchy of actions with associated triggers. Each plan can be split into three parts, Drive-Collections, Competencies and Action patterns, these three determine when an action is to be triggered. POSH plans use a behaviour library created in the native language of the problem space, see Fig 1. This tool can be a powerful asset to designing and creating an AI as once the behaviours and senses are implemented new AI can be created quickly and with little error.
-	\todo[inline]{Mention the many (((((()))))) language here}
+	\item \textbf{POSH} plans can be created in the ABODE Environment as seen in Figure 1, these are visual planning tools that allow for a hierarchy of actions with associated triggers. Each plan can be split into three parts, Drive-Collections, Competencies and Action patterns, these three determine when an action is to be triggered. POSH plans use a behaviour library created in the native language of the problem space, see Fig 4. This tool can be a powerful asset to designing and creating an AI as once the behaviours and senses are implemented new AI can be created quickly and with little error.
 	\item[]
 	\item \textbf{Microsoft Visual Studios 2010(VS2010)} is an integrated development environment(SDK) from Microsoft \cite{Visual}. It is used to create computer programs, as well as websites, apps, and online services. In this experiment VS2010 is being used to create the behaviours for the AI, as well as any other functionality the AI requires, this includes the framework for the POSH wrapper.
 	\item[]
 	\item \textbf{Chaoslauncher} is an open source third-party launcher for StarCraft that allows the user to inject any universal plugins \cite{Chaos}. For this experiment the launcher will be used as a debugging tool for the first stages of the AI. The launcher also allows StarCraft to be run in windowed mode alongside a BWAPI injector that allows the AI to communicate with BWAPI.	
 	\item[]
 	\item \textbf{StarCraft AI Tournament Manager(STM)} is a tool that was developed by David Churchill to manage and run StarCraft AI tournaments, it is an open source project available for anyone to use. It runs the tournament by creating a server and allowing instances of its counterpart (the Client) to connect to it, each client runs a single instance of StarCraft and the server will put two clients into a game and record the results. This set-up allows for as many instances of StarCraft to be run on the server as the user wants, unfortunately the current set-up of the STM doesn't allow for more than one instance of StarCraft to be run on a single PC at a time. To solve this a virtual machine will be utilized \cite{Tournament}. For the purposes of this experiment the STM will be used to test the AI against the competition AI's, once the tournament is over the STM will compile  a results table similar to fig 2, in a HTML format which can be opened in any browser.
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.5\textwidth]{TMPic}
+		\caption{StarCraft Tournament Manager Server Running.}
+		\label{Fig2}
+	\end{figure}
 	\item[]
 	\item \textbf{Oracle VirtualBox} is a general-purpose full virtualizer for x86 hardware, targeted at server, desktop and embedded use \cite{Virtual}. This allows the user to run multiple instances of an operating system on the same hardware, for this experiment it will be used to run multiple instances of StarCraft on the same PC. 
+	\item[]
+	\item \textbf{R} is a language environment for statistical computing, using R along with R studio the user can compute statistical equations and produce the appropriate graphs. For the purposes of this research R will be used to create some of the figures present in this paper, a code exert of R can be seen in fig 3. 
+	\newline
 \end{itemize}
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.5\textwidth]{TMPic}
-	\caption{StarCraft Tournament Manager Server Running.}
-	\label{Fig2}
-\end{figure}
-
-\subsection{Design and Research Artefact}
-Designing this experiment was a simple task once the research question was settled on, as the only designing required was to obtain several expert strategies. These strategies were obtained from an online source Liquipidiea, this is an online wiki available to the esports community to bring together all the information they can to help each other in their respective sports. This wiki is a valuable source of knowledge when trying to obtain the necessary StarCraft strategies as the ones on this site are used by the experts that play the game. 
-
-The challenge was the implementation of these build orders, as the POSH plans have to be precise, meaning the priorities of its actions had to be correct, plus the timing of each action needed to be correct. 
-
-This work will be focusing on the implementation of an AI with pre-built build orders and their counters taken from Liquipedia \cite{Liquid}, a website dedicated to StarCraft, on the there they have a collection of strategies that are free to use in any capacity. Building upon these build orders, the experiment will also include a method for swapping between the orders at any point, to know when to do this, the AI will scout the map in search of the opponent and compare their current building to its stored build orders and find an appropriate counter. The issue with this method is that in late game the AI will struggle to decide which build order to continue. 
 
 \begin{figure}[H]
 	\begin{lstlisting}
-[ExecutableAction("SelectProbeScout")]
-public bool SelectProbeScout()
-{
-    if (probeScout != null && probeScout.getHitPoints() > 0)
-        return true;
-
-    Unit scout = null;
-    IEnumerable<Unit> units = Interface().GetProbes().Where(probe =>
-    probe.getHitPoints() > 0 && !Interface().IsBuilder(probe));
-
-    foreach (Unit unit in units)
+    [ExecutableAction("SelectProbeScout")]
+    public bool SelectProbeScout()
     {
-        if (!unit.isCarryingGas())
+        if (probeScout != null && probeScout.getHitPoints() > 0)
+            return true;
+
+        Unit scout = null;
+        IEnumerable<Unit> units = Interface().GetProbes().Where(probe =>
+        probe.getHitPoints() > 0 && !Interface().IsBuilder(probe));
+
+        foreach (Unit unit in units)
         {
-            scout = unit;
-            break;
+            if (!unit.isCarryingGas())
+            {
+                scout = unit;
+                break;
+            }
         }
+        
+        if (scout == null && units.Count() > 0)
+        {
+            scout = units.Last();
+        }
+        probeScout = scout;
+        return (probeScout is Unit && probeScout.getHitPoints() > 0) ? true : false;
     }
-    if (scout == null && units.Count() > 0)
-    {
-        scout = units.Last();
-    }
-    probeScout = scout;
-    return (probeScout is Unit && probeScout.getHitPoints() > 0) ? true : false;
-}
-	\end{lstlisting}
-	\caption{c\# executable action for selecting a probe scout, the plan will execute this code when triggered.}
+\end{lstlisting}
+	\caption{C\# executable action for selecting a probe scout, the plan will execute this code when triggered.}
+	\label{Fi4}
+\end{figure}
+
+\subsection{Design and Research Artefact}
+Designing this experiment was a simple, yet time consuming task once the research question was settled on, as the only designing required was to obtain several expert strategies. These strategies were obtained from an online source Liquipidiea, this is an online wiki available to the esports community to bring together all the information they can to help each other in their respective sports. This wiki is a valuable source of knowledge when trying to obtain the necessary StarCraft strategies as the ones on this site are used by the experts that play the game. 
+
+The challenge was the implementation of these build orders, as the POSH plans have to be precise, meaning the priorities of its actions had to be correct, plus the timing of each action needed to be correct. 
+
+This work will be focusing on the implementation of an AI with pre-built build orders and their counters taken from Liquipedia \cite{Liquid}, a website dedicated to StarCraft, on the there they have a collection of strategies that are free to use in any capacity. Implementing these build orders are covered in greater detail in Iteration 5 : Implementation of New Strategies.
+
+\begin{figure}[H]
+	\begin{lstlisting}
+qplot(input$`Win%`, input$Duration, geom = c("point",
+"smooth"), method="rlm", main="Correlation between Win % and Game Duration", xlab="Win %", ylab="Game Duration")
+\end{lstlisting}
+	\caption{R code to create a scatter plot with a line of best fit. The figure created from this exert can be seen in Figure 9.}
 	\label{Fig3}
 \end{figure}
-\todo[inline]{Talk about the lifecycle of the artefact agile test driven development TDD no use of daily scrums.}
 
-This artefact used Agile and Test Driven Development(TDD) or in terms of this artefact it will refer to Test-Driven Design for its lifecycle. In K.Beck's Book: Test-Driven Development By Example (cite), TDD as a development concept follows two rules:
+For the creation of the artefact there were many option for life cycles that could have been adopted. Chief among these were the incremental model and Agile, both supported a short development cycles, but lacked the ability to revisit and refactor code \cite{Life}. For the incremental model each development cycle is static and isolated, meaning that when the cycle is over the build will never be revisited again. This approach would be a impractical for this artefact as the strategies and variables in the code need ot be constantly re factored and tweaked.
 
-\begin{itemize}
-	\item Don't write a line of new code unless you firs have a failing automates test.
-	\item Eliminate Duplication
-\end{itemize}
+The Agile development cycle seemed like a better choice as it is more friendly towards an iterative development cycle that produces smaller chunks of code. Though Agile still lacked 
+the focus on testing first, this was required for this artefact as with each implementation it needed testing to confirm if the implementation succeeded. For this artefact Agile will be combined with Test Driven Development (TDD) as there is no use of daily scrums, plus the focus of this research is to have a working AI, and the best method to achieve this is to continuously test and refactor. This method is called Agile Model Driven Development (AMDD) which focuses on iterative development while also being test driven, a more detailed description of this can be found in the appendix under figure.
 
-These two rules 
-\todo[inline]{Expand on this}
-Testing in this instance was only concerned with whether a function within the code did as was designed, there is only a pass/fail did it do the thing it was designed for or not, when testing these only one test is usually required to ge the answer then a slight modification was made each time if it resulted in a fail. The tests had only minor automation as the artefact had to be manually run and the game manually set-up.
+For testing the only concern was whether a function within the code did as was designed, there is only a pass/fail did it do the thing it was designed for or not, when testing these only one test is usually required to ge the answer then a slight modification was made each time if it resulted in a fail. The tests had only minor automation as the artefact had to be manually run and the game manually set-up.
 \newline
 
-\subsubsection{Sprint 1 : Software Installation}
+\subsubsection{Iteration 0 : Software Installation And Design}
+Before any development was carried out, the first decision was how was the AI to be created, it could either be done in C++ pure, Java or C\# using POSH-tools. PODH tools were chosen as
+ 
 The first sprint was to set up the environment. This involved downloading and installing several versions of Visual Studio, and downloading the correct version of BWAPI, Chaoslauncher, and the addition of PoshSharp. An intimidate issue that came up after attempting to compile BWAPI, there were missing .ddl's in the Windows directory, to rectify this the relevant dll's were manually copied into the relevant locations. Once the coding environment was set up, the next step before any code was written was to set up the testing environment. This was done using the Chaoslauncher, BWAPI had to compile correctly to begin with otherwise the AI would not inject into the game correctly. Once StarCraft launched with no issues, a basic POSH plan with no functionality, that came with POSHSharp was compiled and executed, this all had to be done in admin mode as it would not work correctly. By the end of this sprint the correct software was installed, the testing environment was working, and a basic plan ran in the game. The artefact at this point was ready to be designed and have code written in the behaviours.
-\newline
 
-\subsubsection{Sprint 2 : Prototype}
-For the prototype stage of the artefact a race had to be chosen, in StarCraft, there are three, Zerg, Protoss and Terran, each with their own unique play style. Zerg is a rushing faction, with their units being relatively weak and cheap, Zerg usually focus on overwhelming their enemy with numbers. Protoss are strong but expensive, relying on smaller numbers and taking longer to produce anything, this means they can be weak at rushing and defending from a rush. Terran is a balance of the two, being able to produce strong and expensive units as well as cheap, weak ones, they can effectively rush and defend from a rush.
+Before any design could commence a race had to be chosen, in StarCraft, there are three, Zerg, Protoss and Terran, each with their own unique play style. Zerg is a rushing faction, with their units being relatively weak and cheap, Zerg usually focus on overwhelming their enemy with numbers. Protoss are strong but expensive, relying on smaller numbers and taking longer to produce anything, this means they can be weak at rushing and defending from a rush. Terran is a balance of the two, being able to produce strong and expensive units as well as cheap, weak ones, they can effectively rush and defend from a rush.
 
 A rush is a tactic employed in RTS games which involves building up a small force as quickly as possible to harass the enemy base and units. A rush is only considered a rush if it is done within the first five minutes of the game \cite{Liqui}.
 
+Once the software was installed, the method of development was chosen and Protoss was picked, the next step was to begin testing and developing. 
+\newline
+
+\subsubsection{Iteration 1 : Prototype}
 The artefact needed to have an executable plan for the desired race, in this case Protoss, the reasoning for this is explained in the Method section, under Preliminary Results. No behaviours were changed, this was simply an exercise to ensure the testing environment ran with the correct race, so only basic functionality was present. In this case the Probes would gather resources and build a Pylon. This would be the final step in setting up the tests, as now the Protoss ran with no issues in game and testing would be seamless.
 \newline
 
-\subsubsection{Sprint 3 : Alpha}
+\subsubsection{Iteration 2 : Alpha}
 Creating an alpha involved changing the behaviours to suit the race and the behaviours that came with the software were written for Zerg only. Which meant that there had to be a lot of redesigns and code re-factoring needed. And example of this would be the positioning of buildings, as for Zerg they can only build on something called "Creep" this is present at the start of the game at a set radius around the starting base, and can be extended through the use of special structures. For Protoss however they can only build within range of a structure called a "Pylon", these Pylons can be built anywhere but any other structure bar the starting structure has to be built within range. The behaviour for the placement of structures for Zerg worked fine for them however for the Protoss the function had to be refined for more precision when building. 
 
 Another example is when building structures the Zerg loose a builder, as the builder "Morphs" into the structure so each time something is built the AI would just select a new builder and remove the previous one from any list it was related to. Protoss on the other hand can have many structures constructing at one time, this means that the build must remain the same unit. Plus the Training of units, as Zerg only trained from one structure where as Protoss would train from several.
 
 This was done over several weeks, every behaviour, action and sense that was modified/written was tested for functionality each and every time there was a change. This allowed the artefact to take small steps with each change and test always progressing. Once a piece of code was complete there was rarely a need to return to it, and if there was then it was a simple matter to make a change and test if it worked. By the end of the sprint the AI was building in the correct places and produced units from another structure.
 \newline
-\todo[inline]{Reasonable plan with most basic behaviours working}
 
-\subsubsection{Sprint 4 : Beta}
+\subsubsection{Iteration 3 : Beta}
 During this sprint the objective was to ensure the AI could build in other locations as well as build an army to attack the enemy. The first goal was to create a method for the AI to find the choke point and set it as a base location for building, this also opened up an issue with ensuring the AI can swap building locations. Within BWAPI the AI has knowledge of all the choke points and base locations, though they are not allowed to access them unless it has been revealed on the map. then once it has the AI can save that location, and once it needs to build there it will use the positioning code from that location instead of from the start base. 
 
 Once the functionality for building at the choke was implemented and tested, a plan with greater detail was created. Meaning that the AI would now take advantage of building at both the starting area as well as the natural expansion and choke point. Along with this the AI had to build an army and attack the enemy, using the new method for finding new build locations, it was a simple modification to the scouting function to allow the AI to find the enemy base and mark its location, which allowed the AI to know where to go with its forces.
@@ -376,9 +385,8 @@ During this sprint it became clear that the strategies provided from Liquipidia 
 
 To counteract this The AI has been modified to include a tactic that is not present in any of the strategies, which is to build several Protoss Photon Cannons at the natural expansion. This means that the base immediately next the the AI's starting position will be built up with defensive structures to stop any early game threat, allowing the AI to continue with the original strategy proposed.
 \newline
-\todo[inline]{Mostly complete plan most behaviours working}
 
-\subsubsection{Sprint 5 : Polish}
+\subsubsection{Iteration 4 : Polish}
 At the end of this sprint the AI was expected to have all behaviours fully implemented and tested and a completed plan written and tested. This was an opportunity to look back and re-factor any code that needed tuning or any duplicate code that got into the system. Though the point of TDD is to avoid duplicate code, its priority is to get code that works, in the case of this software duplicate code did end up in the system. Unfortunately due to the nature of the "Action", "Sense" system there is bound to be duplicate code, though it can be minimized with internal functions.
 \begin{table*}[]
 	\centering
@@ -388,10 +396,20 @@ At the end of this sprint the AI was expected to have all behaviours fully imple
 \end{table*}
 Tuning the plan took most of the time in this sprint as with each change the plan had to be tested within the game, to ensure that th change was meaningful and effective. This usually involved changing the build order and priority order of actions.
 \newline
-\todo[inline]{Complete plan and complete behaviours with tuning}
-\subsubsection{Sprint 6 : Implementation of New Strategies}
-The final sprint was to implement several plans that could work alongside the base plan, these would all be taken from the Liquipidiea site. Unfortunately the current set-up only allows for one plan to be used at a time, though each plan can contain several strategies that are triggered when the AI plays.
-\newline
+
+\subsubsection{Iteration 5 : Implementation of New Strategies}
+The final sprint was to implement several plans that could work alongside the base plan, these would all be taken from the Liquipidiea site. Unfortunately the current set-up only allows for one plan to be used at a time, though each plan can contain several strategies that are triggered when the AI plays. Each strategy was tailored to face each race as an opponent, three strategies were chosen from Liquipedia, one for Protoss VS Terran, VS Zerg, and VS Protoss, When two races are the same it is refereed to as a mirror match.
+
+Each strategy focuses on the same goal, producing a unit called Dark Templars (DT) as quickly as possible. This Unit is cloaked and has a clear advantage over an enemy that has no detectors (detectors are a unit that can reveal cloaked/hidden units). The process to achieve this can be seen in figure 11 in the Appendix, which shows the tech tree for the Protoss.
+Though each strategy gets to this goal in different ways:
+
+\begin{itemize}
+	\item For Protoss VS Zerg, the focus is to produce Zealots and as soon as possible produce DT's, once the DT's are in production the Zealots are to move to the Zerg base and harass them until the DT's arrive. At which point the Zerg should either be crippled or defeated, though smart building placement by the Zerg can counter this, then to counter the counter, the Protoss must recover as quickly as possible and renew the attack, or at least continue harassing the Zerg until the Protoss has a large enough army to win \cite{PVZ}.
+	\item When facing the Terran the Protoss must forego the Zealots and head straight into DT's, the means that the Protoss are prone to early rushes by the enemy, but to defend against this one or two ranges units called Dragoons are trained to defend. Once the Protoss has two DT's they are sent into the enemies natural expansion to harass them and lock them in their base unit the Protoss are ready to finish them off \cite{PVT}.
+	\item The hardest strategy to implement is for the mirror Protoss VS Protoss, as they both can produce the same units at the same rate. DT's are again used in this instance. Though this strategy employs tactics from both other strategies, building Zealots and Dragoons for both attack and defence. Photon cannons (A defensive structure) are used to help defend against any attacks. Once the initial attack was defended, and the natural expansion taken the focus shifts to mass producing units, and sending them in too attack the enemy, it is down to how the enemy is player which dictates what unit to produce \cite{PVP}.
+\end{itemize}
+
+Each strategy was implemented separately and as each action taken by the AI had to be precise and done at the correct time, not in game time, but when a building was completed then another action has to be taken. With each implementation the whole process began again, with a prototype of the plan, followed by a beta, alpha, then polishing and finally implementing the next strategy. The only difference at this point was that all the behaviours were implemented and only the plan followed this development cycle, this allowed for all three plans to be implemented, tested and working in a relatively short period of time.
 
 \subsection{Preliminary Results}
 To prepare for final testing a preliminary test was carried out using the tournament manager, this was done to ensure the software was set-up and working for the final testing for the AI developed for this research. For the preliminary test 9 AI's were chosen from the AIIDE 2016 competition, three from the top, three from the middle and three form the bottom. These bots would then play one on one games on 10 maps, totalling to 360 games, the results of each match were recorded automatically by the tournament manager and compiled into table 1, from this table fig 4-8 were created. These results allowed the further development of this researches metrics, this is explained in the following section.
@@ -409,8 +427,6 @@ because the times are only for the games that have that bot in it
 	\includegraphics[width=0.5\textwidth]{AvgTimeBarBot}
 	\caption{Box and whisker showing the average game length, with the mean, median and outlier based on the results obtained from table 1.}
 	\label{Fig5}
-\end{figure}
-\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.5\textwidth]{WinBarBot}
 	\caption{Box and whisker showing Win Rate, with the mean and median based on the results obtained from table 1.}
@@ -435,7 +451,7 @@ Initially the StarCraft AI was to be measured on its success in these two metric
 	\item \textbf{Time Survived} (Average of 13 minutes or above)
 	\item \textbf{Endgame Condition} (Whether the AI wins the game or looses)
 \end{itemize}
-These metrics were obtained from the results from the AIIDE which found that the average time of each game was 13-minutes, and the quickest average being 8-minutes and the longest being 19-minutes. The win ratio of the AI's vary substantially from 17.21\% to a high 83.11\% as can be seen in Table 1 \cite{Results}. 
+These metrics were obtained from the results from the AIIDE 2017 StarCraft Competition, which found that the average time of each game was 13-minutes, and the quickest average being 8-minutes and the longest being 19-minutes. The win ratio of the AI's vary substantially from 17.21\% to a high 83.11\% as can be seen in Table 2 \cite{Results}. 
 
 After presenting these findings, it was discussed that the metrics required a greater level of merit, to achieve this, the metrics were modified using the preliminary results and further inspection of the AI's within the literature. As can be seen in fig 6, the mean win rate for the AI was 50\% and the mean game length from fig 5 was 14.20, and within the literature the only concern for some papers were win rate, these range from 54-91\% \cite{ELGoal,Swen,OnlineEvo,GoalDriven}. The literature AI's were faced against both competition AI's and in-built AI's, which means their win rates could be inflated.
 
@@ -497,56 +513,27 @@ A further step that could be taken is to allow the AI to construct its own plans
 
 \section{Reflective Addendum}
 \todo[inline]{FOR EXAMPLE: During this dissertation many challenges had to be overcome, in subsection those challenges will be explored.}
-
+\newpage
 % Appendices
 \appendix
+\begin{figure}
+	\centering
+	\includegraphics[width=0.75\textwidth]{AMDD}
+	\centering\caption{The Agile Model Driven Development (AMDD) lifecycle \cite{AMDD}}
+	\label{Fig10}
+	\centering
+	\includegraphics[width= 0.5 \textwidth]{ProtossTechTree}
+	\centering\caption{The Tech tree for Protoss, to be able to produce Datk Templar's from the Gateway, Protoss must fist have the Templar Archives. To produce Dragoons the Cybernetics Core must be present, Zealots can be trained as soon as the Gateway is built \cite{Tech}}
+	\label{Fig11}
+\end{figure}
 \begin{table*}
 	\centering
-	{\rowcolors{3}{green!80!yellow!50}{green!70!yellow!40}}
-	\begin{tabular} { |p{3cm}||p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|  } 
-		\hline
-		\multicolumn{6}{|c|}{2017 AIIDE StarCraft AI Competition} \\
-		\hline
-		Bot & Games & Win & Loss & Win\% & AvgTime\\
-		\hline
-		ZZZKBot	&	2966	&	2465	&	501	&	83.11	&	8:00	\\
-		PurpleWave	&	2963	&	2440	&	523	&	82.35	&	13:27	\\
-		Iron	&	2965	&	2417	&	548	&	81.52	&	14:19	\\
-		cpac	&	2963	&	2104	&	859	&	71.01	&	9:45	\\
-		Microwave	&	2962	&	2099	&	863	&	70.86	&	11:34	\\
-		CherryPi	&	2966	&	2049	&	917	&	69.08	&	9:50	\\
-		McRave	&	2964	&	1988	&	976	&	67.07	&	14:35	\\
-		Arrakhammer	&	2963	&	1954	&	1009	&	65.95	&	11:37	\\
-		Tyr	&	2966	&	1955	&	1011	&	65.91	&	13:09	\\
-		Steamhammer	&	2964	&	1901	&	1063	&	64.14	&	10:32	\\
-		AILien	&	2966	&	1729	&	1237	&	58.29	&	13:04	\\
-		LetaBot	&	2955	&	1682	&	1273	&	56.92	&	16:48	\\
-		Ximp	&	2962	&	1605	&	1357	&	54.19	&	18:46	\\
-		UAlbertaBot	&	2968	&	1585	&	1383	&	53.4	&	10:54	\\
-		Aiur	&	2965	&	1496	&	1469	&	50.46	&	13:51	\\
-		IceBot	&	2955	&	1348	&	1607	&	45.62	&	17:16	\\
-		Skynet	&	2958	&	1295	&	1663	&	43.78	&	11:40	\\
-		KillAll	&	2965	&	1276	&	1689	&	43.04	&	10:56	\\
-		MegaBot	&	2802	&	1200	&	1602	&	42.83	&	12:21	\\
-		Xelnaga	&	2962	&	1099	&	1863	&	37.1	&	15:19	\\
-		Overkill	&	2958	&	967	&	1991	&	32.69	&	18:00	\\
-		Juno	&	2962	&	876	&	2086	&	29.57	&	14:07	\\
-		GarmBot	&	2961	&	802	&	2159	&	27.09	&	15:21	\\
-		Myscbot	&	2964	&	769	&	2195	&	25.94	&	13:41	\\
-		HannesBredberg	&	2964	&	630	&	2334	&	21.26	&	14:09	\\
-		Sling	&	2963	&	625	&	2338	&	21.09	&	16:21	\\
-		ForceBot	&	2960	&	532	&	2428	&	17.97	&	15:10	\\
-		Ziabot	&	2964	&	510	&	2454	&	17.21	&	10:08	\\
-		Total	&	41398	&	41398	&	41398	&	49.98	&	13:23	\\
-		\hline
-	\end{tabular}
+	\includegraphics[width=\textwidth]{2017}
 	\caption{Results of the 2017 AIIDE StarCraft AI Competition Sourced from the official website \cite{Results}}
 	\label{table2}
 \end{table*}
 
-
-\newpage
-\listoftodos[Notes]
+%\listoftodos[Notes]
 
 % that's all folks
 \end{document}
