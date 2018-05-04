@@ -101,12 +101,11 @@
     <None Include="library\plans\PSCB-3HatchHydra.lap">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="library\plans\PSCB-Basic.lap" />
     <None Include="library\plans\PSCB-Carrier.lap" />
-    <None Include="library\plans\PSCB-James" />
-    <None Include="library\plans\PSCB-ZDragoon.lap" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="O:\StarCraftAI - Project\BWAPI\bwapi-mono-bridge2\Source\bwapi-clr-client\bwapi-clr\bwapi-clr.csproj">
+    <ProjectReference Include="..\..\..\..\..\StarCraftAI - Project\BWAPI\bwapi-mono-bridge2\Source\bwapi-clr-client\bwapi-clr\bwapi-clr.csproj">
       <Project>{6657C37C-4F1B-4972-AAB0-B395EE5F53DF}</Project>
       <Name>bwapi-clr</Name>
     </ProjectReference>

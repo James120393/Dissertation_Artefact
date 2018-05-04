@@ -49,16 +49,6 @@ namespace POSH_StarCraftBot.behaviours
         //
         // INTERNAL
         //
-
-        protected int CheckForMorphingUnits(UnitType type)
-        {
-            if (!morphingUnits.ContainsKey(type.getID()))
-                return 0;
-            morphingUnits[type.getID()].RemoveAll(unit=> !unit.isMorphing());
-
-            return morphingUnits[type.getID()].Count;
-        }
-
         private int ConvertTilePosition(TilePosition pos)
         {
             return (pos.xConst() * 1000) + pos.yConst();
@@ -183,6 +173,7 @@ namespace POSH_StarCraftBot.behaviours
 		// Function to Train units
 		protected bool TrainProbe(UnitType type, bool naturalBuild)
 		{
+            // Can afford to build
 			if (CanTrainUnit(type))
 			{
 				int targetLocation = (int)BuildSite.StartingLocation;
@@ -190,12 +181,17 @@ namespace POSH_StarCraftBot.behaviours
 				if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
 					targetLocation = (int)Interface().currentBuildSite;
 
+                // Get all Nexus' available 
 				IEnumerable<Unit> prodBuildings = Interface().GetNexus();
+
+                // If there are none then return false
 				if (prodBuildings.Count() <= 0)
 					return false;
 
+                // If the natural bool is true then only build at the natural expansion
 				if (naturalBuild)
 				{
+                    // Return false if the build queue is 5
 					if (prodBuildings.Last().getTrainingQueue().Count() < 5)
 					{
 						bool trainSuccess = prodBuildings.Last().train(type);
@@ -206,6 +202,7 @@ namespace POSH_StarCraftBot.behaviours
 						}
 					}					
 				}
+                // Go thorugh each Nexus and train probes until build queue's are full
 				else
 				{
 					foreach (Unit build in prodBuildings)
@@ -228,6 +225,7 @@ namespace POSH_StarCraftBot.behaviours
         // Function to Train units
 		protected bool TrainUnit(UnitType type, UnitType building, bool single, int timeout = 50)
 		{
+            // Can afford to build
 			if (CanTrainUnit(type))
 			{
 				int targetLocation = (int)BuildSite.StartingLocation;
@@ -235,48 +233,149 @@ namespace POSH_StarCraftBot.behaviours
 				if (Interface().baseLocations.ContainsKey((int)Interface().currentBuildSite))
 					targetLocation = (int)Interface().currentBuildSite;
 
+                // Get all buildings of the same type as the input
 				IEnumerable<Unit> prodBuildings = Interface().GetBuilding(building);
 				if (prodBuildings.Count() <= 0)
 					return false;
 
+                // Go thorugh each buildiong and train the selected unit until build queue's are full
 				foreach (Unit build in prodBuildings)
 				{
+                    // Return false if the build queue is 5
 					if (build.getTrainingQueue().Count() < 1 && timeout > 0)
 					{
 						bool trainSuccess = build.train(type);
 						if (trainSuccess)
 						{
 							Console.Out.WriteLine("Training Unit: " + type.getName());
+                            // If true will only train one unit and will not fill up the build queue
 							if (single)
 								return true;
 						}
-						//timeout--;
 					}
-					//if (timeout <= 0)
-						//continue;
 				}
 			}
 			return false;
 		}
 
         //
-        // SENSES
+        // ACTIONS
         //
         // Action to tell the AI that its forces are finished being trained
-		[ExecutableAction("FinishedForce")]
+        [ExecutableAction("FinishedForce")]
         public bool FinishedForce()
         {
             forceReady = true;
             return true;
         }
 
-		[ExecutableAction("NotFinishedForce")]
-		public bool NotFinishedForce()
-		{
-			forceReady = false;
-			return false;
-		}
+        // Action to tell the AI that its forces are not finished building
+        [ExecutableAction("NotFinishedForce")]
+        public bool NotFinishedForce()
+        {
+            forceReady = false;
+            return false;
+        }
 
+        //Action to tell the AI to Build a Protoss Probe
+        [ExecutableAction("BuildProbe")]
+        public bool BuildProbe()
+        {
+            return TrainProbe(bwapi.UnitTypes_Protoss_Probe, false);
+        }
+
+        //Action to tell the AI to Build a Protoss Probe at the natural expansion
+        [ExecutableAction("BuildNaturalProbe")]
+        public bool BuildNaturalProbe()
+        {
+            return TrainProbe(bwapi.UnitTypes_Protoss_Probe, true);
+        }
+
+        //Action to tell the AI to Build a Protoss Zealot
+        [ExecutableAction("TrainZealot")]
+        public bool TrainZealot()
+        {
+            return TrainUnit(bwapi.UnitTypes_Protoss_Zealot, bwapi.UnitTypes_Protoss_Gateway, false);
+        }
+
+        //Action to tell the AI to Never build Zealots
+        [ExecutableAction("StopZealot")]
+        public bool StopZealot()
+        {
+            stopZealotBuild = false;
+            return true;
+        }
+
+        //Action to tell the AI to Build a Protoss Dragoon
+        [ExecutableAction("TrainDragoon")]
+        public bool TrainDragoon()
+        {
+            return TrainUnit(bwapi.UnitTypes_Protoss_Dragoon, bwapi.UnitTypes_Protoss_Gateway, false);
+        }
+
+        //Action to tell the AI to Build a single Protoss Dragoon
+        [ExecutableAction("TrainSingleDragoon")]
+        public bool TrainSingleDragoon()
+        {
+            return TrainUnit(bwapi.UnitTypes_Protoss_Dragoon, bwapi.UnitTypes_Protoss_Gateway, true);
+        }
+
+        //Action to tell the AI to Build a Protoss Corsair
+        [ExecutableAction("TrainCorsair")]
+        public bool TrainCorsair()
+        {
+            return TrainUnit(bwapi.UnitTypes_Protoss_Corsair, bwapi.UnitTypes_Protoss_Stargate, false);
+        }
+
+        //Action to tell the AI to Build a Protoss Carrier
+        [ExecutableAction("TrainCarrier")]
+        public bool TrainCarrier()
+        {
+            return TrainUnit(bwapi.UnitTypes_Protoss_Carrier, bwapi.UnitTypes_Protoss_Stargate, false);
+        }
+
+        //Action to tell the AI to Build a Protoss Dark Templar
+        [ExecutableAction("TrainDarkTemplar")]
+        public bool TrainDarkTemplar()
+        {
+            return TrainUnit(bwapi.UnitTypes_Protoss_Dark_Templar, bwapi.UnitTypes_Protoss_Gateway, false);
+        }
+
+        //Action to tell the AI to Build a Protoss Observer
+        [ExecutableAction("TrainObserver")]
+        public bool TrainObserver()
+        {
+            return TrainUnit(bwapi.UnitTypes_Protoss_Observer, bwapi.UnitTypes_Protoss_Robotics_Facility, false);
+        }
+
+        //Action to tell the AI to Never build Zealots
+        [ExecutableSense("CanTrainZealot")]
+        public bool CanTrainZealot()
+        {
+            return stopZealotBuild;
+        }
+
+        //Action to tell the AI to Assign Probes to gather minerals
+        [ExecutableAction("AssignProbes")]
+        public bool AssignProbes()
+        {
+            IEnumerable<Unit> mineralPatches = Interface().GetMineralPatches();
+            return ProbesToResource(mineralPatches, minedPatches, 6, true, 1);
+        }
+
+
+        //Action to tell the AI to Assign Probes to gather Vespin Gas
+        [ExecutableAction("AssignToGas")]
+        public bool AssignToGas()
+        {
+            IEnumerable<Unit> assimilators = Interface().GetBuilding(bwapi.UnitTypes_Protoss_Assimilator);
+
+            return ProbesToResource(assimilators, minedGas, 2, true, 1);
+        } 
+
+        //
+        // SENSES
+        //
         // Sense to tell the AI that their forces are ready
         [ExecutableSense("ForceReady")]
         public bool ForceReady()
@@ -357,7 +456,7 @@ namespace POSH_StarCraftBot.behaviours
 			return Interface().ObserverCount() + CheckForTrainingUnits(bwapi.UnitTypes_Protoss_Observer);
 		}
 
-		//Sense to tell the AI how many Carriers it has
+		//Sense to tell the AI how many carriers it has not including those training
 		[ExecutableSense("CarrierCountNotTraining")]
 		public int CarrierCountNotTraining()
 		{
@@ -380,105 +479,6 @@ namespace POSH_StarCraftBot.behaviours
 				return false;
 			}
 		}
-
-        //
-        // ACTIONS
-        //
-
-        //Action to tell the AI to Build a Protoss Probe
-        [ExecutableAction("BuildProbe")]
-        public bool BuildProbe()
-        {
-			return TrainProbe(bwapi.UnitTypes_Protoss_Probe, false);
-        }
-
-		//Action to tell the AI to Build a Protoss Probe
-		[ExecutableAction("BuildNaturalProbe")]
-		public bool BuildNaturalProbe()
-		{
-			return TrainProbe(bwapi.UnitTypes_Protoss_Probe, true);
-		}
-
-        //Action to tell the AI to Build a Protoss Zealot
-        [ExecutableAction("TrainZealot")]
-        public bool TrainZealot()
-        {
-			return TrainUnit(bwapi.UnitTypes_Protoss_Zealot, bwapi.UnitTypes_Protoss_Gateway, false);
-        }
-
-		//Action to tell the AI to Never build Zealots
-		[ExecutableAction("StopZealot")]
-		public bool StopZealot()
-		{
-			stopZealotBuild = false;
-			return stopZealotBuild;
-		}
-
-        //Action to tell the AI to Build a Protoss Dragoon
-        [ExecutableAction("TrainDragoon")]
-        public bool TrainDragoon()
-        {
-			return TrainUnit(bwapi.UnitTypes_Protoss_Dragoon, bwapi.UnitTypes_Protoss_Gateway, false);
-        }
-
-		//Action to tell the AI to Build a Protoss Dragoon
-		[ExecutableAction("TrainSingleDragoon")]
-		public bool TrainSingleDragoon()
-		{
-			return TrainUnit(bwapi.UnitTypes_Protoss_Dragoon, bwapi.UnitTypes_Protoss_Gateway, true);
-		}
-
-        //Action to tell the AI to Build a Protoss Corsair
-        [ExecutableAction("TrainCorsair")]
-        public bool TrainCorsair()
-        {
-			return TrainUnit(bwapi.UnitTypes_Protoss_Corsair, bwapi.UnitTypes_Protoss_Stargate, false);
-        }
-
-		//Action to tell the AI to Build a Protoss Corsair
-		[ExecutableAction("TrainCarrier")]
-		public bool TrainCarrier()
-		{
-			return TrainUnit(bwapi.UnitTypes_Protoss_Carrier, bwapi.UnitTypes_Protoss_Stargate, false);
-		}
-
-        //Action to tell the AI to Build a Protoss Dark Templar
-        [ExecutableAction("TrainDarkTemplar")]
-        public bool TrainDarkTemplar()
-        {
-			return TrainUnit(bwapi.UnitTypes_Protoss_Dark_Templar, bwapi.UnitTypes_Protoss_Gateway, false);
-        }
-
-		//Action to tell the AI to Build a Protoss Observer
-		[ExecutableAction("TrainObserver")]
-		public bool TrainObserver()
-		{
-			return TrainUnit(bwapi.UnitTypes_Protoss_Observer, bwapi.UnitTypes_Protoss_Robotics_Facility, false);
-		}
-
-		//Action to tell the AI to Never build Zealots
-		[ExecutableSense("CanTrainZealot")]
-		public bool CanTrainZealot()
-		{
-			return stopZealotBuild;
-		}
-
-        //Action to tell the AI to Assign Probes to gather minerals
-        [ExecutableAction("AssignProbes")]
-        public bool AssignProbes()
-        {
-            IEnumerable<Unit> mineralPatches = Interface().GetMineralPatches();
-            return ProbesToResource(mineralPatches, minedPatches, 6, true, 1);
-        }
-
-
-        //Action to tell the AI to Assign Probes to gather Vespin Gas
-        [ExecutableAction("AssignToGas")]
-        public bool AssignToGas()
-        {
-            IEnumerable<Unit> assimilators = Interface().GetBuilding(bwapi.UnitTypes_Protoss_Assimilator);
-
-            return ProbesToResource(assimilators, minedGas, 2, true, 1);
-        }        
+       
     }
 }

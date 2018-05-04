@@ -115,6 +115,7 @@ namespace POSH_StarCraftBot
 
             }
 
+            // Get all base locations to be used for scouting and attacking
 			basePositions = bwta.getBaseLocations().Where(baseLoc => bwta.getGroundDistance(Self().getStartLocation(), baseLoc.getTilePosition()) > 0).OrderBy(baseLoc => bwta.getGroundDistance(Self().getStartLocation(), baseLoc.getTilePosition()));
 			basePositions.Reverse();
 			
@@ -404,7 +405,7 @@ namespace POSH_StarCraftBot
             return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Cybernetics_Core.getID());
         }
 
-		//Return the number of Cybernetics Cores under the AI's control Plus their location
+        //Return the number of Observatories under the AI's control Plus their location
 		public IEnumerable<Unit> GetObservatory()
 		{
 			return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Observatory.getID());
@@ -428,7 +429,7 @@ namespace POSH_StarCraftBot
 			return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == bwapi.UnitTypes_Protoss_Templar_Archives.getID());
 		}
 
-		//Return the building ID, used for training units at different buildings
+		//Return the building ID
 		public IEnumerable<Unit> GetBuilding(UnitType Building)
 		{
 			return bwapi.Broodwar.self().getUnits().Where(unit => unit.getType().getID() == Building.getID());

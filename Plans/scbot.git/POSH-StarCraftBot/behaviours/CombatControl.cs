@@ -18,11 +18,17 @@ namespace POSH_StarCraftBot.behaviours
         /// </summary>
         public Dictionary<int, Unit> enemyBuildings;
 
+        // Keys for unit ID's and postions for forces to attack
         public Dictionary<int, Position> enemyBuildingsPositions = new Dictionary<int,Position>();
 
+        // To identify Terran missile turrets and postions
 		public Dictionary<int, Position> enemyMissileTurrets = new Dictionary<int,Position>();
 
-        public IEnumerable<Unit> shownEnemyBuildings; 
+        // Enum for all enemy buildings
+        public IEnumerable<Unit> shownEnemyBuildings;
+
+        // Bool for whether to attack or not
+        public bool stopAttacks = false;
 
         /// <summary>
         /// the key is the units ID which does not change over the course of a game
@@ -35,7 +41,6 @@ namespace POSH_StarCraftBot.behaviours
         /// contains the targets for the two armies we can control also identified by ForceLocations ArmyOne and ArmyTwo
         /// </summary>
         Dictionary<ForceLocations, ForceLocations> armyTargets;
-
         List<UnitAgent> selectedForce;
         Dictionary<ForceLocations, TacticalAgent> fights;
 
@@ -51,6 +56,500 @@ namespace POSH_StarCraftBot.behaviours
             fights = new Dictionary<ForceLocations, TacticalAgent>();
         }
 
+        // Attack specified location
+        protected bool AttackLocation(ForceLocations location)
+        {
+            TacticalAgent agent = null;
+            // check which key the location contains
+            if (fights.ContainsKey(location))
+                agent = fights[location];
+            else if (selectedForce != null && selectedForce.Count > 0)
+            {
+                agent = new TacticalAgent(selectedForce, log);
+                fights.Add(location, agent);
+            }
+            if (agent.MySquad.Count > 0)
+            { // update the squat by removing dead units
+                agent.MySquad.RemoveAll(unit => unit.HealthLevelOk == 0);
+            }
+            if (agent.MySquad.Count == 0)
+            {
+                fights.Remove(location); //Own Amy annihilated
+                return false;
+            }
+
+            if (agent.MySquad[0].SCUnit.getPosition().getApproxDistance(new Position(Interface().baseLocations[(int)location])) < 5 * DELTADISTANCE
+                || location == ForceLocations.NotAssigned || agent.MySquad[0].SCUnit.isUnderAttack()) //larger distance to not be over the base
+                agent.ExecuteBestActionForSquad();
+            else
+            {
+                agent.MySquad.All(ua => ua.SCUnit.rightClick(new Position(Interface().baseLocations[(int)location])));
+            }
+
+            return true;
+
+        }
+
+        /// <summary>
+        /// Each race has specific units that need prioritising hence three seperate functions
+        /// </summary>
+        // Attack function for terran
+		private bool MoveForceTerran(BaseLocation moveLocation, bool builder, bool harras)
+		{
+			try
+			{
+                // do the builders need to get involved with the fight
+				IEnumerable<Unit> force = null;
+				if (!builder)
+					force = Interface().GetAllUnits(false);
+				if (builder)
+					force = Interface().GetAllUnits(false).Concat(Interface().GetAllUnits(true));
+                // if the enemy needs harrasing
+				if (harras)
+					force = Interface().GetAllUnits(false).Where(unit => unit.getType() == bwapi.UnitTypes_Protoss_Dark_Templar);
+
+				Position location = new Position(moveLocation.getTilePosition());
+				foreach (Unit unit in force)
+				{
+					if (unit.getHitPoints() > 0)
+					{
+                        // get all enemy units
+						IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
+						if (enemies != null)
+						{
+                            // get the closest Ground units only
+							IEnumerable<Unit> enemy = enemies.Where(eunit => !eunit.getType().isFlyer()).OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
+							unit.attack(location);
+							try
+							{
+                                // attack detectors first
+								IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => eunit.getType().isBuilding()).Where(eunit => eunit.getType().isDetector());
+								unit.attack(enemyUnit.First().getPosition());
+							}
+							catch
+							{
+								try
+								{
+                                    // try to attack ground units before buildings
+									IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => !eunit.getType().isBuilding() && !eunit.getType().isFlyer());
+									unit.attack(enemyUnit.First().getPosition());
+								}
+								catch
+								{
+									try
+									{
+                                        // if there are no enemies in sight then attack a building from the dictionary
+										if (enemyBuildingsPositions.Count() > 0)
+										{
+											unit.attack(enemyBuildingsPositions.First().Value);
+										}
+									}
+									catch
+									{
+                                        // if all else fails just attack the location
+										unit.attack(location);
+									}
+								}
+							}
+						}
+						else
+						{
+                            // if there are no enemies in the list then attack the location
+							unit.attack(location);
+						}
+					}
+				}
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		private bool MoveForce(BaseLocation moveLocation, bool builder, bool harras)
+		{
+			try
+			{
+                // do the builders need to get involved with the fight
+                IEnumerable<Unit> force = null;
+                if (!builder)
+                    force = Interface().GetAllUnits(false);
+                if (builder)
+                    force = Interface().GetAllUnits(false).Concat(Interface().GetAllUnits(true));
+                // if the enemy needs harrasing
+                if (harras)
+                    force = Interface().GetAllUnits(false).Where(unit => unit.getType() == bwapi.UnitTypes_Protoss_Dark_Templar);
+
+				Position location = new Position(moveLocation.getTilePosition());
+
+				foreach (Unit unit in force)
+				{
+					if (unit.getHitPoints() > 0)
+					{
+                        // get all enemy units
+						IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
+						if (enemies != null)
+						{
+                            // get the closest enemy
+							IEnumerable<Unit> enemy = enemies.OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
+							unit.attack(location);
+							try
+							{
+                                // attack units not buildings
+								IEnumerable<Unit> enemtUnit = enemy.Where(units => units.getHitPoints() > 0).Where(units => !units.getType().isBuilding());
+								unit.attack(enemtUnit.First().getPosition());
+							}
+							catch
+							{
+								try
+								{
+                                    // attack buildings if there are not units
+									IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => eunit.getType().isBuilding());
+									unit.attack(enemyUnit.First().getPosition());
+								}
+								catch
+								{
+									try
+									{
+                                        // if there are no enemies in sight then attack a building from the dictionary
+										if (enemyBuildingsPositions.Count() > 0)
+										{
+											unit.attack(enemyBuildingsPositions.First().Value);
+										}
+									}
+									catch
+									{
+                                        // if all else fails attack the location
+										unit.attack(location);
+									}
+								}
+							}
+						}
+						else
+						{
+                            // is enemy list is empty attack the location
+							unit.attack(location);
+						}
+					}
+				}
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		private bool MoveForceProtoss(BaseLocation moveLocation, bool builder, bool harras)
+		{
+			try
+			{
+                // do the builders need to get involved with the fight
+                IEnumerable<Unit> force = null;
+                if (!builder)
+                    force = Interface().GetAllUnits(false);
+                if (builder)
+                    force = Interface().GetAllUnits(false).Concat(Interface().GetAllUnits(true));
+                // if the enemy needs harrasing
+                if (harras)
+                    force = Interface().GetAllUnits(false).Where(unit => unit.getType() == bwapi.UnitTypes_Protoss_Dark_Templar);
+
+				Position location = new Position(moveLocation.getTilePosition());
+				foreach (Unit unit in force)
+				{
+					if (unit.getHitPoints() > 0)
+					{
+                        // get all enemy units
+						IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
+						if (enemies != null)
+						{
+                            // get closest ground unit
+							IEnumerable<Unit> enemy = enemies.Where(eunit => !eunit.getType().isFlyer()).OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
+							unit.attack(location);
+							try
+							{
+                                // attack pylons first
+								IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => eunit.getType().isBuilding()).Where(eunit => eunit.getType() == bwapi.UnitTypes_Protoss_Pylon);
+								unit.attack(enemyUnit.First().getPosition());
+							}
+							catch
+							{
+								try
+								{
+                                    // Attack units if there are not pylons
+									IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => !eunit.getType().isBuilding());
+									unit.attack(enemyUnit.First().getPosition());
+								}
+								catch
+								{
+									try
+									{
+                                        // if there are no enemies in sight then attack a building from the dictionary
+										if (enemyBuildingsPositions.Count() > 0)
+										{
+											unit.attack(enemyBuildingsPositions.First().Value);
+										}
+									}
+									catch
+									{
+                                        // if all else fails attack the location
+										unit.attack(location);
+									}
+								}
+							}
+						}
+						else
+						{
+                            // is enemy list is empty attack the location
+							unit.attack(location);
+						}
+					}
+				}
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+	
+
+        //
+        // ACTIONS
+        //
+        // Move forces to natural
+		[ExecutableAction("MoveForceNatural")]
+		public bool MoveForceNatural()
+		{
+			return MoveForce(Interface().basePositions.First(), false, false);
+		}
+
+        // Stop all attacks
+        [ExecutableAction("StopAttacks")]
+        public bool StopAttack()
+        {
+            stopAttacks = true;
+            return stopAttacks;
+        }
+
+        // Attack the zerg
+		[ExecutableAction("AttackZerg")]
+		public bool AttackZerg()
+		{
+			try
+			{
+				return MoveForce(Interface().basePositions.Last(), false, false);
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+        // Attack the Terran
+		[ExecutableAction("AttackTerran")]
+		public bool AttackTerran()
+		{
+			try
+			{
+				return MoveForceTerran(Interface().basePositions.Last(), false, false);
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+        // Attack the Protoss
+		[ExecutableAction("AttackProtoss")]
+		public bool AttackProtoss()
+		{
+			try
+			{
+				return MoveForceProtoss(Interface().basePositions.Last(), false, false);
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+        //Harras the Enemy in this case Terran, as no other strategy calls for it
+		[ExecutableAction("HarrasEnemy")]
+		public bool HarrasEnemy()
+		{
+			Interface().basePositions.Reverse();
+			try
+			{
+				return MoveForceTerran(Interface().basePositions.Last(), false, false);
+			}
+			catch
+			{
+				return false;
+			}
+
+		}
+
+        // Attack the enemies natural
+        [ExecutableAction("AttackEnemyNatural")]
+        public bool AttackEnemyNatural()
+        {
+			try
+			{
+				return AttackLocation(ForceLocations.EnemyNatural);
+			}
+			catch
+			{
+				return false;
+			}
+        }
+
+        // Select all units available
+        [ExecutableAction("SelectAllUnits")]
+        public bool SelectAllUnits()
+        {
+            // get all units
+            IEnumerable<Unit> force = Interface().GetAllUnits(false);
+            List<UnitAgent> ag = new List<UnitAgent>();
+            // Go through each unit adding to a list
+            foreach (Unit un in force)
+                ag.Add(new UnitAgent(un, new UnitAgentOptimizedProperties(), this)); //TODO: needs to be altered to be more elegant why not creatre UnitAgents when the unit is created in UnitControl
+
+            selectedForce = ag;
+
+            return (selectedForce.Count > 0) ? true : false;
+        }
+
+        //
+        // SENSES
+        //
+		// Is the enemy on screen
+		[ExecutableSense("EnemyDetected")]
+		public int EnemyDetected()
+		{
+            // Get all enemy units and then buildings in two seperate lists
+			IEnumerable<Unit> shownUnits = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0).Where(units => !units.getType().isBuilding());
+            IEnumerable<Unit> enemyBuildingsShown = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0).Where(units => units.getType().isBuilding());
+            bool detectedNew = false;
+
+            // Go through each building in sight adding to a dictionary its ID and position
+            foreach (Unit build in enemyBuildingsShown)
+            {
+                try
+                {	
+                    // Remove if the dictionary already contains the building ID and its dead.
+					if (enemyBuildingsPositions.ContainsKey(build.getID()) && build.getHitPoints() <= 0)
+					{
+                        enemyBuildingsPositions.Remove(build.getID());
+					}
+					if (!enemyBuildingsPositions.ContainsKey(build.getID()) && build.getHitPoints() > 0)
+					{
+						Console.Out.WriteLine("Enemy Building Detected");
+                        enemyBuildingsPositions.Add(build.getID(), build.getPosition());
+					}
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+
+            // Go through each enemy unit
+			foreach (Unit unit in shownUnits)
+			{
+				try
+				{
+                    // If it is alive then return true
+					if (unit.getHitPoints() > 0)
+					{
+						Console.Out.WriteLine("Enemy Detected");
+						detectedNew = true;
+					}
+				}
+				catch
+				{
+					break;
+				}
+			}
+			return (detectedNew) ? 1 : 0;
+		}
+
+        // Is the base under attack
+        [ExecutableSense("BaseUnderAttack")]
+        public bool BaseUnderAttack()
+        {
+            if (Interface().GetAllBuildings().Count() < 1)
+                return false;
+            int attackCounter = Interface().GetAllBuildings().Where(building => building.isUnderAttack()).Count();
+            if (attackCounter > 0)
+                return true;
+
+            int randomMult = 3;
+
+            // Go thorugh each enemy on screen and if its too close print to screen
+            foreach (Unit enemy in bwapi.Broodwar.enemy().getUnits().Where(unit => unit.getPosition().getDistance(new Position(Interface().baseLocations[(int)BuildSite.StartingLocation])) <= randomMult * DELTADISTANCE))
+                Console.Out.WriteLine(++attackCounter + "enemy at:" + enemy.getTilePosition().xConst() + "" + enemy.getTilePosition().yConst());
+
+            // if the enemy is at a base and is attacking that base, return the location of the base and ture or flase if it is under attack
+            if (Interface().baseLocations.ContainsKey((int)BuildSite.StartingLocation))
+            {
+                attackCounter += Interface().GetAllUnits(true).Where(unit => unit.isUnderAttack() && unit.getPosition().getDistance(new Position(Interface().baseLocations[(int)BuildSite.StartingLocation])) < randomMult * DELTADISTANCE).Count();
+            }
+            if (Interface().baseLocations.ContainsKey((int)BuildSite.Natural))
+            {
+                attackCounter += Interface().GetAllUnits(true).Where(unit => unit.isUnderAttack() && unit.getPosition().getDistance(new Position(Interface().baseLocations[(int)BuildSite.Natural])) < randomMult * DELTADISTANCE).Count();
+            }
+			if (Interface().baseLocations.ContainsKey((int)BuildSite.NaturalChoke))
+			{
+				attackCounter += Interface().GetAllUnits(true).Where(unit => unit.isUnderAttack() && unit.getPosition().getDistance(new Position(Interface().baseLocations[(int)BuildSite.NaturalChoke])) < randomMult * DELTADISTANCE).Count();
+			}
+            return attackCounter > 0;
+        }
+
+        // Defend against the Zerg
+		[ExecutableAction("DefendZerg")]
+		public bool DefendZerg()
+		{
+			try
+			{
+				return MoveForce(Interface().basePositions.First(), false, false);
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+        // Defend against the Terran
+		[ExecutableAction("DefendTerran")]
+		public bool DefendTerran()
+		{
+			try
+			{
+				return MoveForceTerran(Interface().basePositions.First(), false, false);
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+        // Defend against the Protoss
+		[ExecutableAction("DefendProtoss")]
+		public bool DefendProtoss()
+		{
+			try
+			{
+				return MoveForceProtoss(Interface().basePositions.First(), false, false);
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+        ///////////////////////////////////////////////////////////////Un-used Code Saved for later use, Please disregard all following code///////////////////////////////////////////////////////////////
         //
         // INTERNAL
         //
@@ -199,39 +698,6 @@ namespace POSH_StarCraftBot.behaviours
                 Interface().forces[currentForce].RemoveAll(unit => unit.SCUnit.getHitPoints() <= 0);
         }
 
-        protected bool AttackLocation(ForceLocations location)
-        {
-            TacticalAgent agent = null;
-
-            if (fights.ContainsKey(location))
-                agent = fights[location];
-            else if (selectedForce != null && selectedForce.Count > 0)
-            {
-                agent = new TacticalAgent(selectedForce, log);
-                fights.Add(location, agent);
-            }
-            if (agent.MySquad.Count > 0)
-            { // update the squat by removing dead units
-                agent.MySquad.RemoveAll(unit => unit.HealthLevelOk == 0);
-            }
-            if (agent.MySquad.Count == 0)
-            {
-                fights.Remove(location); //Own Amy annihilated
-                return false;
-            }
-
-            if (agent.MySquad[0].SCUnit.getPosition().getApproxDistance(new Position(Interface().baseLocations[(int)location])) < 5 * DELTADISTANCE
-                || location == ForceLocations.NotAssigned || agent.MySquad[0].SCUnit.isUnderAttack()) //larger distance to not be over the base
-                agent.ExecuteBestActionForSquad();
-            else
-            {
-                agent.MySquad.All(ua => ua.SCUnit.rightClick(new Position(Interface().baseLocations[(int)location])));
-            }
-
-            return true;
-
-        }
-
         private ForceLocations ClosestLocation(Unit unit, ForceLocations first, ForceLocations second)
         {
             double distanceFirst = Interface().baseLocations[(int)first].getDistance(unit.getTilePosition());
@@ -240,202 +706,8 @@ namespace POSH_StarCraftBot.behaviours
             return (distanceFirst < distanceSecond) ? first : second;
         }
 
-		private bool MoveForceTerran(BaseLocation moveLocation, bool builder, bool harras)
-		{
-			try
-			{
-				IEnumerable<Unit> force = null;
-				if (!builder)
-					force = Interface().GetAllUnits(false);
-				if (builder)
-					force = Interface().GetAllUnits(false).Concat(Interface().GetAllUnits(true));
-				if (harras)
-					force = Interface().GetAllUnits(false).Where(unit => unit.getType() == bwapi.UnitTypes_Protoss_Dark_Templar);
-
-				Position location = new Position(moveLocation.getTilePosition());
-				foreach (Unit unit in force)
-				{
-					if (unit.getHitPoints() > 0)
-					{
-						IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
-						if (enemies != null)
-						{
-							IEnumerable<Unit> enemy = enemies.Where(eunit => !eunit.getType().isFlyer()).OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
-							unit.attack(location);
-							try
-							{
-								IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => eunit.getType().isBuilding()).Where(eunit => eunit.getType().isDetector());
-								unit.attack(enemyUnit.First().getPosition());
-							}
-							catch
-							{
-								try
-								{
-									IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => !eunit.getType().isBuilding() && !eunit.getType().isFlyer());
-									unit.attack(enemyUnit.First().getPosition());
-								}
-								catch
-								{
-									try
-									{
-										if (enemyBuildingsPositions.Count() > 0)
-										{
-											unit.attack(enemyBuildingsPositions.First().Value);
-										}
-									}
-									catch
-									{
-										unit.attack(location);
-									}
-								}
-							}
-						}
-						else
-						{
-							unit.attack(location);
-						}
-					}
-				}
-				return true;
-			}
-			catch
-			{
-				return false;
-			}
-		}
-
-		private bool MoveForce(BaseLocation moveLocation, bool builder, bool harras)
-		{
-			try
-			{
-				IEnumerable<Unit> force = null;
-				if (!builder)
-					force = Interface().GetAllUnits(false);
-				if (builder)
-					force = Interface().GetAllUnits(false).Concat(Interface().GetAllUnits(true));
-				if (harras)
-					force = Interface().GetAllUnits(false).Where(unit => unit.getType() == bwapi.UnitTypes_Protoss_Dark_Templar);
-
-				Position location = new Position(moveLocation.getTilePosition());
-
-				foreach (Unit unit in force)
-				{
-					if (unit.getHitPoints() > 0)
-					{
-						IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
-						if (enemies != null)
-						{
-							IEnumerable<Unit> enemy = enemies.OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
-							unit.attack(location);
-							try
-							{
-								IEnumerable<Unit> enemtUnit = enemy.Where(units => units.getHitPoints() > 0).Where(units => !units.getType().isBuilding());
-								unit.attack(enemtUnit.First().getPosition());
-							}
-							catch
-							{
-								try
-								{
-									IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => eunit.getType().isBuilding());
-									unit.attack(enemyUnit.First().getPosition());
-								}
-								catch
-								{
-									try
-									{
-										if (enemyBuildingsPositions.Count() > 0)
-										{
-											unit.attack(enemyBuildingsPositions.First().Value);
-										}
-									}
-									catch
-									{
-										unit.attack(location);
-									}
-								}
-							}
-						}
-						else
-						{
-							unit.attack(location);
-						}
-					}
-				}
-				return true;
-			}
-			catch
-			{
-				return false;
-			}
-		}
-
-		private bool MoveForceProtoss(BaseLocation moveLocation, bool builder, bool harras)
-		{
-			try
-			{
-				IEnumerable<Unit> force = null;
-				if (!builder)
-					force = Interface().GetAllUnits(false);
-				if (builder)
-					force = Interface().GetAllUnits(false).Concat(Interface().GetAllUnits(true));
-				if (harras)
-					force = Interface().GetAllUnits(false).Where(unit => unit.getType() == bwapi.UnitTypes_Protoss_Dark_Templar);
-
-				Position location = new Position(moveLocation.getTilePosition());
-				foreach (Unit unit in force)
-				{
-					if (unit.getHitPoints() > 0)
-					{
-						IEnumerable<Unit> enemies = bwapi.Broodwar.enemy().getUnits();
-						if (enemies != null)
-						{
-							IEnumerable<Unit> enemy = enemies.Where(eunit => !eunit.getType().isFlyer()).OrderBy(eunit => bwta.getGroundDistance(unit.getTilePosition(), eunit.getTilePosition()));
-							unit.attack(location);
-							try
-							{
-								IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => eunit.getType().isBuilding()).Where(eunit => eunit.getType() == bwapi.UnitTypes_Protoss_Pylon);
-								unit.attack(enemyUnit.First().getPosition());
-							}
-							catch
-							{
-								try
-								{
-									IEnumerable<Unit> enemyUnit = enemy.Where(units => units.getHitPoints() > 0).Where(eunit => !eunit.getType().isBuilding());
-									unit.attack(enemyUnit.First().getPosition());
-								}
-								catch
-								{
-									try
-									{
-										if (enemyBuildingsPositions.Count() > 0)
-										{
-											unit.attack(enemyBuildingsPositions.First().Value);
-										}
-									}
-									catch
-									{
-										unit.attack(location);
-									}
-								}
-							}
-						}
-						else
-						{
-							unit.attack(location);
-						}
-					}
-				}
-				return true;
-			}
-			catch
-			{
-				return false;
-			}
-		}
-	
-
         //
-        // ACTIONS
+        //Actions
         //
         [ExecutableAction("RetreatForce")]
         public bool RetreatForce()
@@ -485,87 +757,6 @@ namespace POSH_StarCraftBot.behaviours
 
             return true;
         }
-        bool stopAttacks = false;
-
-		[ExecutableAction("MoveForceNatural")]
-		public bool MoveForceNatural()
-		{
-			return MoveForce(Interface().basePositions.First(), false, false);
-		}
-
-        [ExecutableAction("StopAttacks")]
-        public bool StopAttack()
-        {
-            stopAttacks = true;
-            return stopAttacks;
-        }
-
-		[ExecutableAction("AttackZerg")]
-		public bool AttackZerg()
-		{
-			try
-			{
-				return MoveForce(Interface().basePositions.Last(), false, false);
-			}
-			catch
-			{
-				return false;
-			}
-		}
-		[ExecutableAction("AttackTerran")]
-		public bool AttackTerran()
-		{
-			try
-			{
-				return MoveForceTerran(Interface().basePositions.Last(), false, false);
-			}
-			catch
-			{
-				return false;
-			}
-		}
-
-		[ExecutableAction("AttackProtoss")]
-		public bool AttackProtoss()
-		{
-			try
-			{
-				return MoveForceProtoss(Interface().basePositions.Last(), false, false);
-			}
-			catch
-			{
-				return false;
-			}
-		}
-
-		[ExecutableAction("HarrasEnemy")]
-		public bool HarrasEnemy()
-		{
-			Interface().basePositions.Reverse();
-			try
-			{
-				return MoveForceTerran(Interface().basePositions.Last(), false, false);
-			}
-			catch
-			{
-				return false;
-			}
-
-		}
-
-        [ExecutableAction("AttackEnemyNatural")]
-        public bool AttackEnemyNatural()
-        {
-			try
-			{
-				return AttackLocation(ForceLocations.EnemyNatural);
-			}
-			catch
-			{
-				return false;
-			}
-        }
-
         [ExecutableAction("AttackEnemyUnDirected")]
         public bool AttackEnemyUnDirected()
         {
@@ -609,20 +800,7 @@ namespace POSH_StarCraftBot.behaviours
 
             return false;
         }
-
-        [ExecutableAction("SelectAllUnits")]
-        public bool SelectAllUnits()
-        {
-            IEnumerable<Unit> force = Interface().GetAllUnits(false);
-            List<UnitAgent> ag = new List<UnitAgent>();
-            foreach (Unit un in force)
-                ag.Add(new UnitAgent(un, new UnitAgentOptimizedProperties(), this)); //TODO: needs to be altered to be more elegant why not creatre UnitAgents when the unit is created in UnitControl
-
-            selectedForce = ag;
-
-            return (selectedForce.Count > 0) ? true : false;
-        }
-
+        
         [ExecutableAction("AssignArmyOne")]
         public bool AssignArmyOne()
         {
@@ -675,6 +853,7 @@ namespace POSH_StarCraftBot.behaviours
 
             return (selectedForce.Count > 0);
         }
+
         /// <summary>
         /// Switches currenty active army to Army One.
         /// </summary>
@@ -704,6 +883,9 @@ namespace POSH_StarCraftBot.behaviours
             return (selectedForce != null && selectedForce.Count > 0);
         }
 
+        //
+        //Senses
+        //
         [ExecutableSense("GuessEnemyBase")]
         public bool GuessEnemyBase()
         {
@@ -731,125 +913,8 @@ namespace POSH_StarCraftBot.behaviours
 
             return false;
         }
-
-
-
-        //
-        // SENSES
-        //
-		
-		[ExecutableSense("EnemyDetected")]
-		public int EnemyDetected()
-		{
-			IEnumerable<Unit> shownUnits = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0).Where(units => !units.getType().isBuilding());
-            IEnumerable<Unit> enemyBuildingsShown = bwapi.Broodwar.enemy().getUnits().Where(units => units.getHitPoints() > 0).Where(units => units.getType().isBuilding());
-            bool detectedNew = false;
-
-            foreach (Unit build in enemyBuildingsShown)
-            {
-                try
-                {	
-					if (enemyBuildingsPositions.ContainsKey(build.getID()) && build.getHitPoints() <= 0)
-					{
-                        enemyBuildingsPositions.Remove(build.getID());
-					}
-					if (!enemyBuildingsPositions.ContainsKey(build.getID()) && build.getHitPoints() > 0)
-					{
-						Console.Out.WriteLine("Enemy Building Detected");
-                        enemyBuildingsPositions.Add(build.getID(), build.getPosition());
-					}
-                }
-                catch
-                {
-                    continue;
-                }
-            }
-			foreach (Unit unit in shownUnits)
-			{
-				try
-				{
-					if (unit.getHitPoints() > 0)
-					{
-						Console.Out.WriteLine("Enemy Detected");
-						detectedNew = true;
-					}
-				}
-				catch
-				{
-					break;
-				}
-			}
-			return (detectedNew) ? 1 : 0;
-		}
-
-        [ExecutableSense("BaseUnderAttack")]
-        public bool BaseUnderAttack()
-        {
-            if (Interface().GetAllBuildings().Count() < 1)
-                return false;
-            int attackCounter = Interface().GetAllBuildings().Where(building => building.isUnderAttack()).Count();
-            if (attackCounter > 0)
-                return true;
-
-            int randomMult = 3;
-
-            foreach (Unit enemy in bwapi.Broodwar.enemy().getUnits().Where(unit => unit.getPosition().getDistance(new Position(Interface().baseLocations[(int)BuildSite.StartingLocation])) <= randomMult * DELTADISTANCE))
-                Console.Out.WriteLine(++attackCounter + "enemy at:" + enemy.getTilePosition().xConst() + "" + enemy.getTilePosition().yConst());
-
-            if (Interface().baseLocations.ContainsKey((int)BuildSite.StartingLocation))
-            {
-                attackCounter += Interface().GetAllUnits(true).Where(unit => unit.isUnderAttack() && unit.getPosition().getDistance(new Position(Interface().baseLocations[(int)BuildSite.StartingLocation])) < randomMult * DELTADISTANCE).Count();
-            }
-            if (Interface().baseLocations.ContainsKey((int)BuildSite.Natural))
-            {
-                attackCounter += Interface().GetAllUnits(true).Where(unit => unit.isUnderAttack() && unit.getPosition().getDistance(new Position(Interface().baseLocations[(int)BuildSite.Natural])) < randomMult * DELTADISTANCE).Count();
-            }
-			if (Interface().baseLocations.ContainsKey((int)BuildSite.NaturalChoke))
-			{
-				attackCounter += Interface().GetAllUnits(true).Where(unit => unit.isUnderAttack() && unit.getPosition().getDistance(new Position(Interface().baseLocations[(int)BuildSite.NaturalChoke])) < randomMult * DELTADISTANCE).Count();
-			}
-            return attackCounter > 0;
-        }
-
-		[ExecutableAction("DefendZerg")]
-		public bool DefendZerg()
-		{
-			try
-			{
-				return MoveForce(Interface().basePositions.First(), false, false);
-			}
-			catch
-			{
-				return false;
-			}
-		}
-
-		[ExecutableAction("DefendTerran")]
-		public bool DefendTerran()
-		{
-			try
-			{
-				return MoveForceTerran(Interface().basePositions.First(), false, false);
-			}
-			catch
-			{
-				return false;
-			}
-		}
-
-		[ExecutableAction("DefendProtoss")]
-		public bool DefendProtoss()
-		{
-			try
-			{
-				return MoveForceProtoss(Interface().basePositions.First(), false, false);
-			}
-			catch
-			{
-				return false;
-			}
-		}
-		/// <summary>
+        
+        /// <summary>
         /// returns the ForceLocation identifier of the force losing. There are currently 8 forceLocations specified in BODStarraftBot.
         /// Zero means no force is losing.
         /// </summary>
