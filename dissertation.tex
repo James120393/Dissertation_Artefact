@@ -56,6 +56,7 @@
 \usepackage{float}
 \usepackage{cite}
 
+\graphicspath{{./Figures/}}
 
 % Select what to do with todonotes: 
 %\usepackage[disable]{todonotes} % notes not showed
@@ -185,10 +186,9 @@ Since the release of StarCraft Brood War API it has been easier for Academics to
 This paper is organised as follows, first StarCraft and what it is will be presented, followed by a review of the current methods being utilized by the research community in the development of StarCraft AI's. With a description on the research that this work will be using, this is proceeded by the method and tools that will be used to create the AI as well the metrics used to measure its effectiveness finishing with the hypothesis.
 \todo[inline]{Look back to this once conclusion is done to ensure they match}
 
+\section{Related Work}
 \subsection{StarCraft}
 StarCraft is an RTS game developed by Blizzard Entertainment \cite{Blizzard} and popular for testing AI \cite{Current}, the game was released in 1998 \cite{Release}. Later that year StarCraft: Brood War was released and took hold in the e-sports community and is still popular today. StarCraft 2: Wings of Liberty was released much later in 2010, with a complete visual overhaul, most of the game mechanics remained the same other than balance changes. The premise of StarCraft is to gather resources, build a base, and build an army to then use to destroy an enemies base and army, during playtime, there are also many upgrades available for these units to give them the edge over an enemy who did not spend the time acquiring them. There are many ways of doing this each player with a different order of building their armies/bases commonly referred to as their "Build Order" \cite{BuildOrder}. Build orders refer to a players macro-management, whereas in StarCraft Micro-management is a huge part of the game, as those with greater control over individual units can better outmanoeuvre their opponent, and thus defeat them. There is a difference in the way units are controlled, in StarCraft:BW you can only select up to 12 units at a time and can not group them for easy selection, so when playing you have to utilise micromanagement skills more than in StarCraft 2 where you can select an unlimited number of units and can group them for easy selection.
-
-\section{Related Work}
 StarCraft is considered difficult due to its requirement of abstraction level thinking when planning. Strategy selection is perhaps the most important choice any player or AI can make in StarCraft and RTS as a whole, as this will dictate the actions and reactions which they take during playtime. Though a human player can be proficient at choosing their strategy by simply scouting the map, finding the enemy and seeing what they are building. The human player can then counter accordingly, and if they countered incorrectly the human player can simply change their strategy to accommodate. Creating an AI to do the same though can be a huge and complex task \cite{Fuzzy,OnlineEvo,GoalDriven}, one way to achieve this result without a large commitment of time is to create a library of expert strategies, and allow the AI to select the appropriate one throughout the game. This can be achieved using tools such as Advanced Behaviour Oriented Design Environment (ABODE) and Parallel-rooted Ordered Slip-stack Hierarchical (POSH) reactive plans \cite{POSH}, which will also be covered later in the paper. These tools allow for an iterative design approach for AI's in games and in this work will be focusing on the macro-management with a particular focus on build orders and the selection of strategies rather than micro-management. 
 
 In the StarCraft research community, there are many different methods of AI creation. Some focus on micro-management like S. Liu et al \cite{EffectiveMicro} that uses a Genetic Algorithm (GA) and others that focus on macro-management looking at the build order like N. Justesen et al \cite{OnlineEvo}. Many of these research methods are cross depended and utilise more than one method, for example, D. Churchill et al \cite{Agents} created the UAlbertaBot, which was intended to automate both build order planning and unit control. There are also AI's that only use one strategy that has won several times in competitions like the ZZZKBot \cite{ZZZK,Results}, which only uses a 3pool build and built that uses a rush tactic. This rush tactic involves creating many weak inexpensive units and sending them to the enemy base within 5 minutes of starting the game. Many AI tend to struggle with countering this strategy, hence why this type of AI tends to win.
@@ -382,7 +382,7 @@ To counteract this The AI has been modified to include a tactic that is not pres
 At the end of this sprint the AI was expected to have all behaviours fully implemented and tested and a completed plan written and tested. This was an opportunity to look back and re-factor any code that needed tuning or any duplicate code that got into the system. Though the point of TDD is to avoid duplicate code, its priority is to get code that works, in the case of this software duplicate code did end up in the system. Unfortunately due to the nature of the "Action", "Sense" system there is bound to be duplicate code, though it can be minimized with internal functions.
 \begin{table*}[]
 	\centering
-	\includegraphics[width=\textwidth]{STMResults}
+	\includegraphics[width=\textwidth]{STMResultsWithBot}
 	\caption{The HTML results table produced by the StarCraft Tournament Manager \cite{Tournament}. Blue represents Terran, Purple represents Zerg, and Yellow represents Protoss}
 	\label{Table1}
 \end{table*}
@@ -390,7 +390,7 @@ Tuning the plan took most of the time in this sprint as with each change the pla
 \newline
 \todo[inline]{Complete plan and complete behaviours with tuning}
 \subsubsection{Sprint 6 : Implementation of New Strategies}
-The final sprint was to implement several plans that could work alongside the base plan, these would all be taken from the Liquipidiea site. Unfortunately the current set-up only allows for one plan to be used at a time, though each plan can contain several strategies that are triggered when the AI plays. These triggers can be anything from race to the number of a type of unit the enemy has.
+The final sprint was to implement several plans that could work alongside the base plan, these would all be taken from the Liquipidiea site. Unfortunately the current set-up only allows for one plan to be used at a time, though each plan can contain several strategies that are triggered when the AI plays.
 \newline
 
 \subsection{Preliminary Results}
@@ -406,25 +406,25 @@ because the times are only for the games that have that bot in it
 \end{figure}
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.5\textwidth]{AvgTimeBar}
+	\includegraphics[width=0.5\textwidth]{AvgTimeBarBot}
 	\caption{Box and whisker showing the average game length, with the mean, median and outlier based on the results obtained from table 1.}
 	\label{Fig5}
 \end{figure}
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.5\textwidth]{WinBar}
+	\includegraphics[width=0.5\textwidth]{WinBarBot}
 	\caption{Box and whisker showing Win Rate, with the mean and median based on the results obtained from table 1.}
 	\label{Fig6}
 \end{figure}
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.5\textwidth]{WinTimeLine}
+	\includegraphics[width=0.5\textwidth]{WinTimeLineWithBot}
 	\caption{A line graph showing both the win rate and game length for all the bots, starting with the highest win rate on the left, based on the results obtained from table 1.}
 	\label{Fig7}
 \end{figure}
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.5\textwidth]{Scatter}
+	\includegraphics[width=0.5\textwidth]{ScatterWinvsDurLine}
 	\caption{A scatter plot showing a negative correlation between the win rate and game length, based on the results obtained from the preliminary experiment. Each dot represents an average win rate and average game length for each bot during each round.}
 	\label{Fig8}
 \end{figure}
