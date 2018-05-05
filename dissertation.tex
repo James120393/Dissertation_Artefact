@@ -55,6 +55,7 @@
 \usepackage[table]{xcolor}
 \usepackage{float}
 \usepackage{cite}
+\usepackage{comment}
 
 \graphicspath{{./Figures/}}
 
@@ -69,6 +70,9 @@
 \setlength{\arrayrulewidth}{0.5mm}
 \setlength{\tabcolsep}{10pt}
 %\usepackage{courier} %caused problems for me
+
+%\renewcommand{\includegraphics}[2][]{}
+%\renewcommand{\lstinputlisting}[2][]{}
 
 \def\ps@IEEEtitlepagestyle{%
 	\def\@oddfoot{\mycopyrightnotice}%
@@ -148,7 +152,7 @@
 % Linebreaks \\ can be used within to get better formatting as desired.
 % Do not put math or special symbols in the title.
 \title{%
-	To What Degree can an AI Built With Expert Strategies be Effective Against Competition AI?} %\\
+	To What Degree Can an AI Built With Expert Strategies be Effective Against Competition AI?} %\\
 	%\large A Planning Approach to StarCraft AI}
 
 %
@@ -172,7 +176,7 @@ Email: jh182233@falmouth.ac.uk\\}
 % As a general rule, do not put math, special symbols or citations
 % in the abstract or keywords.
 \begin{abstract}
-Effective macro-management (the ability to create armies and expand bases), is essential to obtaining victory in Real-Time Strategy (RTS), in the research community many Artificial Intelligence's (AI's) have been created to handle this. One method is to use a design approach to create what is known as a build order, many of these build orders take from expert strategies used by real people in high ranking tournaments. Build orders can be ridged during games leaving little room for adaptation to the opponent's strategy. In this work, a collection of build orders will be used to create an AI and investigates the impact of build orders that effectively counter-strategies used by other AI's. A hypothesis is made here that the AI will only be effective in the early stages of the game and will be outmanoeuvred in late-game stages. Therefore the effectiveness of this AI will be measured its average time survived, with a high average being effective and a low average being ineffective. Whether the AI wins the matches will also be taken into account, a higher average win rate will allow the AI to face a greater challenge. Upon successful completion of this work, the AI will be submitted to one of three competitions.
+Effective macro-management (the ability to create armies and expand bases), is essential to obtaining victory in Real-Time Strategy (RTS), in the research community many Artificial Intelligence's (AI's) have been created to handle this. One method is to use a design approach to create what is known as a build order, many of these build orders take from expert strategies used by real people in high ranking tournaments. Build orders can be ridged during games leaving little room for adaptation to the opponent's strategy. In this work, a collection of build orders will be used to create an AI and investigates the impact of build orders that effectively counter strategies used by other AI's. A hypothesis is made here that the AI will only be effective in the early stages of the game and will be outmanoeuvred in late-game stages. Therefore the effectiveness of this AI will be measured its average time survived, with a high average being effective and a low average being ineffective. Whether the AI wins the matches will also be taken into account, a higher average win rate will allow the AI to face a greater challenge. Upon successful completion of this work, the AI will be submitted to one of three competitions.
 \end{abstract}
 
 \section{Introduction}
@@ -409,7 +413,7 @@ Though each strategy gets to this goal in different ways:
 
 Each strategy was implemented separately and as each action taken by the AI had to be precise and done at the correct time, not in game time, but when a building was completed then another action has to be taken. With each implementation the whole process began again, with a prototype of the plan, followed by a beta, alpha, then polishing and finally implementing the next strategy. The only difference at this point was that all the behaviours were implemented and only the plan followed this development cycle, this allowed for all three plans to be implemented, tested and working in a relatively short period of time.
 
-Also as stated on the Liquipeidia website, these build orders can be changed to suite the needs of the player, in this case AI. For example, to fight againt the Zerg rush, a forge and photon cannons were built at the beginning of the game, even though the build order did not call for it. Changes like that one were made to each of the strategies, though the underlying direction of each strategy remains the same \cite{Alter}.
+Also as stated on the Liquipeidia website, these build orders can be changed to suite the needs of the player, in this case AI. For example, to fight against the Zerg rush, a forge and photon cannons were built at the beginning of the game, even though the build order did not call for it. Changes like that one were made to each of the strategies, though the underlying direction of each strategy remained the same \cite{Alter}.
 
 \subsection{Preliminary Results}
 To prepare for final testing a preliminary test was carried out using the tournament manager, this was done to ensure the software was set-up and working for the final testing for the AI developed for this research. For the preliminary test 9 AI's were chosen from the AIIDE 2016 competition, three from the top, three from the middle and three form the bottom. These bots would then play one on one games on 10 maps, totalling to 360 games, the results of each match were recorded automatically by the tournament manager and compiled into table 1, from this table fig 4-8 were created. These results allowed the further development of this researches metrics, this is explained in the following section.
@@ -445,28 +449,64 @@ Through these revised metrics, the effectiveness of the AI will be determined, i
 \subsection{Testing}
 The AI was faced against the open source competition AI's, 400 match ups were simulated, 80 of which the AI presented in this paper took part in. The environment chosen to test the AI's was the same as the competitions run by D. Churchill, this method of testing was chosen as it provided a ready made, well validated method for testing the AI.
 
-During testing there was a total of 10 AI's including the AI that was developed for this research, for the rest of this paper will be refereed to as POSH-bot. To choose these AI's, three were selected from the top of the board, three from the middle and three from the bottom. They will be selected from the AIIDE 2016 competition, to keep the experiment af fair as possible each AI in each tier will consist of each of the races, where that is not possible, a substitute will be made \cite{2016}. AIIDE 2016 was chosen as all the AI's required for testing were available for download.
+During testing there was a total of 10 AI's including the AI that was developed for this research, for the rest of this paper will be refereed to as POSH-bot. To choose these AI's, three were selected from the top of the board, three from the middle and three from the bottom. They will be selected from the AIIDE 2016 competition, to keep the experiment af fair as possible each AI in each tier will consist of each of the races, where that is not possible, a substitute has been made \cite{2016}. AIIDE 2016 was chosen as all the AI's required for testing were available for download. The final AI's that POSH-bot will be facing consist of 4 Terran, 3 Protoss and 2 Zerg, a Zerg was substituted for a Terran as the original Zerg AI chosen continued to crash throughout the preliminary testing. It was also judged that it would not make a significant difference to the results as one of the Zerg AI's has such a high win rate.
 
 The 10 AI's will be playing on 3 1v1 maps, traditionally there are a selection of 2v2 maps as well. For the purposes of this research only the 1v1 were used as it was judged that on larger maps POSH-bot would have timed out more often, thus resulting in more skewed results. The AI's played for 9 rounds to total 400 match ups with one winner and one looser, the score and game length were also recorded. The three maps used were,(2)Benzene, (2)Destination, (2)HeartbreakRidge, all are available from the D. Churchill's GitHub page for the tournament manager \cite{Tournament}. 
 
 To set up the testing environment a VM was required to run several instances of StarCraft, and the STM. Once the virtual machine was installed a 64-bit operating system had to be installed on the VM, a 64-bit version was required as the STM needed a minimum of 2 Central Processing Unit (CPU) cores to run alongside Starcraft. Then once the VM is set up correctly, the server was launched along side two clients, one on the host machine and one on the VM. Once the three programs have been launched the user chooses how many rounds the tournament should last, and the rest of the process is automated, the STM will select the correct AI's, send them to the clients and launch the game. After each game the process would begin anew until the tournament was complete, this process took approximately 16 hours. 
+\begin{table*}[]
+	\centering
+	\includegraphics[width=\textwidth]{POSH-botWin}
+	\caption{Results from the 80 matches that the POSH-bot described in this paper took part in against the competition AI's on three 1v1 competition maps.}
+	\label{Table3}
+\centering
+\includegraphics[width=\textwidth]{TopThreeWin}
+\caption{Results from the top three bots of each race, ZZZKBot(Zerg), Iron(Terran), Xelnaga(Protoss), compared to POSH-bot}
+\label{Table4}
+\centering
+\includegraphics[width=\textwidth]{PvsZ}
+\caption{Closer inspection of the results comparing matches between ZZZKBot and POSH-bot}
+\label{Table5}
+\end{table*}
 
-\section{Results}
-After the implementation of the three chosen strategies, and final testing stages within the tournament manager, the results contained within table 6 located in the appendix came forth. From the other tables were produced, table 1 and 2 were produced automatically by the STM, table 3 and 4 were manually created. 
+\section{Results \& Analysis}
+After the implementation of the three chosen strategies, and final testing stages within the tournament manager, the results contained within table 7 located in the appendix came forth. From this other tables were produced, 1 and 5 were produced automatically by the STM, table 2, 3 and 4 were manually created. Though
 
-time
+Investigating POSH-bot facing each race individually, from the results in table 2, under the average game length, the shortest games were against the Protoss with the average game lasting 11:48s and a 3.7\% win rate. POSH-bot also proved less efficient in scores with a -215.37\% difference. This shows that the strategy used by POSH-bot was flawed, as the average game time was 11:48s this indicates that it was early-mid game, meaning that the early game strategy for the enemy was coming into fruition and POSH-bot failed counter. This resulted in the low 3.7\% win rate and substantial difference in score. Though the games ended earlier, the average game length was above 10 minutes, which would indicate that any early rush attempts made by the opponent were countered.
+
+When faced against the Zerg POSH-bot had a similar win rate of 5.88\%, but did considerably better with its scores, with a lesser -14.12\%, however the game length on average lasted for 16:46s. Though POSH-bot still failed to achieve a high win rate against the Zerg it did however make the matches last longer, past the 15 minute mark. This indicates that the Zerg rush was completely countered, as at this point any early game strategy would have finished and that game was well into mid game. Which also suggests that the strategy employed against the Zerg was successful up until mid game. Another indication of POSH-bot fairing better against the Zerg is the score difference.
+
+The win rate when against Terran was a higher 16.67\%, all 6 of these victories were against the same AI which had a win rate of 18.52\%. The score difference was lower with -9.17\% and the longest average game length of 19:41s. This suggests that the strategy employed to counter the Terran faired better than the others, likely due to the game lasting past the 15 minute mark allowing the strategy to be fulfilled. The score also supports this as there is a smaller difference means that the POSH-bot managed to counter any rush attempt and produce units to fight.
+
+When inspecting the differences between POSH-bot and the three top AI's for each race in table 3, POSH-bots average game length was close to the same as its counterpart Xelnaga with both having 16:24s and 16:11s respectively. This indicated that POSH-bots strategy succeeded in countering any early rush attempt. Their win rates however were considerably different, with POSH-bot having 10\% and Xelnaga claiming 60\%, and coming fourth overall in the testing. Iron a Terran race has a win rate of 86.25\% and a average game length of 13:13s, both of wish were better than the results POSH-bot obtained. ZZZKBot whom came out on top during testing managed to secure a 91.25\% win rate, and an average game length of 6:25s. This would indicate that Iron and ZZZKbot's ability to succesfully complete an 
+
+Upon closer inspection in table 4, the results obtained from the matches between ZZZKBot and POSH-bot. Though ZZZKBot had a win rate of 100\% the average game length when matched against POSH-bot increased by 146.6\%, both AI's scores were close with a 7\% difference. Though with Iron the game length was decreased by 37.7\% and by 11.98\% by Xelnaga suggesting that POSH-bots early game rush counter was successful against any Zerg attempt, but was hard countered by Terran. Xelnaga also being stronger earlier that POSH-bot attributed to the faster games.
+
+Investigating the scores, 
+
+\section{Discussion}
+It is clear from these results that the AI was not effective in its use of the implemented strategies, thus confirming the null hypothesis that the AI can not achieve above a 50\% win ratio. 
 
 
-win \%
 
-Surviving rush
-From the results in table 3, under the average game length, the shortest games were against the Protoss, this was not unexpected as during development mirror matches proved the most difficult to win. Though the Protoss 
 
-score
+During early testing it became clear that the strategies provided from Liquipidia were not going to work, as they relied on the player (AI) scouting and building immediately as the game started. As the system could not compute its actions instantaneously the AI could not execute the strategies in time before the enemy AI had either rushed or built a larger force. This proves my null hypothesis in these conditions, being the framework is too slow and needs altering, and as this was not the focus of this research would have been an improper use of resources.
 
-comparison against different races
+To counteract this The AI has been modified to include a tactic that is not present in any of the strategies, which is to build several Protoss Photon Cannons at the natural expansion. This means that the base immediately next the the AI's starting position will be built up with defensive structures to stop any early game threat, allowing the AI to continue with the original strategy proposed.
 
-comparison against top bots
+Upon further inspection of the replays it was apparent that the strategy used in an attempt to counter any rushed and the focus on DT production
+
+need better execution of the opening
+
+The results for the mirror matches were not unexpected as during development these matches proved the most difficult to implement a strategy for, as both faction can create units at the same rate.
+\begin{table*}
+	\centering
+	\includegraphics[width=\textwidth]{PvsBots}
+	\caption{A line graph showing both the win rate and game length for all the bots, starting with the highest win rate on the left, based on the results obtained from table 1.}
+	\label{Table6}
+\end{table*}
+
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.5\textwidth]{WinTimeLineWithBot}
@@ -479,34 +519,8 @@ comparison against top bots
 	\caption{A scatter plot showing a negative correlation between the win rate and game length, based on the results obtained from the preliminary experiment. Each dot represents an average win rate and average game length for each bot during each round.}
 	\label{Fig8}
 \end{figure}
-\begin{table*}[]
-	\centering
-	\includegraphics[width=\textwidth]{STMResultsWithBot}
-	\caption{The HTML results table produced by the StarCraft Tournament Manager \cite{Tournament}. Blue represents Terran, Purple represents Zerg, and Yellow represents Protoss}
-	\label{Table2}
-\end{table*}
-\begin{table*}[]
-	\centering
-	\includegraphics[width=\textwidth]{POSH-botWin}
-	\caption{Results from the 80 matches that the POSH-bot described in this paper took part in against the competition AI's on three 2v2 competition maps.}
-	\label{Table3}
-\end{table*}
 
-\todo[inline]{Describe the results do not discuss}
 
-\begin{table*}[]
-	\centering
-	\includegraphics[width=\textwidth]{TopThreeWin}
-	\caption{Results from the top three bots of each race, ZZZKBot(Zerg), Iron(Terran), Xelnaga(Protoss), compared to POSH-bot}
-	\label{Table4}
-\end{table*}
-
-\section{Discussion}
-\todo[inline]{Talk about the results and the implications}
-
-During early testing it became clear that the strategies provided from Liquipidia were not going to work, as they relied on the player (AI) scouting and building immediately as the game started. As the system could not compute its actions instantaneously the AI could not execute the strategies in time before the enemy AI had either rushed or built a larger force. This proves my null hypothesis in these conditions, being the framework is too slow and needs altering, and as this was not the focus of this research would have been an improper use of resources.
-
-To counteract this The AI has been modified to include a tactic that is not present in any of the strategies, which is to build several Protoss Photon Cannons at the natural expansion. This means that the base immediately next the the AI's starting position will be built up with defensive structures to stop any early game threat, allowing the AI to continue with the original strategy proposed.
 
 \subsection{Disadvantage of Software}
 Though once this system is complete with all the behaviours needed are present, makes it quick and easy to create new AI plans, it has one major disadvantage. The AI can only execute one action at a time, for example, when the executes the "ProbeScoutToEnemyBase" action it must wait for the entire action to be executed before moving on to the next. This has a negative effect on the design of the AI as it must be created in such a way that it can be effective while being limited to only one action at a time.
@@ -536,7 +550,13 @@ A further step that could be taken is to allow the AI to construct its own plans
 
 % Appendices
 \appendix
-\begin{figure}
+\begin{table*}[]
+	\centering
+	\includegraphics[width=\textwidth]{STMResultsWithBot}
+	\caption{The HTML results table produced by the StarCraft Tournament Manager \cite{Tournament}. Blue represents Terran, Purple represents Zerg, and Yellow represents Protoss}
+	\label{Table2}
+\end{table*}
+\begin{table*}
 	\centering
 	\includegraphics[width=0.75\textwidth]{AMDD}
 	\centering\caption{The Agile Model Driven Development (AMDD) lifecycle \cite{AMDD}}
@@ -545,7 +565,7 @@ A further step that could be taken is to allow the AI to construct its own plans
 	\includegraphics[width= 0.5 \textwidth]{ProtossTechTree}
 	\centering\caption{The Tech tree for Protoss, to be able to produce Datk Templar's from the Gateway, Protoss must fist have the Templar Archives. To produce Dragoons the Cybernetics Core must be present, Zealots can be trained as soon as the Gateway is built \cite{Tech}}
 	\label{Fig11}
-\end{figure}
+\end{table*}
 \begin{table*}
 	\centering
 	\includegraphics[width=\textwidth]{2017}
