@@ -47,6 +47,9 @@ compile first bwapii-native then bwapi-clr and then tesbot right click on POSH-L
 ## A video of the Bot working can also be found in:
 comp360_01_1506530\Video
 
+POSH-botVSInBuiltTerran.mp4 was recorded in debug mode.
+POSH-botVSCimex(Zerg).mp4 is a replay from the testing and was only available to record in StarCraft Remastered.
+
 ## The trello board can be found in the Trello folder:
 comp360_01_1506530\Trello
 
