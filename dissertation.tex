@@ -261,9 +261,9 @@ These questions were rejected as creating an adaptive AI was not the focus of th
 \todo[inline]{Empirisism} 
 \todo[inline]{Include some philosophy on this paper (positivist research)}
 
-This research employs a positivist approach as all results will be interpreted through reason and logic, 
+This research employs a positivist approach as all results will be empirical in nature and interpreted through reason and logic.
 
-In this work Protoss will be chosen, this choice was made as Zerg have been done many times and usually rely on rushes to win, whereas Terran are too complex for the planned Bot. Protoss proved a happy middle ground to build upon where rushes are difficult to achieve but they are not too complex that it is too difficult to execute a sound strategy. So the second logical step is to implement an anti-rush strategy as an opening strategy. From there more aggressive strategies will be implemented and executed at the appropriate times. The challenge here is that it is difficult for Protoss to counter a Zerg rush but if successful it will leave the Zerg open for attack. To support this decision the ratio that the races won were looked into and can be seen in fig 4, here the Protoss clearly loose more often than the other two races.
+
 
 \subsection{Tools}
 The tools that will be used in this experiment are; The Brood War Application Programming Interface (BWAPI), POSH tools, specifically POSH Sharp which is an interface that uses c\# instead of C++, and the ABODE editing software which uses POSH plans to create Behaviour Oriented Designs for Bots. Other tools include Visual Studio 2010, Chaoslauncher, StarCraft Tournament Manager, and VirtualBox, all of which will be explained next. 
@@ -360,6 +360,8 @@ For testing the only concern was whether a function within the code did as was d
 Before any development was carried out, the first decision was how was the Bot to be created, it could either be done in C++ pure, Java or C\# using POSH-tools. PODH tools were chosen as
  
 The first sprint was to set up the environment. This involved downloading and installing several versions of Visual Studio, and downloading the correct version of BWAPI, Chaoslauncher, and the addition of PoshSharp. An intimidate issue that came up after attempting to compile BWAPI, there were missing .ddl's in the Windows directory, to rectify this the relevant dll's were manually copied into the relevant locations. Once the coding environment was set up, the next step before any code was written was to set up the testing environment. This was done using the Chaoslauncher, BWAPI had to compile correctly to begin with otherwise the Bot would not inject into the game correctly. Once StarCraft launched with no issues, a basic POSH plan with no functionality, that came with POSHSharp was compiled and executed, this all had to be done in admin mode as it would not work correctly. By the end of this sprint the correct software was installed, the testing environment was working, and a basic plan ran in the game. The artefact at this point was ready to be designed and have code written in the behaviours.
+
+In this work Protoss will be chosen, this choice was made as Zerg have been done many times and usually rely on rushes to win, whereas Terran are too complex for the planned Bot. Protoss proved a happy middle ground to build upon where rushes are difficult to achieve but they are not too complex that it is too difficult to execute a sound strategy. So the second logical step is to implement an anti-rush strategy as an opening strategy. From there more aggressive strategies will be implemented and executed at the appropriate times. The challenge here is that it is difficult for Protoss to counter a Zerg rush but if successful it will leave the Zerg open for attack. To support this decision the ratio that the races won were looked into and can be seen in fig 4, here the Protoss clearly loose more often than the other two races.
 
 Before any design could commence a race had to be chosen, in StarCraft, there are three, Zerg, Protoss and Terran, each with their own unique play style. Zerg is a rushing faction, with their units being relatively weak and cheap, Zerg usually focus on overwhelming their enemy with numbers. Protoss are strong but expensive, relying on smaller numbers and taking longer to produce anything, this means they can be weak at rushing and defending from a rush. Terran is a balance of the two, being able to produce strong and expensive units as well as cheap, weak ones, they can effectively rush and defend from a rush.
 
@@ -512,12 +514,16 @@ As shown in figure 7 the average game length for POSH-bots winning matches is mu
 \subsection{Analysis of final Software}
 \subsubsection{Framework}
 Though once this system is complete with all the behaviours needed are present, makes it quick and easy to create new Bot plans, it has one major disadvantage. The Bot can only execute one action at a time, for example, when the executes the "ProbeScoutToEnemyBase" action it must wait for the entire action to be executed before moving on to the next. This has a negative effect on the design of the Bot as it must be created in such a way that it can be effective while being limited to only one action at a time.
+
+
 \subsubsection{Tournament Manager}
 Another issue presented by this software is that it is CPU intensive and slows down the game simulations considerably, this will make testing time increase and unfortunate there is not much that can be done about it, as the c\# is being translated into c++ for the BWAPI to translate into StarCraft commands.
 
 \subsubsection{Plans}
 To counteract this The Bot has been modified to include a tactic that is not present in any of the strategies, which is to build several Protoss Photon Cannons at the natural expansion. This means that the base immediately next the the Bots starting position will be built up with defensive structures to stop any early game threat, allowing the Bot to continue with the original strategy proposed.
 Upon further inspection of the replays it was apparent that the strategy used in an attempt to counter any rushed and the focus on DT production
+
+placement of buildings
 
 need better execution of the opening
 The results for the mirror matches were not unexpected as during development these matches proved the most difficult to implement a strategy for, as both faction can create units at the same rate.
@@ -556,6 +562,9 @@ Using parallel plans would provide an interesting premiss for designing an Bot. 
 A further step that could be taken is to allow the Bot to construct its own plans with neural networking. It would allow the Bot to learn from pre-built strategies and alter them accordingly as it played a number of matches.
 
 \section{Conclusion}
+
+In this work a bot for StarCraft was presented which used expert strategies sourced from the community surrounding the game, that was tested against several other bots whom have participated in the annual AIIDE StarCraft AI competition.
+
 \section{Acknowledgements}
 I would like to thank Swen Gaudl for his help in the creation of this dissertation, without his guidance and patience this work would not have been produced.
 
