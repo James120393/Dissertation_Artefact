@@ -1,15 +1,16 @@
-The code can be found in the following folder:
+# comp360 Dissertation Artefact Readme
+
+## The code can be found in the following folder:
 comp360_01_1506530\scbot.git\POSH-StarCraftBot\behaviours
 
-### To run the Bot simply run the "run_proxy.bat" file located at:
+## To run the Bot simply run the "run_proxy.bat" file located at:
 comp360_01_1506530\scbot.git\POSH-Launcher\bin\Release
-
 ### Note: You will Need to install StarCraft: BroodWar with patch 1.16.1 
 ### plus ChaosLauncher which can be found [here](http://www.teamliquid.net/forum/brood-war/65196-chaoslauncher-for-1161)
-
 ### Note: The Bot must be run in admin mode otherwise it will not connect to the game.
 The batch file should ask for admin. if it does not then it will not work, to circumven this you must run the POSH-Launcher.exe
 in the command line while running in admin, with the following argument after "-a=POSH-SCBot.dll POSH-SCBot".
+
 
 ## To run the code "From Source" please follow this [link.](https://github.com/suegy/bwapi-mono-bridge2/wiki/StarCraft-Setup-BWAPI)
 
@@ -43,17 +44,18 @@ compile first bwapii-native then bwapi-clr and then tesbot right click on POSH-L
 
 
 
-### A video of the Bot working can also be found in:
+## A video of the Bot working can also be found in:
 comp360_01_1506530\Video
 
-### The trello board can be found in the Trello folder:
+## The trello board can be found in the Trello folder:
 comp360_01_1506530\Trello
 
-### The [link]("https://github.com/James120393/Dissertation_Artefact") to the GitHub Repository
+## The link to the GitHub Repository:
+[link]("https://github.com/James120393/Dissertation_Artefact")
 
-### To open a plan please open the ABODEstar-004.jar located at:
+## To open a plan please open the ABODEstar-004.jar located at:
 "comp320_01_1506530\scbot.git\POSH-StarCraftBot\ABODEstar-004.jar"
 
-### Then select open and navigate to:
+## Then select open and navigate to:
 "comp320_01_1506530\scbot.git\POSH-StarCraftBot\library\plans"
 and select any of the plans within this folder.
