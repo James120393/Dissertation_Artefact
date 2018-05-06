@@ -257,13 +257,7 @@
 	\newline
 	
 	\section{Method}
-	
-	\todo[inline]{Empirisism} 
-	\todo[inline]{Include some philosophy on this paper (positivist research)}
-	
-	This research employs a positivist approach as all results will be empirical in nature and interpreted through reason and logic.
-	
-	
+	To answer the question that this paper focuses on, this research will be performing an experiment to gather the empirical data required then performing a positivist analysis on that data, interpreting it through reason and logic, then forming a discussion to defend or reject the hypothesis presented.
 	
 	\subsection{Tools}
 	The tools that will be used in this experiment are; The Brood War Application Programming Interface (BWAPI), POSH tools, specifically POSH Sharp which is an interface that uses c\# instead of C++, and the ABODE editing software which uses POSH plans to create Behaviour Oriented Designs for Bots. Other tools include Visual Studio 2010, Chaoslauncher, StarCraft Tournament Manager, and VirtualBox, all of which will be explained next. 
@@ -498,42 +492,8 @@
 	From this figure a the p-value is near zero which indicates that the null hypothesis can be rejected, in this case, it was to filter out the matches against Iron, by setting the $\mu$ to 10 for the time that a game transits into mid game and in general a rush can no longer be considered a rush. 
 	
 	During the matches where POSH-bot won as shown in figure 7, on average the games lasted 33:50s, with an average score much higher than that of the opponent. These were most likely timeouts, where the game exceed their maximum frame count quota as stated within the STM readme file \cite{Tournament}. Though victory is awarded to the Bot with the highest score.
-	
-	Investigating the scores, 
-	
-	\section{Discussion}
-	It is clear from these results that the Bot was not by the metrics defined in this paper, effective in its use of the implemented strategies, thus confirming the null hypothesis of hypothesis 3 that the Bot cannot achieve above a 50\% win ratio in its current state. This was not entirely unexpected as during early testing there was evidence that the strategies provided from Liquipidia were not going to be very effective, as they relied on the Bot scouting and building immediately as the game started. As the system could not compute its actions instantaneously the Bot could not execute the strategies in time before the enemy Bot had built a larger force. The framework is too slow and needs altering, and as this was not the focus of this research would have been an improper use of resources.
-	
-	Though the Bot did achieve a win rate greater than 0\% and therefore supporting hypothesis 2. Upon further inspection of the replays of the games that POSH-bot won against Oritaka a Terran Bot, it became clear the victories accounted for the ability to counter a Terran Marine rush. Due to its similarity to the Zerg rush (sending in weak cheap units) it was easily countered by POSH-bot and it became apparent that this was the main focus Oritaka and once POSH-bot acquired some DT's it easily overpowered Oritaka and destroyed its main base. Though most of the games ended in a timeout, victory was awarded to POSH-bot due to the substantial score difference.
-	
-	As evidenced by the consistent increase in times for the ZZZKbot's games and POSH-bots ability to survive past the 10-minute mark, as well as the t-test, hypothesis 4 can be supported. 
-	
-	As shown in figure 7 the average game length for POSH-bots winning matches is much greater than 14 minutes, thus rejecting hypothesis 1 and supporting the null. This was likely due to the lack of scouting abilities within POSH-bot, along with a present bug in the software where the units would not attack correctly, causing the units to not move after reaching the centre of the enemies base. 
-	
-	\subsection{Analysis of final Software}
-	\subsubsection{Framework}
-	Though once this system is complete with all the behaviours needed are present, makes it quick and easy to create new Bot plans, it has one major disadvantage. The Bot can only execute one action at a time, for example, when the executes the "ProbeScoutToEnemyBase" action it must wait for the entire action to be executed before moving on to the next. This has a negative effect on the design of the Bot as it must be created in such a way that it can be effective while being limited to only one action at a time.
-	
-	
-	\subsubsection{Tournament Manager}
-	Another issue presented by this software is that it is CPU intensive and slows down the game simulations considerably, this will make testing time increase and unfortunate there is not much that can be done about it, as the c\# is being translated into c++ for the BWAPI to translate into StarCraft commands.
-	
-	\subsubsection{Plans}
-	To counteract this The Bot has been modified to include a tactic that is not present in any of the strategies, which is to build several Protoss Photon Cannons at the natural expansion. This means that the base immediately next the Bots starting position will be built up with defensive structures to stop any early game threat, allowing the Bot to continue with the original strategy proposed.
-	Upon further inspection of the replays, it was apparent that the strategy used in an attempt to counter any rushed and the focus on DT production
-	
-	placement of buildings
-	
-	need better execution of the opening
-	The results for the mirror matches were not unexpected as during development these matches proved the most difficult to implement a strategy for, as both factions can create units at the same rate.
-	\begin{table*}
-		\centering
-		\includegraphics[width=\textwidth]{PvsBots}
-		\caption{A line graph showing both the win rate and game length for all the Bots, starting with the highest win rate on the left, based on the results obtained from table 1.}
-		\label{Table6}
-	\end{table*}
-	
-	
+		
+	After some investigation it was discovered that there may be a correlation between game length and and win rate as shown in figures 8 and 9. Figure 9 shows that there may be a negative correlation between these two values.
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=0.5\textwidth]{WinTimeLineWithBot}
@@ -546,9 +506,49 @@
 		\caption{A scatter plot showing a negative correlation between the win rate and game length, based on the results obtained from the preliminary experiment. Each dot represents an average win rate and average game length for each bot during each round.}
 		\label{Fig8}
 	\end{figure}
+	\section{Discussion}
+	It is clear from these results that the Bot was not by the metrics defined in this paper, effective in its use of the implemented strategies, thus confirming the null hypothesis of hypothesis 3 that the Bot cannot achieve above a 50\% win ratio in its current state. This was not entirely unexpected as during early testing there was evidence that the strategies provided from Liquipidia were not going to be very effective, as they relied on the Bot scouting and building immediately as the game started. As the system could not compute its actions instantaneously the Bot could not execute the strategies in time before the enemy Bot had built a larger force. The framework is too slow and needs altering, and as this was not the focus of this research would have been an improper use of resources.
 	
+	Though the Bot did achieve a win rate greater than 0\% and therefore supporting hypothesis 2. Upon further inspection of the replays of the games that POSH-bot won against Oritaka a Terran Bot, it became clear the victories accounted for the ability to counter a Terran Marine rush. Due to its similarity to the Zerg rush (sending in weak cheap units) it was easily countered by POSH-bot and it became apparent that this was the main focus Oritaka and once POSH-bot acquired some DT's it easily overpowered Oritaka and destroyed its main base. Though most of the games ended in a timeout, victory was awarded to POSH-bot due to the substantial score difference.
 	
+	As evidenced by the consistent increase in times for the ZZZKbot's games and POSH-bots ability to survive past the 10-minute mark, as well as the t-test, hypothesis 4 can be supported. 
 	
+	As shown in figure 7 the average game length for POSH-bots winning matches is much greater than 14 minutes, thus rejecting hypothesis 1 and supporting the null. This was likely due to the lack of scouting abilities within POSH-bot, along with a present bug in the software where the units would not attack correctly, causing the units to not move after reaching the centre of the enemies base. 
+	
+	\subsection{Analysis of final Software}
+	Though two of the hypothesis can be supported, the rearranging two were rejected, this is due to issues that could be improved on in the software. This section will identify those issue and present potential fixes for future work.
+	\newline
+	
+	\subsubsection{Framework}	
+	Though once the system was complete and all the behaviours needed were present and creating plans ware a relatively quick process, it has one major disadvantage. The Bot can only execute one action at a time, for example, when the executes the "ProbeScoutToEnemyBase" action it must wait for the entire action to be executed before moving on to the next. This has a negative effect on the design of the Bot as it must be created in such a way that it can be effective while being limited to only one action at a time. A potential work around for this would be to use parallel plans, this would involve having multiple plans working in unison one separate actions to drive the Bot.	
+	
+	Another issue presented by this software is that it is CPU intensive and at times can slow down the game simulations considerably, this makes testing time increase, there is not much that can be done about it, as the c\# is being translated into c++ for the BWAPI to translate into StarCraft commands. Though ensuring that while loops and for each loops are kept small and only used when absolutely necessary would help to alleviate this issue.
+	
+	When compiling the bot everything must be run in administrator mode, a minor inconvenience when developing the bot as the bot would launch in this mode when Visual Studios was run with administrator privileges. The software required this as without these privileges the Bot was unable to communicate with BWAPI ad function. The major inconvenience of this requirement came when attempting to launch the Bot using a custom batch file, as the batch file had to launch in admin mode, to achieve this the windows user setting had to have security disabled, so admin privileges were given automatically and the operating system would not request permission. If this was not done then the tournament manager would be unable to launch the Bot and all testing involving the Bot would have to be done manually.
+	
+	The results for the mirror matches were not unexpected as during development these matches proved the most difficult to implement a strategy for, as both factions can create units at the same rate. As the framework had issues communicating with the game this slowed down the speed of the bot, giving an advantage to any other Protoss the Bot faced. 
+	\newline
+	\subsubsection{Tournament Manager and Virtual Machine}
+	When using the STM an issue that arrose was that only one instance of StarCraft could be run at a time, which required the use of a VM. The issue with this was that if the VM was not set up exactly as needed, the client would not connect to the server/other client, which caused the whole system to not work. This was mainly an issue with the operating system and networking set-up in the VM, but the issue could have been avoided by allowing the STM to launch multiple instances of StarCraft on one machine. StarCraft and the client only require one CPU core each to run plus another for the server, most modern computers hour an octicore CPU, which would allow for 5 core to be used by the clients and StarCraft. 
+	
+	The STM when running can only allow clients with different IP's to join each other in game, otherwise the game will not recognise that there is a game to join. If the VM was not set up correctly it would share the same IP address as the host machine, which to a user who is unfamiliar with VM software could prevent the use of the STM entirely. A fix that enabled the software to work in this instance was to reinstall the VM with admin privileges which seems to install extra networking adaptor options allowing for the use of a separate IP adress to the host machine, which in turn allows the clients to connect.
+	
+	When running the STM all firewalls have to be turned off and the registry altered to allow seamless networking between the clients and server, this posses a very high security risk to the users system and could potentially be solved if the STM has a local version which runs off a single host machine.
+	\newline
+	\subsubsection{Plans and Behaviours}
+	As the Bot works through the plan it works from top to bottom, working through the drive and stepping into them as needed if the sense is satisfied. Each of these drives can be delayed and skipped to ensure that all drives are triggered, though this should work in theory. In reality if the delay is more than a few micro seconds the change in speed for the behaviours being triggered is noticeable, as the bot must trigger a command several times as BWAPI does not always work. As for if there is no delay put on the drives, the system will crash as it is running faster than the other two systems, POSH and BWAPI, this causes NULL exceptions to be thrown, so there must be a delay present. The designer can however plan the delays in such a way that the plan not only works its was down the drive list but also works back up. This helps with any issues pertaining to the plan getting stuck inside a particular drive, but does not solve the issue, for this it is best to ensure that the senses are set up correctly so the drive is not triggered at all unless it can be resolved. This means that when creating a plan all drives and senses must be precise, as one incorrect number or misplaced drive can break the Bot entirely, so the plan must be checked and tested several times after each change.
+	
+	Another issue that arrose several times was the placement of buildings, as stated earlier, BWAPI does sometimes not accept a command form the Bot so th command must be sent again. Which caused issues with building placement as the Bot would register that the building was placed though in game it was not, this meant that the placement and build functions had to be triggered multiple times. 
+	
+	The Bot currently uses a Fibonacci spiral to locate a suitable build location which should always return a viable option, which is why the Bot currently builds its structures in the immediate vicinity of the main base. This needs to be improved upon as the structures currently interfere with resource gathering, a simple solution would be to implement another strategy that takes advantage of the choke points, this would move the build location to another area. Also as the POSH-bot is Protoss the buildings can only be placed near a Pylon, so another option is to change the build location to each Pylon, though this can cause issues if a Pylon is destroyed, so a list of Pylons would have to be maintained. This solution would force the Bot to build around any Pylon so the only structure that would need changing in its placement would be the Pylon, rather than changing the entire placement system.
+	
+	Currently there is a large delay between when the game begins and when the Bot can trigger certain actions, for instance, scouting, a pivotal part of an opening strategy. This delays the Bot from being able to perform certain functions like building at its natural early on or harassing the enemy immediately as the game begins. This has cased issues when designing the plan, as th strategies required immediate scouting but the final design had to work around that by triggering the scouting later in the strategy.	
+	\begin{table*}
+		\centering
+		\includegraphics[width=\textwidth]{PvsBots}
+		\caption{A line graph showing both the win rate and game length for all the Bots, starting with the highest win rate on the left, based on the results obtained from table 1.}
+		\label{Table6}
+	\end{table*}
 	
 	\section{Future Work}
 	Though the null hypothesis was confirmed, this work provided an interesting find, that there is a possible correlation between the win rate and game length. A proposed question for future work would be if there is a correlation between them. This would be an interesting find as it could be used to alter the design of Bots to facilitate fast strategies, and through the Zerg implemented a rush tactic which is inherently fast, it would be interesting to see how and Bot using Terran or Protoss would cope with similar strategies.
@@ -558,13 +558,13 @@
 	
 	Using parallel plans would provide an interesting premiss for designing a Bot. The Bot could have multiple plans, each focusing on a separate component of the game, these could be combat, base building, resource management or defence. Creating a Bot with this capability would provide a challenge in its design as the plans would have to communicate with each other to allow the correct execution times, and it would have to ensure there are no conflicts of interest when managing units. This could be solved with an order of priority or a threat calculation, so the defence can take over from the combat plan if the Bot is losing its base.
 	
+	A potential improvement to this work could be to investigate the scores of the Bot as in many cases the POSH-bot may not have won but may have performed well as reflected by its scores. As this was not the focus for effectiveness in this paper it could provide a more granular method of evaluating its performance. 
+	
 	A further step that could be taken is to allow the Bot to construct its own plans with neural networking. It would allow the Bot to learn from pre-built strategies and alter them accordingly as it played a number of matches.
 	
 	\section{Conclusion}
-	Creating an effective Bot for StarCraft can be a challenging task, to which much research has been done this paper presented a literature review to analyse the methods used in research for such a task. After this analysis a method was chosen on 
-	In this work a bot for StarCraft was presented which used expert strategies sourced from the community surrounding the game, that was tested against several other bots which have participated in the annual AIIDE StarCraft AI competition.
-	
-	
+	In games there are many way to create AI and many game to create AI in, for this work StarCraft was chosen a a platform in which to create one such AI. Creating an effective AI or Bot, for StarCraft can be a challenging task, to which much research has been done, this paper reviewed the literature in this area to analyse the methods used for such a task. After this analysis several questions and hypothesis were presented and a method was created appropriate to solving these questions and supporting the hypothesis.	In this work a bot for StarCraft was presented which used expert strategies sourced from the community surrounding the game, that was tested against several other bots which have participated in the annual AIIDE StarCraft AI competition. The tools that were used were presented as well as the life cycle involved with the Bots creation, once complete the Bot was then tested in a competition environment against Bots that were entered into the 2016 AIIDE StarCraft AI competition. The results were then recorded presented and analysed, after which a discussion was held on the implications of the results, followed with an analysis of the final software used and potential future works. 
+	Though the Bot did not fair as well as was hoped, it did prove an interesting challenge, as the design of the Bot was the greatest challenge, as the limitations of the frameworks speed and the way the plans operated had to be circumvented to produce a viable artefact. In this case the Bot presented was not effective in its use of expert strategies, that being said, the Bot did achieve a greater than 0\% win rate, plus the initial rushes were countered, supporting two of the hypothesis presented, showing potential for improvement. For any future work it would be recommended that strategies are kept as simple as possible while maintaining and effective strategy or employ the use of parallel plans to make the Bot more efficient in carrying out that strategy.	
 	
 	\section{Acknowledgements}
 	I would like to thank Swen Gaudl for his help in the creation of this dissertation, without his guidance and patience this work would not have been produced.
@@ -578,7 +578,7 @@
 	\bibliography{references}
 	
 	\section{Reflective Addendum}
-	\todo[inline]{FOR EXAMPLE: During this dissertation, many challenges had to be overcome, in the subsection, those challenges will be explored.}
+	If there is one this I have learnt through writing this paper and creating the Bot is that it requires patience and determination. When I began this journey I knew nothing about POSH plans, StarCraft Bots, BWAPI or even any C\#, after taking this project on I realised that it was a bigger deal that I first anticipated, but 
 	
 	% Appendices
 	\appendix
