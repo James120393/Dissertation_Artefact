@@ -298,10 +298,6 @@
 		(
 		(buildFirstGateway (trigger ((GatewayCount 0.0 <=) (PylonCount 1.0 >=))) buildGateway)	)
 		(
-		(buildForge (trigger ((ForgeCount 0.0 ==) (PylonCount 1.0 >=))) buildForge)	)
-		(
-		(buildBaseCannon (trigger ((ForgeCount 1.0 >=) (CannonCount 1.0 <=))) buildBaseCannon)	)
-		(
 		(buildProbes (trigger ((ProbeCount 10.0 <))) BuildProbe) )
 		(
 		(buildAssimilator (trigger ((AssimilatorCount 0.0 <=) (GatewayCount 1.0 >=))) buildAssimilator)	)
@@ -325,6 +321,8 @@
 		(buildSupplyPylon (trigger ((PylonConstructing 0.0 ==) (PylonCount 2.0 <=))) buildBasePylon)	)
 		(
 		(buildNaturalNexus (trigger ((NexusCount 1.0 <=) (NexusCount 2.0 <) (NaturalFound 1.0 ==))) naturalNexus)	)
+		(
+		(buildForge (trigger ((ForgeCount 0.0 ==) (NexusCount 2.0 >=))) buildForge)	)
 		(
 		(buildProbes (trigger ((ProbeCount 18.0 <) (NexusCount 2.0 >=))) BuildNaturalProbe) )
 		(
@@ -440,7 +438,7 @@
 
 (SDC EighteenNexusOpening (goal ((GameRunning 0.0 =)))
 	(drives			
-		(		(defend (trigger ((HasUnits 1.0 ==)(EnemyDetected 1.0 ==)(BaseUnderAttack 1.0 ==))) defendLocation(seconds 0.2)))
+		(		(defend (trigger ((EnemyDetected 1.0 ==)(BaseUnderAttack 1.0 ==))) defendLocation(seconds 0.2)))
 		(		(scout (trigger ((ArchivesCount 1.0 >=) (NaturalFound 0.0 ==))) exploreLocal (seconds 0.001)))
 		(		(harvest (trigger ((IdleProbes))) probeHarvesting(seconds 0.0003)))
 		(		(retreat (trigger ((ForceIsLosing 1.0 =))) flee(seconds 1.0)))		

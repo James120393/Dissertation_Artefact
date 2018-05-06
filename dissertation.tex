@@ -277,7 +277,7 @@
 		\item[]
 		\item \textbf{Chaoslauncher} is an open source third-party launcher for StarCraft that allows the user to inject any universal plugins \cite{Chaos}. For this experiment, the launcher will be used as a debugging tool for the first stages of the Bot. The launcher also allows StarCraft to be run in windowed mode alongside a BWAPI injector that allows the Bot to communicate with BWAPI.    
 		\item[]
-		\item \textbf{StarCraft AI Tournament Manager(STM)} is a tool that was developed by David Churchill to manage and run StarCraft AI tournaments, it is an open source project available for anyone to use. It runs the tournament by creating a server and allowing instances of its counterpart (the Client) to connect to it, each client runs a single instance of StarCraft and the server will put two clients into a game and record the results. This set-up allows for as many instances of StarCraft to be run on the server as the user wants, the current set-up of the STM doesn't allow for more than one instance of StarCraft to be run on a single PC at a time. To solve this a Virtual Machine (VM) will be utilized \cite{Tournament}. For the purposes of this experiment the STM will be used to test the Bot against the competition Bots, once the tournament is over the STM will compile a results table similar to fig 2, in an HTML format which can be opened in any browser.
+		\item \textbf{StarCraft AI Tournament Manager(STM)} is a tool that was developed by David Churchill to manage and run StarCraft AI tournaments, it is an open source project available for anyone to use. It runs the tournament by creating a server and allowing instances of its counterpart (the Client) to connect to it, each client runs a single instance of StarCraft and the server will put two clients into a game and record the results. This set-up allows for as many instances of StarCraft to be run on the server as the user wants, the current set-up of the STM doesn't allow for more than one instance of StarCraft to be run on a single PC at a time. To solve this a Virtual Machine (VM) will be utilized \cite{Tournament}. For the purposes of this experiment the STM will be used to test the Bot against the competition Bots, once the tournament is over the STM will compile a results table as seen in table 1, in an HTML format which can be opened in any browser.
 		\begin{figure}
 			\centering
 			\includegraphics[width=0.5\textwidth]{TMPic}
@@ -336,13 +336,13 @@
 		qplot(input$`Win%`, input$Duration, geom = c("point",
 		"smooth"), method="rlm", main="Correlation between Win % and Game Duration", xlab="Win %", ylab="Game Duration")
 		\end{lstlisting}
-		\caption{R code to create a scatter plot with a line of best fit. The figure created from this excerpt can be seen in Figure 9.}
+		\caption{R code to create a scatter plot with a line of best fit. The figure created from this excerpt can be seen in Figure 8.}
 		\label{Fig3}
 	\end{figure}
 	
 	For the creation of the artefact, there were many options for life cycles that could have been adopted. Chief among these were the incremental model and Agile, both supported short development cycles, but lacked the ability to revisit and refactor code \cite{Life}. For the incremental model, each development cycle is static and isolated, meaning that when the cycle is over the build will never be revisited again. This approach would be impractical for this artefact as the strategies and variables in the code need to be constantly refactored and tweaked, an action that the incremental model does not allow.
 	
-	The Agile development cycle seemed like a better choice as it is more friendly towards an iterative development cycle that produces smaller chunks of code. Though Agile still lacked the focus on testing first, this was required for this artefact as with each implementation it needed testing to confirm if the implementation succeeded. For this artefact, Agile will be combined with Test Driven Development (TDD) as there is no use of daily scrums, plus the focus of this research is to have a working Bot, and the best method to achieve this is to continuously test and refactor. This method is called Agile Model Driven Development (AMDD) which focuses on iterative development while also being test driven, a more detailed description of this can be found in Appendix B under table 7. Another reason for AMDD is that the constant small changes to the code would dramatically affect the functionality of the Bot, therefore every change needs testing.
+	The Agile development cycle seemed like a better choice as it is more friendly towards an iterative development cycle that produces smaller chunks of code. Though Agile still lacked the focus on testing first, this was required for this artefact as with each implementation it needed testing to confirm if the implementation succeeded. For this artefact, Agile will be combined with Test Driven Development (TDD) as there is no use of daily scrums, plus the focus of this research is to have a working Bot, and the best method to achieve this is to continuously test and refactor. This method is called Agile Model Driven Development (AMDD) which focuses on iterative development while also being test driven, a more detailed description of this can be found in Appendix B under figure 9. Another reason for AMDD is that the constant small changes to the code would dramatically affect the functionality of the Bot, therefore every change needs testing.
 	
 	For testing the only concern was whether a function within the code did as was designed, there is only a pass/fail did it do the thing it was designed for or not, when testing these only one test is usually required to get the answer then a slight modification was made each time if it resulted in a fail. The tests had only minor automation as the artefact had to be manually run and the game manually set-up.
 	\newline
@@ -352,9 +352,7 @@
 	
 	The first sprint was to set up the environment. This involved downloading and installing several versions of Visual Studio and downloading the correct version of BWAPI, Chaoslauncher, and the addition of PoshSharp. An issue that came up after attempting to compile BWAPI, there were missing Dynamic-link libraries (ddl's) in the Windows directory, to rectify this the relevant dll's were manually copied into the relevant locations. Once the coding environment was set up, the next step before any code was written was to set up the testing environment. This was done using the Chaoslauncher, which would inject BWAPI into the game to allow the Bot to work correctly within the game. Once StarCraft launched with no issues, a basic POSH plan with no functionality, that came with POSHSharp was compiled and executed, this all had to be done in admin mode as it would not work correctly. By the end of this sprint, the correct software was installed, the testing environment was working, and a basic plan ran in the game. The artefact at this point was ready to be designed and have code written in the behaviours.
 	
-	Before any design could commence a race had to be chosen, in StarCraft, there are three, Zerg, Protoss and Terran, each with their own unique play style. Zerg is a rushing faction, with their units being relatively weak and cheap, the Zerg usually focus on overwhelming their enemy with numbers. Protoss are strong but expensive, relying on smaller numbers and taking longer to produce anything, this means they can be weak at rushing and defending from a rush. Terran is a balance of the two, being able to produce strong and expensive units as well as cheap, weak ones, they can effectively rush and defend from a rush.
-	
-	In this work Protoss will be chosen, this choice was made as Zerg and Terran tend to win more often in comparison to Protoss as seen in figure 5. Protoss provides a middle ground to build upon where rushes are difficult to achieve as well as not being too complex that it is too difficult to execute a sound strategy. 
+	Before any design could commence a race had to be chosen, in StarCraft, there are three, Zerg, Protoss and Terran, each with their own unique play style. Zerg is a rushing faction, with their units being relatively weak and cheap, the Zerg usually focus on overwhelming their enemy with numbers. Protoss are strong but expensive, relying on smaller numbers and taking longer to produce anything, this means they can be weak at rushing and defending from a rush. Terran is a balance of the two, being able to produce strong and expensive units as well as cheap, weak ones, they can effectively rush and defend from a rush.	In this work Protoss will be chosen, this choice was made as Protoss provides a middle ground to build upon where rushes are difficult to achieve as well as not being too complex to achieve a sound strategy. 
 		
 	Once the software was installed, the method of development was chosen and Protoss was picked, the next step was to begin testing and developing. 
 	\newline
@@ -391,7 +389,7 @@
 	\subsubsection{Iteration 5 : Implementation of New Strategies}
 	The final sprint was to implement several plans that could work alongside the base plan, these would all be taken from the Liquipidiea site. The current set-up only allows for one plan to be used at a time, though each plan can contain several strategies that are triggered when the Bot plays. Each strategy was tailored to face each race as an opponent, three strategies were chosen from Liquipedia, one for Protoss VS Terran, VS Zerg, and VS Protoss, When two races are the same it is referred to as a mirror match.
 	
-	Each strategy focuses on the same goal, producing a unit called Dark Templars (DT's) as quickly as possible. This Unit is cloaked and has a clear advantage over an enemy that has no detectors (detectors are a unit that can reveal cloaked/hidden units). The process to achieve this can be seen in Appendix B figure 11, which shows the tech tree for the Protoss.
+	Each strategy focuses on the same goal, producing a unit called Dark Templars (DT's) as quickly as possible. This Unit is cloaked and has a clear advantage over an enemy that has no detectors (detectors are a unit that can reveal cloaked/hidden units). The process to achieve this can be seen in Appendix B figure 10, which shows the tech tree for the Protoss.
 	Though each strategy gets to this goal in different ways:
 	
 	\begin{itemize}
@@ -408,14 +406,8 @@
 	Also as stated on the Liquipeidia website, these build orders can be changed to suit the needs of the player, or in this case the Bot. For example, to fight against the Zerg rush, a forge and photon cannons were built at the beginning of the game, even though the build order did not call for it. Changes like that one were made to each of the strategies, though the underlying direction of each strategy remained the same \cite{Alter}.
 	
 	\subsection{Preliminary Results}
-	To prepare for final testing a preliminary test was carried out using the tournament manager, this was done to ensure the software was set-up and working for the final testing for the Bot developed for this research. For the preliminary test, 9 Bots were chosen from the AIIDE 2016 competition, three from the top, three from the middle and three from the bottom. These Bots would then play one on one games on 10 maps, totalling to 360 games, the results of each match were recorded automatically by the tournament manager and compiled into table 1, from this table fig 4-8 were created. These results allowed the further development of the metrics within this research, this is explained in the following section.
-	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.5\textwidth]{RacePie}
-		\caption{A pie chart representing the average win rate \% for the three races, based on the results obtained from table 1.}
-		\label{Fig4}
-	\end{figure}
+	To prepare for final testing a preliminary test was carried out using the tournament manager, this was done to ensure the software was set-up and working for the final testing for the Bot developed for this research. For the preliminary test, 9 Bots were chosen from the AIIDE 2016 competition, three from the top, three from the middle and three from the bottom. These Bots would then play one on one games on 10 maps, totalling to 360 games, the results of each match were recorded automatically by the tournament manager and compiled into table 1. These results allowed the further development of the metrics within this research, this is explained in the following section.
+
 	\subsection{Metrics}
 	
 	Initially, the StarCraft Bot was to be measured on its success in these two metrics:
@@ -423,7 +415,7 @@
 		\item \textbf{Time Survived} (Average of 13 minutes or above)
 		\item \textbf{Endgame Condition} (Whether the Bot wins the game or looses)
 	\end{itemize}
-	These metrics were obtained from the results from the AIIDE 2017 StarCraft Competition, which found that the average time of each game was 13-minutes, and the quickest average being 8-minutes and the longest being 19-minutes. The win ratio of the Bots vary substantially from 17.21\% to a high 83.11\% as can be seen in Table 2 \cite{Results}. 
+	These metrics were obtained from the results from the AIIDE 2017 StarCraft Competition, which found that the average time of each game was 13-minutes, and the quickest average being 8-minutes and the longest being 19-minutes. The win ratio of the Bots vary substantially from 17.21\% to a high 83.11\% as can be seen in Appendix B Table 7. 
 	
 	After presenting these findings, it was discussed that the metrics required a greater level of merit, to achieve this, the metrics were modified using the preliminary results and further inspection of the Bots within the literature. As can be seen in fig 6, the mean win rate for the Bot was 50\% and within the literature, the win rate ranged from 54-91\% \cite{ELGoal,Swen,OnlineEvo,GoalDriven}. The literature Bots were faced against both competition Bots and in-built Bots which came with StarCraft.
 	
@@ -462,7 +454,7 @@
 	\end{table*}
 	
 	\section{Results \& Analysis}
-	After the implementation of the three chosen strategies, and final testing was done within the tournament manager, the results contained in table 7 located in Appendix B came forth. From this other tables were produced, 1 and 5 were produced automatically by the STM, table 2, 3 and 4 were manually created. 
+	After the implementation of the three chosen strategies, and final testing was done within the tournament manager, the results contained in table 7 located in Appendix B were produced. An example of the full list of results can be found in Appendix B Table 8. From table 7 other tables were produced, 1 and 6 were produced automatically by the STM, while tables 2, 3 and 4 were manually created. 
 		
 	Investigating POSH-bot facing each race individually, from the results in table 2, under the average game length, the shortest games were against the Protoss with the average game lasting 11:48s and a 3.7\% win rate. POSH-bot also proved less efficient in scores with a -215.37\% difference. This shows that the strategy used by POSH-bot was flawed, as the average game time was 11:48s this indicates that it was the early-mid game, meaning that the early game strategy for the enemy was coming into fruition and POSH-bot failed to counter it. This resulted in the low 3.7\% win rate and substantial difference in score. Though the games ended earlier, the average game length was above 10 minutes, which would indicate that any early rush attempts made by the opponent were countered.
 	
@@ -472,7 +464,7 @@
 	
 	When inspecting the differences between POSH-bot and the three top Bots for each race in table 3, POSH-bots average game length was close to the same as its counterpart Xelnaga with both having 16:24s and 16:11s respectively. This indicated that POSH-bots strategy succeeded in countering any early rush attempt. Their win rates were considerably different, with POSH-bot having 10\% and Xelnaga claiming 60\%, and coming fourth overall in the testing. Iron, a Terran race has a win rate of 86.25\% and an average game length of 13:13s, both of which were better than the results POSH-bot obtained. ZZZKBot who came out on top during testing managed to secure a 91.25\% win rate, and an average game length of 6:25s. ZZZKBot likely achieved such a low average on game length due to its rush tactic, Iron also follows suit on this though from the replays, it is evident that Iron takes longer than ZZZKBot to build its forces.
 	
-	Upon closer inspection of the results table 4 was created which contains the results obtained from the matches between ZZZKBot and POSH-bot. ZZZKBot had a win rate of 100\% the average game length when matched against POSH-bot increased by 146.6\%, both Bots scores were close with a 7\% difference. Though with Iron the game length was decreased by 37.7\% and by 11.98\% by Xelnaga suggesting that POSH-bots early game rush counter was successful against any Zerg attempt, but was hard countered by a Terran vulture and factory rush. Xelnaga also being stronger earlier than POSH-bot attributed to the faster games. Through performing a left-handed t-test on all the results for game length for all matches involving POSH-bot figure 6 was obtained.
+	Upon closer inspection of the results table 4 was created which contains the results obtained from the matches between ZZZKBot and POSH-bot. ZZZKBot had a win rate of 100\% the average game length when matched against POSH-bot increased by 146.6\%, both Bots scores were close with a 7\% difference. Though with Iron the game length was decreased by 37.7\% and by 11.98\% by Xelnaga suggesting that POSH-bots early game rush counter was successful against any Zerg attempt, but was hard countered by a Terran vulture and factory rush. Xelnaga also being stronger earlier than POSH-bot attributed to the faster games. Through performing a left-handed t-test on all the results for game length for all matches involving POSH-bot figure 5 was obtained.
 	
 	\begin{figure}[H]
 		\centering
@@ -487,13 +479,13 @@
 	
 	As seen in figure 6 the p-value is less than 5\% which indicates that the null hypothesis can be rejected, in this case, it was to filter out the matches against Iron, by setting the $\mu$ to 13 for the time that a game transits into mid game and in general a rush can no longer be considered a rush. 
 	
-	During the matches where POSH-bot won as shown in figure 7, on average the games lasted 33:50s, with an average score much higher than that of the opponent. These were most likely timeouts, where the games exceed their maximum frame count quota as stated within the STM readme file \cite{Tournament}. Though victory is awarded to the Bot with the highest score.
+	During the matches where POSH-bot won as shown in figure 6, on average the games lasted 33:50s, with an average score much higher than that of the opponent. These were most likely timeouts, where the games exceed their maximum frame count quota as stated within the STM readme file \cite{Tournament}, from the timeout times the maximum time a Bot can spend in a game is around 59:31s. Though victory is awarded to the Bot with the highest score.
 	
-	After some investigation, it was discovered that there may be a correlation between game length and win rate as shown in figures 8 and 9. Figure 9 shows that there may be a negative correlation between these two values.
+	After some investigation, it was discovered that there may be a correlation between game length and win rate as shown in figures 7 and 8. Figure 8 shows that there may be a negative correlation between these two values.
 	\begin{figure}
 		\centering
 		\includegraphics[width=0.5\textwidth]{WinTimeLineWithBot}
-		\caption{A line graph showing both the win rate and game length for all the Bots, starting with the highest win rate on the left, based on the results obtained from table 1.}
+		\caption{A line graph showing both the win rate and game length for all the Bots, starting with the highest win rate on the left, based on the results obtained from table 8 in Appendix B.}
 		\label{Fig7}
 	\end{figure}
 	\begin{figure}
@@ -509,7 +501,7 @@
 	
 	As evidenced by the consistent increase in times for the ZZZKbot's games and POSH-bots ability to survive past the 10-minute mark, as well as the t-test, hypothesis 4 can be supported. 
 	
-	As shown in figure 7 the average game length for POSH-bots winning matches is much greater than 14 minutes, thus rejecting hypothesis 1 and supporting the null. This was likely due to the lack of scouting abilities within POSH-bot, along with a present bug in the software where the units would not attack correctly, causing the units to not move after reaching the centre of the enemies base. 
+	As shown in figure 6 the average game length for POSH-bots winning matches is much greater than 14 minutes, thus rejecting hypothesis 1 and supporting the null. This was likely due to the lack of scouting abilities within POSH-bot, along with a present bug in the software where the units would not attack correctly. This caused the units to not move after reaching the centre of the enemies base thus timing out the game.
 	
 	\subsection{Analysis of final Software}
 	Though two of the hypothesis can be supported, the rearranging two were rejected, this is due to issues that could be improved on in the software. This section will identify those issue and present potential fixes for future work.
@@ -532,19 +524,13 @@
 	When running the STM all firewalls have to be turned off and the registry altered to allow seamless networking between the clients and server, this posses a very high security risk to the users system and could potentially be solved if the STM has a local version which runs off a single host machine.
 	\newline
 	\subsubsection{Plans and Behaviours}
-	As the Bot works through the plan, it works from top to bottom, working through the drives and stepping into their functions as needed if the sense is satisfied. Each of these drives can be delayed and skipped to ensure that all drives are triggered, this should work in theory. In reality, if the delay is more than a few microseconds the change in speed for the behaviours being triggered is noticeable, as the bot must trigger a command several times as BWAPI does not always work. If there is no delay put on the drives, the system will crash as it is running faster than the other two systems, POSH and BWAPI, this causes NULL exceptions to be thrown, so there must be a time delay present. The designer can, however, plan the delays in such a way that the plan not only works its way down the drive list but also works back up. This helps with any issues pertaining to the plan getting stuck inside a particular drive but does not solve the issue, for this, it is best to ensure that the senses are set up correctly so the drive is not triggered at all unless it can be resolved. This means that when creating a plan all drives and senses must be precise, as one incorrect number or misplaced drive can break the Bot entirely, so the plan must be checked and tested several times after each change. An example of the code output from the plans can be seen in Appendix B figure 10.
+	As the Bot works through the plan, it works from top to bottom, working through the drives and stepping into their functions as needed if the sense is satisfied. Each of these drives can be delayed and skipped to ensure that all drives are triggered, this should work in theory. In reality, if the delay is more than a few microseconds the change in speed for the behaviours being triggered is noticeable, as the bot must trigger a command several times as BWAPI does not always work. If there is no delay put on the drives, the system will crash as it is running faster than the other two systems, POSH and BWAPI, this causes NULL exceptions to be thrown, so there must be a time delay present. The designer can, however, plan the delays in such a way that the plan not only works its way down the drive list but also works back up. This helps with any issues pertaining to the plan getting stuck inside a particular drive but does not solve the issue, for this, it is best to ensure that the senses are set up correctly so the drive is not triggered at all unless it can be resolved. This means that when creating a plan all drives and senses must be precise, as one incorrect number or misplaced drive can break the Bot entirely, so the plan must be checked and tested several times after each change. An example of the code output from the plans can be seen in Appendix B figure 11.
 	
 	Another issue that arose several times was the placement of buildings, as stated earlier, BWAPI does sometimes not accept a command from the Bot so the command must be sent again. Which caused issues with building placement as the Bot would register that the building was placed but in the game, it was not, this meant that the placement and build functions had to be triggered multiple times. 
 	
 	The Bot currently uses a Fibonacci spiral to locate a suitable build location which should always return a viable option, which is why the Bot currently builds its structures in the immediate vicinity of the main base. This needs to be improved upon as the structures currently interfere with resource gathering, a simple solution would be to implement another strategy that takes advantage of the choke points, this would move the build location to another area. Also as the POSH-bot is Protoss the buildings can only be placed near a Pylon, so another option is to change the build location to each Pylon, though this can cause issues if a Pylon is destroyed, so a list of Pylons would have to be maintained. This solution would force the Bot to build around any Pylon so the only structure that would need changing in its placement would be the Pylon, rather than changing the entire placement system.
 	
 	Currently, there is a large delay between when the game begins and when the Bot can trigger certain actions, for instance, scouting, a pivotal part of an opening strategy. This delays the Bot from being able to perform certain functions like building at its natural expansion early, or harassing the enemies base immediately as the game begins. This has caused issues when designing the plan, as the strategies required immediate scouting but the final design had to work around that by triggering the scouting later in the strategy.    
-	\begin{table*}
-		\centering
-		\includegraphics[width=\textwidth]{PvsBots}
-		\caption{A line graph showing both the win rate and game length for all the Bots, starting with the highest win rate on the left, based on the results obtained from table 1.}
-		\label{Table6}
-	\end{table*}
 	
 	\section{Future Work}
 	Though the null hypothesis was confirmed, this work provided an interesting find, that there is a possible correlation between the win rate and game length. A proposed question for future work would be if there is a correlation between them. This would be an interesting find as it could be used to alter the design of Bots to facilitate fast strategies, and though the Zerg implements rush tactics which is inherently fast, it would be interesting to see how and Bot using Terran or Protoss would cope with similar strategies.
@@ -584,7 +570,7 @@
 	\subsection{Learning New Systems}
 	Producing this text and the accompanying artefact allowed me to learn outside of a games engine, and helped me understand further 
 	\subsection{Research Question}
-	\subsection{title}
+	\subsection{Targets for the Next Project}
 	\section{Supporting Figures and Tables}
 \begin{table*}[]
 		\centering
