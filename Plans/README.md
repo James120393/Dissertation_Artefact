@@ -51,8 +51,8 @@ POSH-botVSInBuiltTerran.mp4 was recorded in debug mode.
 
 POSH-botVSCimex(Zerg).mp4 is a replay from the testing and was only available to record in StarCraft Remastered.
 
-## The trello board can be found in the Trello folder:
-comp360_01_1506530\Trello
+## The trello board can be found in the Images folder:
+comp360_01_1506530\Images
 
 ## The link to the GitHub Repository:
 [link]("https://github.com/James120393/Dissertation_Artefact")
@@ -63,3 +63,11 @@ comp360_01_1506530\Trello
 ## Then select open and navigate to:
 "comp320_01_1506530\scbot.git\POSH-StarCraftBot\library\plans"
 and select any of the plans within this folder.
+
+## An image depicting the testing process can be found in the Images folder:
+comp360_01_1506530\Images
+
+This screenshot is showing the process taken for testing the software. At every implementation or change to a variable the Bot would be compiled and run,
+this would open the command window as seen in the bottom right. This would then run in-game and the function would then be observed, for a pass/fail as to whether
+it succeeded in its function. If it failed a breakpoint would be placed at the appropriate location in the code and the function would then be debugged.
+This was the process taken for each test case, unfortunately, there are not any accompanying documents containing unit test tables.
